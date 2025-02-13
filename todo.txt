@@ -31,6 +31,17 @@ Credentials:
 		User:      ADMIN
 		Password:  Welcome_1 
 	
+
+
+bugs:
+	_ copy the conn_string.txt to the container each time it runs
+		create a dockerfile for the ords-developer image
+		
+	Issue with the image not being able to download from the container registry
+	
+
+
+
 	
 X Provide 2 different configurations:
 	X persistent data (for development sessions)

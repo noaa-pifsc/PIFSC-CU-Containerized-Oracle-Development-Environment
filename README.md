@@ -7,7 +7,26 @@ The PIFSC Oracle Developer Environment (ODE) project was developed to provide a 
 -   ### ODE Version Control Information
     -   URL: https://picgitlab.nmfs.local/oracle-developer-environment/pifsc-oracle-developer-environment
     -   Version: 1.0 (git tag: ODE_v1.0)
--   [ODE Demonstration Outline](./docs/demonstration_outline.md) 
+-   [ODE Demonstration Outline](./docs/demonstration_outline.md)
+
+# Prerequisites
+-   Have Docker Installed(of course)
+-   <mark>Create an account & test login to Oracle Image Registry</mark>
+    -   [Oracle Image/Container Registry](https://container-registry.oracle.com/ords/f?p=113:10)
+-   Then, in a command(cmd) window, Log into Oracle Registry
+```
+docker login container-registry.oracle.com
+```
+-   To sign in with a different user account, just use logout command:
+```
+docker logout container-registry.oracle.com
+```
+-   And Pull the latest Oracle XE & ORDS Images from the Oracle Registry
+    -   \*Note: Oracle's container registry will not allow downloads from within the PIFSC network, you must disconnect before you can download the images or you will need to get them a different way (container registry, .tar.gz files, etc.)
+```
+docker pull container-registry.oracle.com/database/express:latest
+docker pull container-registry.oracle.com/database/ords-developer:latest
+```
 
 ## Customization Process
 -   \*Note: this process will fork the ODE parent repository and repurpose it as a project-specific ODE
