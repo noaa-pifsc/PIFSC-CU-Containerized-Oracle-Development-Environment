@@ -28,4 +28,27 @@ EOF
 
 	echo "SQL scripts executed successfully!"
 
+	echo "Create the CU schema"
+
+
+	# change the directory so the script can run without alterations
+	cd ${CU_FOLDER_PATH}
+
+# create the CU schema(s)
+sqlplus -s /nolog <<EOF
+@dev_container_setup/create_docker_schemas.sql
+$SYS_CREDENTIALS
+EOF
+
+
+
+	echo "Create the CU objects"
+
+# run the container database deployment script
+sqlplus -s /nolog <<EOF
+@automated_deployments/deploy_dev_container.sql
+$CU_CREDENTIALS
+EOF
+
+	echo "The CU objects were created"
 echo "custom deployment scripts have completed successfully"

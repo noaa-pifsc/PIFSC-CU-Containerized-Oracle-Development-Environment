@@ -11,3 +11,14 @@ DSC_CREDENTIALS="$DB_DSC_USER/$DB_DSC_PASSWORD@${DBHOST}:${DBPORT}/${DBSERVICENA
 
 # define the DSC database folder path
 DSC_FOLDER_PATH="/usr/src/DSC/SQL"
+
+
+# define CU schema credentials
+DB_CU_USER="CEN_UTILS"
+DB_CU_PASSWORD="[CONTAINER_PW]"
+
+# define CU connection string
+CU_CREDENTIALS="$DB_CU_USER/$DB_CU_PASSWORD@${DBHOST}:${DBPORT}/${DBSERVICENAME}"
+
+# define the CU database folder path
+CU_FOLDER_PATH="/usr/src/CU/SQL"
