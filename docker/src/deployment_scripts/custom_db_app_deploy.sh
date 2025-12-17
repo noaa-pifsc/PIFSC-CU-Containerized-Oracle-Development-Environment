@@ -40,6 +40,13 @@ sqlplus -s /nolog <<EOF
 $SYS_CREDENTIALS
 EOF
 
+echo "grant the CEN_UTILS schema privileges on the DSC schema"
+
+	# grant the PRI schema privileges on the DSC schema
+sqlplus -s /nolog <<EOF
+CONNECT $SYS_CREDENTIALS
+@queries/grant_privs_to_CEN_UTILS.sql
+EOF
 
 
 	echo "Create the CU objects"
