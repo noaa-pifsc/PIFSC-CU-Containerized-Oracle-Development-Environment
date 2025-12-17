@@ -68,22 +68,29 @@ git bash commands:
 	# Dev:
 
 		# stop and remove CODE containers and delete volumes
-		cd /c/Users/jesse.abdul/Documents/Version\ Control/Git/PIFSC-DSC-Containerized-Oracle-Development-Environment/deployment_scripts
+		cd /c/Users/jesse.abdul/Documents/Version\ Control/Git/PIFSC-DSC-Containerized-Oracle-Development-Environment
 		
-		docker compose -f ../docker/docker-compose-dev.yml down
-		docker volume rm apex-static-vol
-		docker volume rm db-vol
+		docker compose \
+		  --env-file ./docker/.env \
+		  -f docker/CODE-db-deploy.yml \
+		  -f docker/CODE-db-named-volume.yml \
+		  -f docker/custom-docker-compose.yml \
+		  down -v
 		
 		# build and deploy the development scenario of the CODE
-		bash build_deploy_project_dev.sh
+		bash ./deployment_scripts/build_deploy_project.sh dev
 	
 	# Test:
 
 		# stop and remove CODE containers and delete volumes
-		cd /c/Users/jesse.abdul/Documents/Version\ Control/Git/PIFSC-DSC-Containerized-Oracle-Development-Environment/deployment_scripts
+		cd /c/Users/jesse.abdul/Documents/Version\ Control/Git/PIFSC-DSC-Containerized-Oracle-Development-Environment
 		
-		docker compose -f ../docker/docker-compose-test.yml down
-		docker volume rm apex-static-vol
+		docker compose \
+		  --env-file ./docker/.env \
+		  -f docker/CODE-db-deploy.yml \
+		  -f docker/custom-docker-compose.yml \
+		  down -v
+
 
 		# build and deploy the test scenario of the CODE
-		bash build_deploy_project_test.sh
+		bash ./deployment_scripts/build_deploy_project.sh dev
