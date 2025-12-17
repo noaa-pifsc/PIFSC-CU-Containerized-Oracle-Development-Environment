@@ -55,11 +55,11 @@ The PIFSC DSC Containerized Oracle Developer Environment (DCODE) project was dev
 ## Container Architecture
 -   See the CODE [container architecture documentation](https://github.com/noaa-pifsc/PIFSC-Containerized-Oracle-Development-Environment?tab=readme-ov-file/-/blob/main/README.md?ref_type=heads#container-architecture) for details
 -   ### DCODE Customizations:
-    -   [docker/.env](./docker/.env) was updated to define an appropriate APP_SCHEMA_NAME value
-    -   [custom_deployment_functions.sh](./deployment_scripts/functions/custom_deployment_functions.sh) was updated to remove the [CODE-ords.yml](./docker/CODE-ords.yml) configuration file
-    -   [custom-docker-compose.yml](./docker/custom-docker-compose.yml) was updated to implement file-based secrets, PRI and CODE-specific mounted volume overrides 
+    -   [docker/.env](./docker/.env) was updated to define an appropriate APP_SCHEMA_NAME value and remove TARGET_APEX_VERSION since there is no corresponding Apex app
+    -   [custom_deployment_functions.sh](./deployment_scripts/functions/custom_deployment_functions.sh) was updated to remove the [CODE-ords.yml](./docker/CODE-ords.yml) configuration file since the ORDS service is not implemented
+    -   [custom-docker-compose.yml](./docker/custom-docker-compose.yml) was updated to implement CODE-specific mounted volume overrides 
     -   [custom_db_app_deploy.sh](./docker/src/deployment_scripts/custom_db_app_deploy.sh) was updated to deploy the DSC database
-    -   [custom_container_config.sh](./docker/src/deployment_scripts/config/custom_container_config.sh) was updated to define DB credentials and mounted volume file paths for the PRI SQL scripts
+    -   [custom_container_config.sh](./docker/src/deployment_scripts/config/custom_container_config.sh) was updated to define DB credentials and mounted volume file paths for the DSC SQL scripts
 
 ## Connection Information
 -   See the CODE [connection information documentation](https://github.com/noaa-pifsc/PIFSC-Containerized-Oracle-Development-Environment?tab=readme-ov-file/-/blob/main/README.md?ref_type=heads#connection-information) for details
