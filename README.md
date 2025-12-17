@@ -62,14 +62,10 @@ The Centralized Utilities (CU) PIFSC Containerized Oracle Developer Environment 
 ## Container Architecture
 -   See the CODE [container architecture documentation](https://github.com/noaa-pifsc/PIFSC-Containerized-Oracle-Development-Environment?tab=readme-ov-file/-/blob/main/README.md?ref_type=heads#container-architecture) for details
 -   ### CU CODE Customizations:
-    <mark>-   [docker/.env](./docker/.env) was updated to define an appropriate APP_SCHEMA_NAME value
-    -   [custom_deployment_functions.sh](./deployment_scripts/functions/custom_deployment_functions.sh) was updated to add the PRI docker-compose.yml file and the [secrets/.env](./secrets/.env) file.  It was also updated to remove the [CODE-ords.yml](./docker/CODE-ords.yml) configuration file
-    -   [custom-docker-compose.yml](./docker/custom-docker-compose.yml) was updated to implement file-based secrets, PRI and CODE-specific mounted volume overrides 
-    -   [custom_db_app_deploy.sh](./docker/src/deployment_scripts/custom_db_app_deploy.sh) was updated to deploy the PRI database and application schemas
-    -   [custom_container_config.sh](./docker/src/deployment_scripts/config/custom_container_config.sh) was updated to define DB credentials and mounted volume file paths for the PRI SQL scripts
-    -   Multiple files were added in the [secrets](./secrets) folder to specify secret values (e.g. [ria_pass.txt](./secrets/ria_pass.txt) to specify the RIA database password)
-        -   [secrets/.env](./secrets/.env) was updated to specify PRI-specific and CODE-specific environment variables
-
+    -   [docker/.env](./docker/.env) was updated to define an appropriate APP_SCHEMA_NAME value
+    -   [custom-docker-compose.yml](./docker/custom-docker-compose.yml) was updated to define CODE-specific mounted volume overrides 
+    -   [custom_db_app_deploy.sh](./docker/src/deployment_scripts/custom_db_app_deploy.sh) was updated to deploy the CU database schema
+    -   [custom_container_config.sh](./docker/src/deployment_scripts/config/custom_container_config.sh) was updated to define DB credentials and mounted volume file paths for the CU SQL scripts
 
 ## Connection Information
 -   See the CODE [connection information documentation](https://github.com/noaa-pifsc/PIFSC-Containerized-Oracle-Development-Environment?tab=readme-ov-file/-/blob/main/README.md?ref_type=heads#connection-information) for details
