@@ -1,7 +1,7 @@
 X merge upstream changes from DSC 
 
 
-_ test the different deployment/restart scenarios (tests completed on 12/17/25)
+X test the different deployment/restart scenarios (tests completed on 12/17/25)
 	X dev
 		X new deployment
 			X db
@@ -18,12 +18,12 @@ _ test the different deployment/restart scenarios (tests completed on 12/17/25)
 				X login to SYS
 				X login to SYSTEM
 
-	_ test (does not save database volume)
-		_ db
-			_ CEN_UTILS schema works
-			_ DSC DB schema works
-			_ login to SYS
-			_ login to SYSTEM
+	X test (does not save database volume)
+		X db
+			X CEN_UTILS schema works
+			X DSC DB schema works
+			X login to SYS
+			X login to SYSTEM
 
 
 git bash commands:
