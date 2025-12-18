@@ -4,6 +4,3 @@ services:
     volumes:
       - ../modules/DSC/SQL:/usr/src/DSC/SQL
       - ../modules/CU/SQL:/usr/src/CU/SQL
-networks:
-  oracle-net:
-    name: oracle-net

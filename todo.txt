@@ -1,65 +1,30 @@
 X merge upstream changes from DSC 
 
 
-X test the different deployment/restart scenarios (tested on 12/3/25)
+_ test the different deployment/restart scenarios (tests completed on 12/17/25)
 	X dev
 		X new deployment
-			X apex
-				X (error message) TARGET_APEX_VERSION invalid version (regexp validation - e.g. 24.0.0)
-				X (error message) TARGET_APEX_VERSION invalid version (oracle site does not have the intaller - e.g. 24.0, 9.99)
-				X valid APEX (successful and reset admin password to ${ORACLE_PWD}
-					X login to workspace
-						X internal
-					X db
-						X CU DB schema works
-						X DSC DB schema works
-						X login to SYS
-						X login to SYSTEM
-					X ords
-						X configure CU for ORDS
-						X publish AUTH_APP_USERS as an endpoint
-						X confirm records can be retrieved
+			X db
+				X CEN_UTILS schema works
+				X DSC DB schema works
+				X login to SYS
+				X login to SYSTEM
+
 		X restart
-			X change APEX version
-				X TARGET_APEX_VERSION invalid version (regexp validation - e.g. 24.0.0)
-				X (error message) downgrade (e.g. 23.1, 22.1)
-				X (error message) TARGET_APEX_VERSION invalid version (oracle site does not have the intaller - e.g. 24.0, 9.99)
-				X APEX upgrade (successful and reset admin password to ${ORACLE_PWD}
-					X login to workspace
-						X internal
-					X db (does not redeploy DB) 
-						X CU DB schema works
-						X DSC DB schema works
-						X login to SYS
-						X login to SYSTEM
-					X ords
-						X confirm records can be retrieved
-			X leave APEX version unchanged
-				X login to workspace (password unchanged)
-					X internal
-				X db (does not redeploy DB) 
-					X CU DB schema works
-					X DSC DB schema works
-					X login to SYS
-					X login to SYSTEM
-				X ords
-					X confirm records can be retrieved
-	X test (does not save database volume)
-		X apex
-			X (error message) TARGET_APEX_VERSION invalid version (regexp validation - e.g. 24.0.0)
-			X (error message) TARGET_APEX_VERSION invalid version (oracle site does not have the intaller - e.g. 24.0, 9.99) 
-			X valid APEX (successful upgrade and reset admin password to ${ORACLE_PWD}
-				X login to workspace
-					X internal
-				X db
-					X CU DB schema works
-					X DSC DB schema works
-					X login to SYS
-					X login to SYSTEM
-				X ords
-					X configure CU for ORDS
-					X publish AUTH_APP_USERS as an endpoint
-					X confirm records can be retrieved
+			X Does not redeploy DB 
+			X db
+				X CEN_UTILS schema works
+				X DSC DB schema works
+				X login to SYS
+				X login to SYSTEM
+
+	_ test (does not save database volume)
+		_ db
+			_ CEN_UTILS schema works
+			_ DSC DB schema works
+			_ login to SYS
+			_ login to SYSTEM
+
 
 git bash commands:
 

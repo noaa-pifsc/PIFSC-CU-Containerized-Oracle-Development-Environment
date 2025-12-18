@@ -62,7 +62,7 @@ The Centralized Utilities (CU) PIFSC Containerized Oracle Developer Environment 
 ## Container Architecture
 -   See the CODE [container architecture documentation](https://github.com/noaa-pifsc/PIFSC-Containerized-Oracle-Development-Environment?tab=readme-ov-file/-/blob/main/README.md?ref_type=heads#container-architecture) for details
 -   ### CU CODE Customizations:
-    -   [docker/.env](./docker/.env) was updated to define an appropriate APP_SCHEMA_NAME value
+    -   [docker/.env](./docker/.env) was updated to define an appropriate APP_SCHEMA_NAME value and to define the TARGET_APEX_VERSION value to fulfill a database dependency
     -   [custom-docker-compose.yml](./docker/custom-docker-compose.yml) was updated to define CODE-specific mounted volume overrides 
     -   [custom_db_app_deploy.sh](./docker/src/deployment_scripts/custom_db_app_deploy.sh) was updated to deploy the CU database schema
     -   [custom_container_config.sh](./docker/src/deployment_scripts/config/custom_container_config.sh) was updated to define DB credentials and mounted volume file paths for the CU SQL scripts
