@@ -20,8 +20,8 @@ services:
   db-ords-deploy:
     image: pifsc/db-ords-deploy:latest
     build:
-      context: .
-      dockerfile: Dockerfile.deploy
+      context: ..
+      dockerfile: containerized_oracle_development_environment/Dockerfile.deploy
     container_name: db-ords-deploy
     depends_on:
       db:

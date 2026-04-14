@@ -9,7 +9,7 @@ RUN yum install dos2unix curl unzip \
 ENV TZ=UTC
 
 # copy the rest of the backend files:
-COPY ./src /usr/src
+COPY . /usr/src
 
 # convert the shell script to unix line endings
 RUN find /usr/src -type f \( -name "*.sh" \) -exec dos2unix {} +
@@ -17,4 +17,5 @@ RUN find /usr/src -type f \( -name "*.sh" \) -exec dos2unix {} +
 # change directory to the SQL source directory
 WORKDIR /usr/src
 
-CMD ["bash", "/usr/src/deployment_scripts/db_app_deploy.sh"]
+# run the container database deployment script
+CMD ["bash", "/usr/src/containerized_oracle_development_environment/deployment_scripts/container_scripts/container_deploy_database.sh"]

@@ -1,18 +1,34 @@
 
+to do:
+	update the configuration so users can specify a unique container name so it won't conflict with other containers on the same server (could allow multiple people to use a different shared container host for development)
+		e.g. GCP shared compute instance running docker, but it will depend on performance
+
+	_ separate out the functionality into separate functions with defined naming convention
+	_ update documentation
+		_ review the sections defined for CDD/CAD and implement the ones that are appropriate
+		_ naming conventions
+		_ implementation instructions
+	_ implement CDD/CDS functions where appropriate	
+		
+		
+		
+		
+
+
 git bash commands:
 
 	# Dev:
 
 		# stop and remove CODE containers and delete volumes
-		cd /c/Users/jesse.abdul/Documents/Version\ Control/Git/PIFSC-Containerized-Oracle-Development-Environment
+		cd /c/Users/jesse.abdul/Documents/Version\ Control/Git/PIFSC-Containerized-Oracle-Development-Environment/containerized_oracle_development_environment
 		
 		# shutdown all containers and delete all associated volumes too
 		docker compose \
-		  --env-file ./docker/.env \
-		  -f docker/CODE-db-deploy.yml \
-		  -f docker/CODE-ords.yml \
-		  -f docker/CODE-db-named-volume.yml \
-		  -f docker/custom-docker-compose.yml \
+		  --env-file ./.env \
+		  -f CODE-db-deploy.yml \
+		  -f CODE-ords.yml \
+		  -f CODE-db-named-volume.yml \
+		  -f custom-docker-compose.yml \
 		  down -v
 
 
@@ -21,14 +37,14 @@ git bash commands:
 
 		
 		# build and deploy the development scenario of the CODE
-		bash ./deployment_scripts/build_deploy_project.sh dev
+		bash ./deployment_scripts/client_scripts/client_deploy_container.sh dev
 
 		docker compose \
-		  --env-file ./docker/.env \
-		  -f docker/CODE-db-deploy.yml \
-		  -f docker/CODE-ords.yml \
-		  -f docker/CODE-db-named-volume.yml \
-		  -f docker/custom-docker-compose.yml \
+		  --env-file ./.env \
+		  -f CODE-db-deploy.yml \
+		  -f CODE-ords.yml \
+		  -f CODE-db-named-volume.yml \
+		  -f custom-docker-compose.yml \
 		  up -d --build
 
 
@@ -36,18 +52,18 @@ git bash commands:
 	# Test:
 
 		# stop and remove CODE containers and delete volumes
-		cd /c/Users/jesse.abdul/Documents/Version\ Control/Git/PIFSC-Containerized-Oracle-Development-Environment
+		cd /c/Users/jesse.abdul/Documents/Version\ Control/Git/PIFSC-Containerized-Oracle-Development-Environment/containerized_oracle_development_environment
 		
 		
 		# shutdown all containers and delete all associated volumes too
 		docker compose \
-		  --env-file ./docker/.env \
-		  -f docker/CODE-db-deploy.yml \
-		  -f docker/CODE-ords.yml \
-		  -f docker/custom-docker-compose.yml \
+		  --env-file ./.env \
+		  -f CODE-db-deploy.yml \
+		  -f CODE-ords.yml \
+		  -f custom-docker-compose.yml \
 		  down -v
 		
 		# build and deploy the development scenario of the CODE
-		bash ./deployment_scripts/build_deploy_project.sh test
+		bash ./deployment_scripts/client_scripts/client_deploy_container.sh test
 
 troubleshooting tips:
