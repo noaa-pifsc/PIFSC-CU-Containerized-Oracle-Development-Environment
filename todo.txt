@@ -11,9 +11,12 @@ to do:
 	_ implement CDD/CDS functions where appropriate	
 		
 		
+	_ (4/14/26) troubleshoot why skip_file_install is 0
+		
 	X replace the way the apex_version_compare	
 		
-
+	documentation:
+		need to sync up the SECRET_MAPPING_ARR and .env file secrets
 
 git bash commands:
 

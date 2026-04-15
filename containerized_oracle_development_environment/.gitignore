@@ -1,0 +1,5 @@
+# prevent secrets from being committed to the repository
+secrets/secrets.sh
+
+# prevent deployment logs from being saved in the repository
+deployment_script_logs/*.log

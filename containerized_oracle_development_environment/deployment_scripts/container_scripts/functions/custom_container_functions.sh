@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # function that executes database scripts within the container
-function container_database_deploy_custom_scripts ()
+function proj_container_database_deploy_custom_scripts ()
 {
 
 
