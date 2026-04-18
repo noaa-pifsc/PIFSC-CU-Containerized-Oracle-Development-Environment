@@ -490,7 +490,7 @@ EOF
 				# run the sqlplus script using the SYS schema
 				echo "Unlocking/Initializing/Configuring APEX accounts..."
 				
-				sqlplus -s -l "${SYS_CREDENTIALS}" <<EOF
+				sqlplus -s -l "${sys_credentials}" <<EOF
 				WHENEVER SQLERROR EXIT SQL.SQLCODE
 				ALTER SESSION SET CONTAINER = ${DBSERVICENAME};
 				-- Use the same password for all internal accounts for simplicity

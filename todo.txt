@@ -32,10 +32,20 @@ git bash commands:
 		  -f CODE-ords.yml \
 		  -f CODE-db-named-volume.yml \
 		  -f custom-docker-compose.yml \
-		  down -v
+		  down
+		docker volume rm apex-static-vol
+		docker volume rm db-vol
 
 
 
+		# shutdown all containers and retain named volumes
+		docker compose \
+		  --env-file ./.env \
+		  -f CODE-db-deploy.yml \
+		  -f CODE-ords.yml \
+		  -f CODE-db-named-volume.yml \
+		  -f custom-docker-compose.yml \
+		  down
 
 
 		

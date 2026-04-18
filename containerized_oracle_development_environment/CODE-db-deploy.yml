@@ -31,7 +31,7 @@ services:
     volumes:
       # Mounts the shared volume as a folder inside this container
       # so the script can write the static files to it.
-      - apex-static-vol:/apex-static
+      - code-apex-static-vol:/apex-static
     environment:
       # Both variables are defined in .env file
       - TARGET_APEX_VERSION=${TARGET_APEX_VERSION}
@@ -43,8 +43,8 @@ services:
     restart: "no"
 volumes:
   # Defines the new shared volume for the APEX static application files
-  apex-static-vol:
-    name: apex-static-vol
+  code-apex-static-vol:
+    name: code-apex-static-vol
     external: false
 networks: 
   oracle-net:

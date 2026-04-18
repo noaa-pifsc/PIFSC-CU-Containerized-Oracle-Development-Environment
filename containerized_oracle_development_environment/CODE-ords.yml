@@ -14,7 +14,7 @@ services:
       - ./ords-config:/etc/ords/config
       # This points to the new shared Docker volume instead 
       # of a local host folder.
-      - apex-static-vol:/opt/oracle/ords/static
+      - code-apex-static-vol:/opt/oracle/ords/static
     ports:
       - ${ORDS_HOST_PORT}:8080
     image: ${ORDS_IMAGE}
@@ -30,8 +30,8 @@ services:
       - ORDS_PWD=${ORACLE_PWD}
 volumes:
   # Defines the new shared volume for the APEX static application files
-  apex-static-vol:
-    name: apex-static-vol
+  code-apex-static-vol:
+    name: code-apex-static-vol
     external: false
 networks: 
   oracle-net:
