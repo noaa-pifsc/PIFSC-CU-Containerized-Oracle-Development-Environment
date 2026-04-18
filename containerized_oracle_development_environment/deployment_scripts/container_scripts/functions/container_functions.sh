@@ -5,8 +5,6 @@
 # 2: second version in the format: [0-9]+(\.[0-9]+)+ 
 # 3: Name of the variable to store the result of the comparison: contains 0 if $1 = $2, contains 1 if $1 > $2, contains 2 if $1 < $2
 function proj_container_version_compare() {
-	echo "running proj_container_version_compare(${1}, ${2}, ${3})"
-
 	version1="${1}"
 	version2="${2}"
 	local -n out_compare_result_ref="${3}"
@@ -18,8 +16,8 @@ function proj_container_version_compare() {
 	fi
 	
 	# Split versions into arrays by '.' so the individual major/minor/patch numbers can be compared
-	IFS='.' read -ra VER1 <<< "$1"
-	IFS='.' read -ra VER2 <<< "$2"
+	IFS='.' read -ra VER1 <<< "$version1"
+	IFS='.' read -ra VER2 <<< "$version2"
 
 	# Iterate through the components of each specified version to compare them
 	for ((i=0; i<${#VER1[@]} || i<${#VER2[@]}; i++)); do
@@ -27,9 +25,6 @@ function proj_container_version_compare() {
 		# store the current component in the v1 and v2 variablesf for $1 and $2 respectively
 		local v1=${VER1[i]:-0}
 		local v2=${VER2[i]:-0}
-		
-		echo "The value of v1 is: ${v1}"
-		echo "The value of v2 is: ${v2}"
 		
 		# if the v1 component is greater than the v2 component then $1 is greater
 		if (( ${v1} > ${v2} )); then
@@ -85,7 +80,6 @@ function proj_container_validate_apex_version_format() {
 
 # function to retrieve the currently installed apex version
 function proj_container_get_installed_apex_version() {
-
 	local sys_credentials="${1}"
 	
 	# validate the bash variable values
@@ -94,7 +88,6 @@ function proj_container_get_installed_apex_version() {
         return 1
 	fi
 	
-
 	# use 'whenever sqlerror exit failure' to catch DB errors
 	# direct stderr to /dev/null to avoid capturing error text in the variable
 	# query for the current apex version number, if APEX is not installed this query will fail with an ORA- error
@@ -120,23 +113,32 @@ EOF
 
 
 # function to validate if the apex version actually exists on Oracle's site
-# $1 is the target apex version
-# $2 is the apex download URL that will be checked
+# the function accepts the following arguments:
+# 1: is the target apex version
+# 2: is the apex download URL that will be checked
 function proj_container_verify_apex_version_exists() {
 
-	# Validate if the apex version actually exists on Oracle's site ---
-	echo "Verifying existence of apex version ${1} on Oracle download site..."
+	local apex_version="${1}"
+	local apex_download_url="${2}"
 
-	# Use curl -I (head request) to check headers only, -f causes curl to fail on HTTP errors (like 404), -s is silent mode
-	if ! curl --output /dev/null --silent --head --fail "${2}"; then
-		echo "ERROR: APEX version ${1} does not exist at URL: ${2}"
+	# validate the bash variable values
+	if ! cds_shared_validate_required_vars "apex_version" "apex_download_url"; then
+        echo "Error: proj_container_verify_apex_version_exists() function required bash variable validation failed" >&2
+        return 1
+	fi
+
+	# Validate if the apex version actually exists on Oracle's site ---
+	echo "Verifying existence of apex version ${apex_version} on Oracle download site..."
+
+	# Use curl to check headers only, -f causes curl to fail on HTTP errors (like 404), -s is silent mode
+	if ! curl --output /dev/null --silent --head --fail "${apex_download_url}"; then
+		echo "ERROR: APEX version ${apex_version} does not exist at URL: ${apex_download_url}"
 		echo "Please check the apex version number and try again."
 		exit 1
 	else
-		echo "The APEX version ${1} confirmed valid and available for download."
+		echo "The APEX version ${apex_version} confirmed valid and available for download."
 	fi
 }
-
 
 # function to install or upgrade apex based on the current installed version and the TARGET_APEX_VERSION environment variable
 # this function accepts the following parameters:
@@ -168,24 +170,18 @@ function proj_container_install_or_upgrade_apex() {
 	# process the apex version to determine which installations (if any) will be executed
 	proj_process_apex_version "${TARGET_APEX_VERSION}" "${apex_download_url}" "${apex_static_dir}" "skip_db_install" "skip_file_install" "${sys_credentials}"
 
-	echo "The value of skip_db_install is: ${skip_db_install}"
-	echo "The value of skip_file_install is: ${skip_file_install}"
-
 	proj_container_process_apex_install "${skip_file_install}" "${skip_db_install}" "${apex_zip_path}" "${apex_download_url}" "${apex_static_dir}" "${sys_credentials}" "${sys_pwd}"
 }
 
 # function to check the apex version to determine if the apex database upgrade (stored in the variable named ${out_skip_db_install_var_name}) and/or the apex file upgrade (stored in the variable named ${out_skip_file_install_var_name}) should occur
 function proj_container_check_apex_version_status()
 {
-	echo "running proj_container_check_apex_version_status()"
-
 	local version_status="${1}"
 	local current_apex_version="${2}"
 	local target_apex_version="${3}"
 	local apex_static_dir="${4}"
 	local out_skip_file_install_var_name="${5}"
 	local out_skip_db_install_var_name="${6}"
-	
 	
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars	"version_status" "current_apex_version" "target_apex_version" "apex_static_dir" "out_skip_file_install_var_name" "out_skip_db_install_var_name"; then
@@ -206,17 +202,15 @@ function proj_container_check_apex_version_status()
 	elif [ ${version_status} -eq 0 ]; then
 		# do not upgrade, target_apex_version and current_apex_version are equivalent
 		echo "APEX is already at the target version (${current_apex_version})."
+
+		# update the variable to indicate the apex database upgrade should be skipped
+		out_skip_db_install_ref=1
 		
 		# Check if static files are also in place
 		if [ -f "${apex_static_dir}/apex_version.js" ]; then
 			echo "Static files are in place. No upgrade needed."
 			# update the variable to indicate the apex file upgrade should be skipped
 			out_skip_file_install_ref=1
-		else
-			echo "APEX DB is upgraded, but static files are missing."
-			echo "Will attempt to download/unzip/copy static files..."
-			# update the variable to indicate the apex database upgrade should be skipped
-			out_skip_db_install_ref=1
 		fi
 	else
 		# upgrade the apex version, target_apex_version is greater than the current_apex_version
@@ -247,14 +241,10 @@ function proj_container_deploy_database_scripts ()
 	# store the oracle admin password in a local variable
 	local sys_pwd="${parsed_secrets_ref[sys_password]:-}"
 	
-	echo "The value of sys_pwd is: ${sys_pwd}"
-	
 	# define the SYS credentials for use in deployment scripts based on environment variables:
 	local sys_credentials="SYS/${sys_pwd}@${DBHOST}:${DBPORT}/${DBSERVICENAME} as SYSDBA"
 
-	echo "The value of sys_credentials is: ${sys_credentials}"
-
-	echo "Running the custom database/apex deployment process"
+#	echo "Running the custom database/apex deployment process"
 
 	# define a query to check if APEX is installed
 	APEX_QUERY="SELECT COUNT(*) FROM DBA_REGISTRY WHERE COMP_ID = 'APEX' AND STATUS = 'VALID';"
@@ -276,7 +266,7 @@ function proj_container_deploy_database_scripts ()
 
 	fi
 
-	echo "Checking if the database has been initialized (schema: ${APP_SCHEMA_NAME})..."
+#	echo "Checking if the database has been initialized (schema: ${APP_SCHEMA_NAME})..."
 	# Check if the database is initialized by querying DBA_USERS
 	if ! proj_container_check_database_initialized "${sys_credentials}"; then
 		echo "Database is not initialized, run the custom database and/or application deployment scripts"
@@ -334,8 +324,6 @@ function proj_process_apex_version()
 	local version_status=""
 	proj_container_version_compare "${target_apex_version}" "${current_apex_version}" "version_status"
 	
-	echo "The value of version_status is: ${version_status}"
-
 	# check the current/target version to determine if the DB and/or file apex installations should be executed
 	proj_container_check_apex_version_status "${version_status}" "${current_apex_version}" "${target_apex_version}" "${apex_static_dir}" "${skip_db_install_var_name}" "${skip_file_install_var_name}"
 
