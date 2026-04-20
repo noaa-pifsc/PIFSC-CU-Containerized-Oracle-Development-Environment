@@ -1,6 +1,6 @@
 services:
-  db:
-    container_name: db
+  code-db:
+    container_name: code-db
     image: ${DB_IMAGE}
     ports: 
       - ${DB_HOST_PORT}:${DBPORT}
@@ -17,14 +17,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 30
-  db-ords-deploy:
-    image: pifsc/db-ords-deploy:latest
+  code-db-ords-deploy:
+    image: pifsc/code-db-ords-deploy:latest
     build:
       context: ..
       dockerfile: containerized_oracle_development_environment/Dockerfile.deploy
-    container_name: db-ords-deploy
+    container_name: code-db-ords-deploy
     depends_on:
-      db:
+      code-db:
         condition: service_healthy
     networks:
       - oracle-net

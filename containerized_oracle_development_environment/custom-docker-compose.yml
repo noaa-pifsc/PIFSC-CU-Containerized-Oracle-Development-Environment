@@ -1,5 +1,5 @@
 services:
-  db-ords-deploy:
+  code-db-ords-deploy:
     # MOUNT: Map the SQL files from the PRI submodule to where 
     # the CODE deploy container expects to find them.
     volumes:

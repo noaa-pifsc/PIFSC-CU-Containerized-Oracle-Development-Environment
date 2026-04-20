@@ -457,7 +457,7 @@ EOF
 
 		# store the results of the file move process in file_move_status so the result can be checked
 		local file_move_status=$? 
-		if [ "$(cds_shared_get_array_val "${arg_array}" "file_move_status")" -eq 0 ]; then
+		if [ "${file_move_status}" -eq 0 ]; then
 			echo "Static files copied successfully."
 			
 			# update owner permissions on the docker volume to the oracle account so the static Apex files can be used by the ords container
@@ -467,13 +467,13 @@ EOF
 		fi
 
 		# wait for background DB install to finish
-		if [ "$(cds_shared_get_array_val "${arg_array}" "db_install_pid")" -ne 0 ]; then
-			echo "Waiting for APEX DB install (PID: $(cds_shared_get_array_val "${arg_array}" "db_install_pid")) to finish..."
-			wait "$(cds_shared_get_array_val "${arg_array}" "db_install_pid")"
+		if [ "${db_install_pid}" -ne 0 ]; then
+			echo "Waiting for APEX DB install (PID: ${db_install_pid}) to finish..."
+			wait "${db_install_pid}"
 				local db_install_status=$?	# store the result of the Apex database installation in a new variable
 
 			# check if the database installation 
-			if [ "$(cds_shared_get_array_val "${arg_array}" "db_install_status")" -eq 0 ]; then
+			if [ "${db_install_status}" -eq 0 ]; then
 				echo "APEX database upgrade successful."
 				
 				# declare the variable to store the version status code returned by the proj_container_version_compare() function

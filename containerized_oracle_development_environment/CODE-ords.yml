@@ -1,11 +1,11 @@
 services:
-  ords:
-    container_name: ords
+  code-ords:
+    container_name: code-ords
     restart: always
     depends_on:
       # Wait for the deploy container to finish to
       # ensure the static files are in place before ORDS starts.
-      db-ords-deploy:
+      code-db-ords-deploy:
         condition: service_completed_successfully
     networks:
       - oracle-net

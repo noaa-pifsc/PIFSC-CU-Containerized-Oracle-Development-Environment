@@ -1,5 +1,5 @@
 services:
-  db:
+  code-db:
     volumes:
       - code-db-vol:/opt/oracle/oradata
 volumes:
