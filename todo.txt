@@ -11,7 +11,16 @@ to do:
 	_ implement CDD/CDS functions where appropriate	
 		
 		
-	_ (4/14/26) troubleshoot why skip_file_install is 0
+		
+	X use array arguments for CODE functions
+		_ passthrough the argument arrays to functions from within functions when appropriate
+		
+		_ check if the docker compose calls should be updated in CDS to allow multiple -f arguments
+		
+		_ other than that the CAD can be used for the linux host deployment method (with no automatic teardown)
+		
+		
+	X (4/14/26) troubleshoot why skip_file_install is 0
 		
 	X replace the way the apex_version_compare	
 		

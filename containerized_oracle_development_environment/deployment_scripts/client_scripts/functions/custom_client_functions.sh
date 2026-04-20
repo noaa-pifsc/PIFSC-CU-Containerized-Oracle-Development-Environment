@@ -3,14 +3,21 @@
 # function that deploys the containers for a development environment
 # the function accepts the following arguments:
 # 1: environment name (dev, test)
-proj_client_build_deploy_dev_environment ()
+function proj_client_build_deploy_dev_environment ()
 {
 	# build the list of compose files:
-	local $env_name="${1}"
+	local env_name="${1}"
+	
+	# validate the bash variable values
+	if ! cds_shared_validate_required_vars "env_name" "BUILD_PATH"; then
+        echo "Error: proj_client_build_deploy_dev_environment() function required bash variable validation failed" >&2
+        return 1
+	fi
 
 	# change to the defined build_path so the docker commands can be run relative to the build path directory
 	cd "${BUILD_PATH}"
 	
+	# build the list of compose files:
 	# include the docker environment variables
 	local compose_files=("--env-file" "./.env")
 	

@@ -8,10 +8,9 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/includes/include_conta
 
 function main ()
 {
+	# define the local array to store the parsed secret values
 	local -A parsed_secrets=()
 	
-	echo "Initializing hybrid security vault..."
-
 	# Process STDIN Pipelining (For Run-time / Remote Server Deployments)
 
 	# capture the STDIN data (if any)

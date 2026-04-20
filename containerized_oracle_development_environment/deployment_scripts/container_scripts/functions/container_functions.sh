@@ -11,8 +11,8 @@ function proj_container_version_compare() {
 
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars	"version1" "version2"; then
-        echo "Error: proj_container_version_compare() function required bash variable validation failed" >&2
-        return 1
+		echo "Error: proj_container_version_compare() function required bash variable validation failed" >&2
+		return 1
 	fi
 	
 	# Split versions into arrays by '.' so the individual major/minor/patch numbers can be compared
@@ -52,8 +52,8 @@ function proj_container_check_database_initialized() {
 
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars	"sys_credentials" "APP_SCHEMA_NAME"; then
-        echo "Error: proj_container_check_database_initialized() function required bash variable validation failed" >&2
-        return 1
+		echo "Error: proj_container_check_database_initialized() function required bash variable validation failed" >&2
+		return 1
 	fi
 
 	# Check if your custom schema (e.g., '${APP_SCHEMA_NAME}') exists
@@ -66,8 +66,8 @@ function proj_container_validate_apex_version_format() {
 
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars	"target_version"; then
-        echo "Error: proj_container_validate_apex_version_format() function required bash variable validation failed" >&2
-        return 1
+		echo "Error: proj_container_validate_apex_version_format() function required bash variable validation failed" >&2
+		return 1
 	fi
 
 	# validate APEX version format (Strictly X.X, e.g., 23.2, 24.1)
@@ -84,8 +84,8 @@ function proj_container_get_installed_apex_version() {
 	
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "sys_credentials"; then
-        echo "Error: proj_container_get_installed_apex_version() function required bash variable validation failed" >&2
-        return 1
+		echo "Error: proj_container_get_installed_apex_version() function required bash variable validation failed" >&2
+		return 1
 	fi
 	
 	# use 'whenever sqlerror exit failure' to catch DB errors
@@ -123,8 +123,8 @@ function proj_container_verify_apex_version_exists() {
 
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "apex_version" "apex_download_url"; then
-        echo "Error: proj_container_verify_apex_version_exists() function required bash variable validation failed" >&2
-        return 1
+		echo "Error: proj_container_verify_apex_version_exists() function required bash variable validation failed" >&2
+		return 1
 	fi
 
 	# Validate if the apex version actually exists on Oracle's site ---
@@ -151,8 +151,8 @@ function proj_container_install_or_upgrade_apex() {
 	
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "sys_credentials" "sys_pwd"; then
-        echo "Error: proj_container_install_or_upgrade_apex() function required bash variable validation failed" >&2
-        return 1
+		echo "Error: proj_container_install_or_upgrade_apex() function required bash variable validation failed" >&2
+		return 1
 	fi
 
 	# Define paths for the dynamic download
@@ -167,55 +167,86 @@ function proj_container_install_or_upgrade_apex() {
 	local skip_db_install=0
 	local skip_file_install=0
 
-	# process the apex version to determine which installations (if any) will be executed
-	proj_process_apex_version "${TARGET_APEX_VERSION}" "${apex_download_url}" "${apex_static_dir}" "skip_db_install" "skip_file_install" "${sys_credentials}"
+	# define the function arguments for proj_process_apex_version()
+	local -A process_apex_func_args=(
+			["target_apex_version"]="${TARGET_APEX_VERSION}"
+			["apex_download_url"]="${apex_download_url}"
+			["apex_static_dir"]="${apex_static_dir}"
+			["skip_db_install_var_name"]="skip_db_install"
+			["skip_file_install_var_name"]="skip_file_install"
+			["sys_credentials"]="${sys_credentials}"
+		)
 
-	proj_container_process_apex_install "${skip_file_install}" "${skip_db_install}" "${apex_zip_path}" "${apex_download_url}" "${apex_static_dir}" "${sys_credentials}" "${sys_pwd}"
+	# process the apex version to determine which installations (if any) will be executed
+	proj_process_apex_version "process_apex_func_args"
+	
+	# define the function arguments for proj_container_process_apex_install()
+	local -A install_upgrade_func_args=(
+			["skip_file_install"]="${skip_file_install}"
+			["skip_db_install"]="${skip_file_install}"
+			["apex_zip_path"]="${apex_zip_path}"
+			["apex_download_url"]="${apex_download_url}"
+			["apex_static_dir"]="${apex_static_dir}"
+			["sys_credentials"]="${sys_credentials}"
+			["sys_pwd"]="${sys_pwd}"
+		)
+
+	# process the apex install/upgrade
+	proj_container_process_apex_install "install_upgrade_func_args"
 }
 
-# function to check the apex version to determine if the apex database upgrade (stored in the variable named ${out_skip_db_install_var_name}) and/or the apex file upgrade (stored in the variable named ${out_skip_file_install_var_name}) should occur
+# function to check the apex version to determine if the apex database upgrade 
+# This function accepts the following parameters as elements in the specified array name  (arg_array):
+# version_status: 0 indicates that the current and target versions are the same, 1 indicates that the target version is higher than the current version and 2 indicates that the target version is lower than the current version
+# current_apex_version: the current apex version
+# target_apex_version: the target apex version
+# apex_static_dir: the file directory for the apex static application files
+# out_skip_file_install_var_name: the variable name that will contain a 1 if the apex file upgrade should be skipped and 0 if the apex file upgrade should be installed
+# out_skip_db_install_var_name: the variable name that will contain a 1 if the apex DB upgrade should be skipped and 0 if the apex DB upgrade should be installed
 function proj_container_check_apex_version_status()
 {
-	local version_status="${1}"
-	local current_apex_version="${2}"
-	local target_apex_version="${3}"
-	local apex_static_dir="${4}"
-	local out_skip_file_install_var_name="${5}"
-	local out_skip_db_install_var_name="${6}"
-	
-	# validate the bash variable values
-	if ! cds_shared_validate_required_vars	"version_status" "current_apex_version" "target_apex_version" "apex_static_dir" "out_skip_file_install_var_name" "out_skip_db_install_var_name"; then
-        echo "Error: proj_container_check_apex_version_status() function required bash variable validation failed" >&2
-        return 1
+	# store the function array argument
+	local arg_array="${1}"
+
+	# Validation check: ensure the argument is a valid array
+	if [[ "$(declare -p "${arg_array}" 2>/dev/null)" != "declare -A"* ]]; then
+		echo "Error: proj_container_check_apex_version_status() function argument '${arg_array}' is not a valid associative array." >&2
+		return 1
 	fi
 
+	# validate that the required function argument array elements exist
+	if ! cds_shared_validate_required_array_vals "${arg_array}" "version_status" "current_apex_version" "target_apex_version" "apex_static_dir" "out_skip_file_install_var_name" "out_skip_db_install_var_name"; then
+		echo "Error: proj_container_check_apex_version_status() function required secure array validation failed" >&2
+		return 1
+	fi
+	
 	# define variable references to the specified variable names
-	local -n out_skip_file_install_ref="${out_skip_file_install_var_name}"
-	local -n out_skip_db_install_ref="${out_skip_db_install_var_name}"
+	local -n out_skip_file_install_ref="$(cds_shared_get_array_val "${arg_array}" "out_skip_file_install_var_name")"
+	local -n out_skip_db_install_ref="$(cds_shared_get_array_val "${arg_array}" "out_skip_db_install_var_name")"
 
 	# check the $version_status to determine if the apex database/files should be upgraded
-	if [ ${version_status} -eq 2 ]; then
+	if [ "$(cds_shared_get_array_val "${arg_array}" "version_status")" -eq 2 ]; then
 		# downgrade attempt detected, the target_apex_version is less than the current_apex_version
-		echo "ERROR: Downgrade detected! Current APEX version is ${current_apex_version}, but target is ${target_apex_version}."
+		echo "ERROR: Downgrade detected! Current APEX version is $(cds_shared_get_array_val "${arg_array}" "current_apex_version"), but target is $(cds_shared_get_array_val "${arg_array}" "target_apex_version")."
 		echo "Downgrading APEX via this method is not supported. Exiting."
 		exit 1
-	elif [ ${version_status} -eq 0 ]; then
+	elif [ "$(cds_shared_get_array_val "${arg_array}" "version_status")" -eq 0 ]; then
 		# do not upgrade, target_apex_version and current_apex_version are equivalent
-		echo "APEX is already at the target version (${current_apex_version})."
+		echo "APEX is already at the target version ($(cds_shared_get_array_val "${arg_array}" "current_apex_version"))."
 
 		# update the variable to indicate the apex database upgrade should be skipped
 		out_skip_db_install_ref=1
 		
 		# Check if static files are also in place
-		if [ -f "${apex_static_dir}/apex_version.js" ]; then
+		if [ -f "$(cds_shared_get_array_val "${arg_array}" "apex_static_dir")/apex_version.js" ]; then
 			echo "Static files are in place. No upgrade needed."
 			# update the variable to indicate the apex file upgrade should be skipped
 			out_skip_file_install_ref=1
 		fi
 	else
 		# upgrade the apex version, target_apex_version is greater than the current_apex_version
-		echo "APEX version mismatch. Found: '${current_apex_version}'"
-		echo "Starting APEX upgrade to ${target_apex_version}..."
+		echo "APEX version mismatch. Found: '$(cds_shared_get_array_val "${arg_array}" "current_apex_version")'"
+		echo "Starting APEX upgrade to $(cds_shared_get_array_val "${arg_array}" "target_apex_version")..."
 		
 		# update the variable to indicate the apex database upgrade should be installed
 		out_skip_db_install_ref=0
@@ -234,8 +265,8 @@ function proj_container_deploy_database_scripts ()
 
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "parsed_secrets_var_name" "DBHOST" "DBPORT" "DBSERVICENAME" "APP_SCHEMA_NAME"; then
-        echo "Error: proj_container_deploy_database_scripts() function required bash variable validation failed" >&2
-        return 1
+		echo "Error: proj_container_deploy_database_scripts() function required bash variable validation failed" >&2
+		return 1
 	fi
 
 	# store the oracle admin password in a local variable
@@ -273,7 +304,7 @@ function proj_container_deploy_database_scripts ()
 
 		# run the custom database deployment scripts:
 		# function that executes database scripts within the container
-		proj_container_database_deploy_custom_scripts
+		proj_container_database_deploy_custom_scripts "${parsed_secrets_var_name}"
 
 	else
 		echo "Database already initialized. Skipping deployment script."
@@ -283,83 +314,100 @@ function proj_container_deploy_database_scripts ()
 }
 
 # function that processes the current and target versions of apex
-# the function accepts the following arguments:
-# 1: target_apex_version: the target apex version
-# 2: apex_download_url: the download URL for the target apex version
-# 3: apex_static_dir: the static apex application directory path
-# 4: skip_db_install_var_name: the name of the variable that indicates if the apex database installation will be processed
-# 5: skip_file_install_var_name: the name of the variable that indicates if the apex file installation will be processed
-# 6: sys_credentials: formatted system database credentials
+# This function accepts the following parameters as elements in the specified array name  (arg_array):
+# target_apex_version: the target apex version
+# apex_download_url: the download URL for the target apex version
+# apex_static_dir: the static apex application directory path
+# skip_db_install_var_name: the name of the variable that indicates if the apex database installation will be processed
+# skip_file_install_var_name: the name of the variable that indicates if the apex file installation will be processed
+# sys_credentials: formatted system database credentials
 function proj_process_apex_version()
 {
-	local target_apex_version="${1}"
-	local apex_download_url="${2}"
-	local apex_static_dir="${3}"
+	# store the function array argument
+	local arg_array="${1}"
 
-	local skip_db_install_var_name="${4}"
-	local skip_file_install_var_name="${5}"
-
-	local -n skip_db_install_var="${4}"
-	local -n skip_file_install_var="${5}"
-	
-	local sys_credentials="${6}"
-
-	# validate the bash variable values
-	if ! cds_shared_validate_required_vars	"target_apex_version" "apex_download_url" "apex_static_dir" "skip_db_install_var_name" "skip_file_install_var_name" "sys_credentials"; then
-        echo "Error: proj_process_apex_version() function required bash variable validation failed" >&2
-        return 1
+	# Validation check: ensure the argument is a valid array
+	if [[ "$(declare -p "${arg_array}" 2>/dev/null)" != "declare -A"* ]]; then
+		echo "Error: proj_process_apex_version() function argument '${arg_array}' is not a valid associative array." >&2
+		return 1
 	fi
 
+	# validate that the required function argument array elements exist
+	if ! cds_shared_validate_required_array_vals "${arg_array}" "target_apex_version" "apex_download_url" "apex_static_dir" "skip_db_install_var_name" "skip_file_install_var_name" "sys_credentials"; then
+		echo "Error: proj_process_apex_version() function required secure array validation failed" >&2
+		return 1
+	fi
+
+	# declare local variables for the specified variable names
+	local -n skip_db_install_var="$(cds_shared_get_array_val "${arg_array}" "skip_db_install_var_name")"
+	local -n skip_file_install_var="$(cds_shared_get_array_val "${arg_array}" "skip_file_install_var_name")"
+
 	# Validate APEX version format (e.g., 23.2, 24.1), if it is invalid exit the function
-	proj_container_validate_apex_version_format "${target_apex_version}"
+	proj_container_validate_apex_version_format "$(cds_shared_get_array_val "${arg_array}" "target_apex_version")"
 
 	# validate if the specified target_apex_version version actually exists on Oracle's site
-	proj_container_verify_apex_version_exists "${target_apex_version}" "${apex_download_url}"
+	proj_container_verify_apex_version_exists "$(cds_shared_get_array_val "${arg_array}" "target_apex_version")" "$(cds_shared_get_array_val "${arg_array}" "apex_download_url")"
 
 	# retrieve the current version of Apex by querying the databae
-	local current_apex_version="$(proj_container_get_installed_apex_version "${sys_credentials}")"
+	local current_apex_version="$(proj_container_get_installed_apex_version "$(cds_shared_get_array_val "${arg_array}" "sys_credentials")")"
 	echo "Current Apex version: ${current_apex_version}"
 
 	# compare the current and target versions of apex and store the return value in version_status
 	local version_status=""
-	proj_container_version_compare "${target_apex_version}" "${current_apex_version}" "version_status"
+	proj_container_version_compare "$(cds_shared_get_array_val "${arg_array}" "target_apex_version")" "${current_apex_version}" "version_status"
+	
+	# define the argument array for the proj_container_check_apex_version_status() function 
+	local -A apex_version_status_func_args=(
+			["version_status"]="${version_status}"
+			["current_apex_version"]="${current_apex_version}"
+			["target_apex_version"]="$(cds_shared_get_array_val "${arg_array}" "target_apex_version")"
+			["apex_static_dir"]="$(cds_shared_get_array_val "${arg_array}" "apex_static_dir")"
+			["out_skip_db_install_var_name"]="$(cds_shared_get_array_val "${arg_array}" "skip_db_install_var_name")"
+			["out_skip_file_install_var_name"]="$(cds_shared_get_array_val "${arg_array}" "skip_file_install_var_name")"
+		)
 	
 	# check the current/target version to determine if the DB and/or file apex installations should be executed
-	proj_container_check_apex_version_status "${version_status}" "${current_apex_version}" "${target_apex_version}" "${apex_static_dir}" "${skip_db_install_var_name}" "${skip_file_install_var_name}"
-
+	proj_container_check_apex_version_status "apex_version_status_func_args"
 }
 
 # function that processes the apex db and file installation
-# the function accepts the following parameters:
-# 1: skip_file_install: flag to indicate if the apex file installation should be processed (1) or not (0)
-# 2: skip_db_install: flag to indicate if the apex db installation should be processed (1) or not (0)
-# 3: apex_zip_path: the path for the dynamic apex zip file local download
-# 4: apex_download_url: the dynamic download url for the specified apex version
-# 5: apex_static_dir: the designated static apex application files directory
-# 6: sys_credentials: formatted system database credentials
-# 7: oracle admin password
+# This function accepts the following parameters as elements in the specified array name  (arg_array):
+# skip_file_install: flag to indicate if the apex file installation should be processed (1) or not (0)
+# skip_db_install: flag to indicate if the apex db installation should be processed (1) or not (0)
+# apex_zip_path: the path for the dynamic apex zip file local download
+# apex_download_url: the dynamic download url for the specified apex version
+# apex_static_dir: the designated static apex application files directory
+# sys_credentials: formatted system database credentials
+# sys_pwd: oracle admin password
 function proj_container_process_apex_install()
 {
-	local skip_file_install="${1}"
-	local skip_db_install="${2}"
-	local apex_zip_path="${3}"
-	local apex_download_url="${4}"
-	local apex_static_dir="${5}"
-	local sys_credentials="${6}"
-	local sys_pwd="${7}"
+	# store the function array argument
+	local arg_array="${1}"
 
 	# validate the bash variable values
-	if ! cds_shared_validate_required_vars	"skip_file_install" "skip_db_install" "apex_zip_path" "apex_download_url" "apex_static_dir" "sys_credentials" "sys_pwd"; then
-        echo "Error: proj_container_process_apex_install() function required bash variable validation failed" >&2
-        return 1
+	if ! cds_shared_validate_required_vars	"DBSERVICENAME"; then
+		echo "Error: proj_container_process_apex_install() function required function argument validation failed" >&2
+		return 1
 	fi
 
+	# Validation check: ensure the argument is a valid array
+	if [[ "$(declare -p "${arg_array}" 2>/dev/null)" != "declare -A"* ]]; then
+		echo "Error: proj_container_process_apex_install() function argument '${arg_array}' is not a valid associative array." >&2
+		return 1
+	fi
+
+	# validate that the required function argument array elements exist
+	if ! cds_shared_validate_required_array_vals "${arg_array}" "skip_file_install" "skip_db_install" "apex_zip_path" "apex_download_url" "apex_static_dir" "sys_credentials" "sys_pwd"; then
+		echo "Error: proj_container_process_apex_install() function required secure array validation failed" >&2
+		return 1
+	fi
+	
 	# check if the static Apex files should be installed
-	if [[ "${skip_file_install}" -ne 1 ]]; then
+	if [[ "$(cds_shared_get_array_val "${arg_array}" "skip_file_install")" -ne 1 ]]; then
 
 		# the apex package does not dynamically download and install the apex installation package
-		echo "Downloading ${apex_download_url}..."
-		curl -L -o "${apex_zip_path}" "${apex_download_url}"
+		echo "Downloading $(cds_shared_get_array_val "${arg_array}" "apex_download_url")..."
+		curl -L -o "$(cds_shared_get_array_val "${arg_array}" "apex_zip_path")" "$(cds_shared_get_array_val "${arg_array}" "apex_download_url")"
 		if [ $? -ne 0 ]; then
 			echo "ERROR: Download of APEX zip file failed."
 			exit 1
@@ -367,8 +415,8 @@ function proj_container_process_apex_install()
 
 		echo "Apex upgrade package download complete."
 		
-		echo "Unzipping ${apex_zip_path}..."
-		unzip -q "${apex_zip_path}" -d /tmp
+		echo "Unzipping $(cds_shared_get_array_val "${arg_array}" "apex_zip_path")..."
+		unzip -q "$(cds_shared_get_array_val "${arg_array}" "apex_zip_path")" -d /tmp
 		if [ $? -ne 0 ]; then
 			echo "ERROR: Failed to unzip APEX file."
 			exit 1
@@ -380,14 +428,14 @@ function proj_container_process_apex_install()
 		# initialize the local variables to support the parallel installation of Apex in the DB and the file system (docker volume)
 		local db_install_pid=0
 		local db_install_status=0
-		local file_copy_status=0
+		local file_move_status=0
 
 		# check if the Apex database installation should proceed
 		if [ $skip_db_install -eq 0 ]; then
 			echo "Starting APEX DB installer (in background)..."
 
 			# Run the DB install in the background by adding '&'
-			sqlplus -s -l "${sys_credentials}" <<EOF &
+			sqlplus -s -l "$(cds_shared_get_array_val "${arg_array}" "sys_credentials")" <<EOF &
 				WHENEVER SQLERROR EXIT SQL.SQLCODE
 				ALTER SESSION SET CONTAINER = ${DBSERVICENAME};
 				@apexins.sql SYSAUX SYSAUX TEMP /i/
@@ -402,39 +450,39 @@ EOF
 		echo "Copying APEX static images to shared volume (in foreground)..."
 		
 		# Clear out any old static Apex files 
-		rm -rf "${apex_static_dir}"/*
+		rm -rf "$(cds_shared_get_array_val "${arg_array}" "apex_static_dir")"/*
 
 		# Move the contents of the images folder to the root of the volume
-		mv /tmp/apex/images/* "${apex_static_dir}"/
+		mv /tmp/apex/images/* "$(cds_shared_get_array_val "${arg_array}" "apex_static_dir")"/
 
-		# store the results of the file move process in file_copy_status so the result can be checked
-		local file_copy_status=$? 
-		if [ "${file_copy_status}" -eq 0 ]; then
+		# store the results of the file move process in file_move_status so the result can be checked
+		local file_move_status=$? 
+		if [ "$(cds_shared_get_array_val "${arg_array}" "file_move_status")" -eq 0 ]; then
 			echo "Static files copied successfully."
 			
 			# update owner permissions on the docker volume to the oracle account so the static Apex files can be used by the ords container
-			chown -R 54321:0 "${apex_static_dir}"/
+			chown -R 54321:0 "$(cds_shared_get_array_val "${arg_array}" "apex_static_dir")"/
 		else
 			echo "ERROR: Static file copy failed."
 		fi
 
 		# wait for background DB install to finish
-		if [ "${db_install_pid}" -ne 0 ]; then
-			echo "Waiting for APEX DB install (PID: ${db_install_pid}) to finish..."
-			wait "${db_install_pid}"
+		if [ "$(cds_shared_get_array_val "${arg_array}" "db_install_pid")" -ne 0 ]; then
+			echo "Waiting for APEX DB install (PID: $(cds_shared_get_array_val "${arg_array}" "db_install_pid")) to finish..."
+			wait "$(cds_shared_get_array_val "${arg_array}" "db_install_pid")"
 				local db_install_status=$?	# store the result of the Apex database installation in a new variable
 
 			# check if the database installation 
-			if [ "${db_install_status}" -eq 0 ]; then
+			if [ "$(cds_shared_get_array_val "${arg_array}" "db_install_status")" -eq 0 ]; then
 				echo "APEX database upgrade successful."
 				
 				# declare the variable to store the version status code returned by the proj_container_version_compare() function
 				local version_status
 				
 				# check if the target apex version is less than 23.2
-				proj_container_version_compare "${TARGET_APEX_VERSION}" "23.2" "version_status"
+				proj_container_version_compare "$(cds_shared_get_array_val "${arg_array}" "target_apex_version")" "23.2" "version_status"
 				
-				if [ "${version_status}" -eq 2 ]; then 
+				if [ "$(cds_shared_get_array_val "${arg_array}" "version_status")" -eq 2 ]; then 
 					# apex version is 23.1 or older
 
 					# define a PL/SQL block to unlock the apex admin using the APEX_UTIL.RESET_PASSWORD procedure
@@ -444,7 +492,7 @@ EOF
 							APEX_UTIL.reset_password(
 								p_user_name => 'ADMIN',
 								p_old_password => NULL,
-								p_new_password => '${sys_pwd}',
+								p_new_password => '$(cds_shared_get_array_val "${arg_array}" "sys_pwd")',
 								p_change_password_on_first_use => FALSE
 							);
 							COMMIT;
@@ -462,7 +510,7 @@ EOF
 							APEX_INSTANCE_ADMIN.UNLOCK_USER(
 								p_workspace => 'INTERNAL',
 								p_username	=> 'ADMIN',
-								p_password	=> '${sys_pwd}'
+								p_password	=> '$(cds_shared_get_array_val "${arg_array}" "sys_pwd")'
 							);
 							COMMIT;
 						EXCEPTION WHEN OTHERS THEN
@@ -473,16 +521,16 @@ EOF
 				
 				fi
 				
-				# The APEX upgrade completed, unlock the APEX_PUBLIC_USER account and attempt to create the APEX instance admin account or if it already exists then reset the password to ${ORACLE_PWD}
+				# The APEX upgrade completed, unlock the APEX_PUBLIC_USER account and attempt to create the APEX instance admin account or if it already exists then reset the password to sys_pwd
 
 				# run the sqlplus script using the SYS schema
 				echo "Unlocking/Initializing/Configuring APEX accounts..."
 				
-				sqlplus -s -l "${sys_credentials}" <<EOF
+				sqlplus -s -l "$(cds_shared_get_array_val "${arg_array}" "sys_credentials")" <<EOF
 				WHENEVER SQLERROR EXIT SQL.SQLCODE
 				ALTER SESSION SET CONTAINER = ${DBSERVICENAME};
 				-- Use the same password for all internal accounts for simplicity
-				ALTER USER APEX_PUBLIC_USER IDENTIFIED BY "${sys_pwd}" ACCOUNT UNLOCK;
+				ALTER USER APEX_PUBLIC_USER IDENTIFIED BY "$(cds_shared_get_array_val "${arg_array}" "sys_pwd")" ACCOUNT UNLOCK;
 				SET SERVEROUTPUT ON
 				
 				-- Switch to the APEX schema to perform admin tasks
@@ -509,7 +557,7 @@ EOF
 					APEX_UTIL.create_user(
 						p_user_name => 'ADMIN',
 						p_email_address => 'admin@localhost',
-						p_web_password=> '${sys_pwd}',
+						p_web_password=> '$(cds_shared_get_array_val "${arg_array}" "sys_pwd")',
 						p_developer_privs => 'ADMIN:CREATE:DATA_LOADER:EDIT:HELP:MONITOR:SQL',
 						p_change_password_on_first_use => 'N' -- Ensure no forced change password
 					);
@@ -542,16 +590,13 @@ EOF
 		fi
 		
 		# Check the results of the background and foreground jobs 
-		if [ "${db_install_status}" -ne 0 ] || [ "${file_copy_status}" -ne 0 ]; then
+		if [ "${db_install_status}" -ne 0 ] || [ "${file_move_status}" -ne 0 ]; then
 			echo "ERROR: One or more upgrade tasks failed. Halting."
 			exit 1
 		fi
 
 		# remove the apex installation files
 		echo "Cleaning up installer files..."
-		rm -rf /tmp/apex "${apex_zip_path}"
+		rm -rf /tmp/apex "$(cds_shared_get_array_val "${arg_array}" "apex_zip_path")"
 	fi
-
-
-
 }
