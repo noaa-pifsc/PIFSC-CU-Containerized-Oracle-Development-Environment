@@ -9,6 +9,8 @@ function proj_container_version_compare() {
 	version2="${2}"
 	local -n out_compare_result_ref="${3}"
 
+	echo "running proj_container_version_compare (${version1}, ${version2}, ${3})"
+
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars	"version1" "version2"; then
 		echo "Error: proj_container_version_compare() function required bash variable validation failed" >&2
@@ -143,14 +145,14 @@ function proj_container_verify_apex_version_exists() {
 # function to install or upgrade apex based on the current installed version and the TARGET_APEX_VERSION environment variable
 # this function accepts the following parameters:
 # 1: sys_credentials: formatted system database credentials
-# 2: oracle admin password
+# 2: sys_password: oracle admin password
 function proj_container_install_or_upgrade_apex() {
 
 	local sys_credentials="${1}"
-	local sys_pwd="${2}"
+	local sys_password="${2}"
 	
 	# validate the bash variable values
-	if ! cds_shared_validate_required_vars "sys_credentials" "sys_pwd"; then
+	if ! cds_shared_validate_required_vars "sys_credentials" "sys_password"; then
 		echo "Error: proj_container_install_or_upgrade_apex() function required bash variable validation failed" >&2
 		return 1
 	fi
@@ -188,7 +190,7 @@ function proj_container_install_or_upgrade_apex() {
 			["apex_download_url"]="${apex_download_url}"
 			["apex_static_dir"]="${apex_static_dir}"
 			["sys_credentials"]="${sys_credentials}"
-			["sys_pwd"]="${sys_pwd}"
+			["sys_password"]="${sys_password}"
 		)
 
 	# process the apex install/upgrade
@@ -269,11 +271,17 @@ function proj_container_deploy_database_scripts ()
 		return 1
 	fi
 
+	# validate that the required function argument array elements exist
+	if ! cds_shared_validate_required_array_vals "${parsed_secrets_ref}" "sys_password"; then
+		echo "Error: proj_container_deploy_database_scripts() function required secure array validation failed" >&2
+		return 1
+	fi
+
 	# store the oracle admin password in a local variable
-	local sys_pwd="${parsed_secrets_ref[sys_password]:-}"
+	local sys_password="${parsed_secrets_ref[sys_password]:-}"
 	
 	# define the SYS credentials for use in deployment scripts based on environment variables:
-	local sys_credentials="SYS/${sys_pwd}@${DBHOST}:${DBPORT}/${DBSERVICENAME} as SYSDBA"
+	local sys_credentials="SYS/${sys_password}@${DBHOST}:${DBPORT}/${DBSERVICENAME} as SYSDBA"
 
 #	echo "Running the custom database/apex deployment process"
 
@@ -291,7 +299,7 @@ function proj_container_deploy_database_scripts ()
 	# install or upgrade the apex container installation (if TARGET_APEX_VERSION is defined):
 	if [ -n "${TARGET_APEX_VERSION}" ]; then
 		echo "TARGET_APEX_VERSION is defined, install/upgrade apex"
-		proj_container_install_or_upgrade_apex "${sys_credentials}" "${sys_pwd}"
+		proj_container_install_or_upgrade_apex "${sys_credentials}" "${sys_password}"
 	else
 		echo "TARGET_APEX_VERSION is not defined, skip apex install/upgrade process"
 
@@ -378,14 +386,14 @@ function proj_process_apex_version()
 # apex_download_url: the dynamic download url for the specified apex version
 # apex_static_dir: the designated static apex application files directory
 # sys_credentials: formatted system database credentials
-# sys_pwd: oracle admin password
+# sys_password: oracle admin password
 function proj_container_process_apex_install()
 {
 	# store the function array argument
 	local arg_array="${1}"
 
 	# validate the bash variable values
-	if ! cds_shared_validate_required_vars	"DBSERVICENAME"; then
+	if ! cds_shared_validate_required_vars	"DBSERVICENAME" "TARGET_APEX_VERSION"; then
 		echo "Error: proj_container_process_apex_install() function required function argument validation failed" >&2
 		return 1
 	fi
@@ -397,7 +405,7 @@ function proj_container_process_apex_install()
 	fi
 
 	# validate that the required function argument array elements exist
-	if ! cds_shared_validate_required_array_vals "${arg_array}" "skip_file_install" "skip_db_install" "apex_zip_path" "apex_download_url" "apex_static_dir" "sys_credentials" "sys_pwd"; then
+	if ! cds_shared_validate_required_array_vals "${arg_array}" "skip_file_install" "skip_db_install" "apex_zip_path" "apex_download_url" "apex_static_dir" "sys_credentials" "sys_password"; then
 		echo "Error: proj_container_process_apex_install() function required secure array validation failed" >&2
 		return 1
 	fi
@@ -480,9 +488,9 @@ EOF
 				local version_status
 				
 				# check if the target apex version is less than 23.2
-				proj_container_version_compare "$(cds_shared_get_array_val "${arg_array}" "target_apex_version")" "23.2" "version_status"
+				proj_container_version_compare "${TARGET_APEX_VERSION}" "23.2" "version_status"
 				
-				if [ "$(cds_shared_get_array_val "${arg_array}" "version_status")" -eq 2 ]; then 
+				if [ "${version_status}" -eq 2 ]; then 
 					# apex version is 23.1 or older
 
 					# define a PL/SQL block to unlock the apex admin using the APEX_UTIL.RESET_PASSWORD procedure
@@ -492,7 +500,7 @@ EOF
 							APEX_UTIL.reset_password(
 								p_user_name => 'ADMIN',
 								p_old_password => NULL,
-								p_new_password => '$(cds_shared_get_array_val "${arg_array}" "sys_pwd")',
+								p_new_password => '$(cds_shared_get_array_val "${arg_array}" "sys_password")',
 								p_change_password_on_first_use => FALSE
 							);
 							COMMIT;
@@ -510,7 +518,7 @@ EOF
 							APEX_INSTANCE_ADMIN.UNLOCK_USER(
 								p_workspace => 'INTERNAL',
 								p_username	=> 'ADMIN',
-								p_password	=> '$(cds_shared_get_array_val "${arg_array}" "sys_pwd")'
+								p_password	=> '$(cds_shared_get_array_val "${arg_array}" "sys_password")'
 							);
 							COMMIT;
 						EXCEPTION WHEN OTHERS THEN
@@ -521,7 +529,7 @@ EOF
 				
 				fi
 				
-				# The APEX upgrade completed, unlock the APEX_PUBLIC_USER account and attempt to create the APEX instance admin account or if it already exists then reset the password to sys_pwd
+				# The APEX upgrade completed, unlock the APEX_PUBLIC_USER account and attempt to create the APEX instance admin account or if it already exists then reset the password to sys_password
 
 				# run the sqlplus script using the SYS schema
 				echo "Unlocking/Initializing/Configuring APEX accounts..."
@@ -530,7 +538,7 @@ EOF
 				WHENEVER SQLERROR EXIT SQL.SQLCODE
 				ALTER SESSION SET CONTAINER = ${DBSERVICENAME};
 				-- Use the same password for all internal accounts for simplicity
-				ALTER USER APEX_PUBLIC_USER IDENTIFIED BY "$(cds_shared_get_array_val "${arg_array}" "sys_pwd")" ACCOUNT UNLOCK;
+				ALTER USER APEX_PUBLIC_USER IDENTIFIED BY "$(cds_shared_get_array_val "${arg_array}" "sys_password")" ACCOUNT UNLOCK;
 				SET SERVEROUTPUT ON
 				
 				-- Switch to the APEX schema to perform admin tasks
@@ -557,7 +565,7 @@ EOF
 					APEX_UTIL.create_user(
 						p_user_name => 'ADMIN',
 						p_email_address => 'admin@localhost',
-						p_web_password=> '$(cds_shared_get_array_val "${arg_array}" "sys_pwd")',
+						p_web_password=> '$(cds_shared_get_array_val "${arg_array}" "sys_password")',
 						p_developer_privs => 'ADMIN:CREATE:DATA_LOADER:EDIT:HELP:MONITOR:SQL',
 						p_change_password_on_first_use => 'N' -- Ensure no forced change password
 					);
