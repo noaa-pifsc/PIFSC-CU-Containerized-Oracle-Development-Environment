@@ -19,5 +19,4 @@ source "${CURR_DIR}/../../config/server_deploy_config.sh"
 
 # include the host functions
 source "${CURR_DIR}/../../shared_scripts/functions/shared_functions.sh"
-source "${CURR_DIR}/../functions/custom_host_functions.sh"
 source "${CURR_DIR}/../functions/host_functions.sh"
