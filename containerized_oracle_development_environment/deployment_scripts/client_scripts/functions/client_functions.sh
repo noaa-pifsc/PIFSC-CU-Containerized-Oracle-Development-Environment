@@ -11,6 +11,8 @@ function proj_client_deploy_container ()
 	local passed_env_value="${1:-}"
 	local passed_deploy_value="${2:-}"
 	
+	echo "running proj_client_deploy_container(${1}, ${2})"
+	
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars	"env_var_name" "dest_var_name"; then
 		echo "Error: proj_client_deploy_container() function required function argument validation failed" >&2
@@ -31,3 +33,5 @@ function proj_client_deploy_container ()
 	# notify the user that the container has finished executing
 	echo "The ${!env_var_name} docker container has finished building and is running on ${!dest_var_name}"
 }
+
+

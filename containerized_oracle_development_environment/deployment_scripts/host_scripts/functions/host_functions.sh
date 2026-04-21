@@ -36,19 +36,7 @@ function proj_host_deploy_container_elev_privs()
 	# process the stdin configuration data: parse and store in variables, construct the formatted variable identified by $SECRET_DATA_VAR_NAME
 	cds_host_process_stdin_secret_data "${SECRET_MAPPING_VAR_NAME}" "${SECRET_DATA_VAR_NAME}"
 
-	# change to the designated build path so the containers can be stopped (if running) and started
-	cd "${BUILD_PATH}"
-
-	# remove the containers if they are already running
-	docker compose --env-file ./.env down
-
-	# declare COMPOSE_FILE as an environment variable
-	export COMPOSE_FILE
-	
-	echo "the value of COMPOSE_FILE is: ${COMPOSE_FILE}"
-
-	# Execute natively for local Desktop Deployments using the injected COMPOSE_FILE
-	docker compose --env-file ./.env up -d --build
+	proj_deploy_CODE_containers "${BUILD_PATH}" "${COMPOSE_FILE}"
 
 	echo "The containers have been started"
 }

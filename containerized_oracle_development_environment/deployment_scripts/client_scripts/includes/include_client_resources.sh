@@ -17,6 +17,7 @@ source "${CURR_DIR}/../../config/container_config.sh"
 source "${CURR_DIR}/../../config/custom_container_config.sh"
 source "${CURR_DIR}/../../config/server_deploy_config.sh"
 
-# include the custom shared/host function definitions
+# include the custom shared/client function definitions
+source "${CURR_DIR}/../../shared_scripts/functions/shared_functions.sh"
 source "${CURR_DIR}/../functions/client_functions.sh"
 source "${CURR_DIR}/../functions/custom_client_functions.sh"
