@@ -12,9 +12,12 @@ to do:
 		
 		
 		
-	_ try to reuse CAD for server deployments
+	X try to reuse CAD for server deployments
+
 		
 	_ try to get CODE running on a linux host
+		_ resolving issue with mounted volume on a linux host (switch to named volume)
+	
 	
 	_ how to guarantee unique container naming so multiple CODE projects can run on the same server at the same time
 		_ need to also change the port number to avoid conflicts
@@ -23,9 +26,24 @@ to do:
 	X use array arguments for CODE functions
 		_ passthrough the argument arrays to functions from within functions when appropriate
 		
-		_ check if the docker compose calls should be updated in CDS to allow multiple -f arguments
-		
+		X check if the docker compose calls should be updated in CDS to allow multiple -f arguments
+			X using COMPOSE_FILE special environment variable
+
 		_ other than that the CAD can be used for the linux host deployment method (with no automatic teardown)
+		
+	_ Update CODE to use CDS directly again
+		
+		
+		_ Update CDS on all dependent projects:
+			_ CDD:
+				_ LHP
+				_ PRI
+				_ LCE
+			_ CAD:
+				_ PRI
+				_ SIA
+				_ PLW
+		
 		
 		
 	X (4/14/26) troubleshoot why skip_file_install is 0
@@ -88,15 +106,8 @@ down
 		# build and deploy the development scenario of the CODE (server)
 		bash ./deployment_scripts/client_scripts/client_deploy_container.sh dev server
 
-
-		docker compose \
-		  --env-file ./.env \
-		  -f CODE-db-deploy.yml \
-		  -f CODE-ords.yml \
-		  -f CODE-db-named-volume.yml \
-		  -f custom-docker-compose.yml \
-		  up -d --build
-
+		# establish the connection to the docker server mapping the default ports so those access can be access on the client machine (make sure there are no containers using localhost that will cause a conflict)
+		ssh -N -L 1521:localhost:1521 -L 8181:localhost:8181 dev_docker
 
 
 	# Test:

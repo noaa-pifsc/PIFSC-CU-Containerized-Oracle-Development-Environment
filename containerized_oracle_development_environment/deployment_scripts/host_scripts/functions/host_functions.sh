@@ -11,11 +11,6 @@ function proj_host_deploy_container()
         return 1
     fi
 
-	# grant write permissions to the ords-config folder
-	chmod -R 777 "${BUILD_PATH}/ords-config"
-
-	ls -l "${BUILD_PATH}"
-
 	# declare the function arguments as a local variable
 	local -A func_args=(
 			["target_user"]="${PRIV_USER}" 
