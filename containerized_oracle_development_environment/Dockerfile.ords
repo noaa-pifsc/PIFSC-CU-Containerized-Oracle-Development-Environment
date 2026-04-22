@@ -7,4 +7,4 @@ FROM ${ORDS_IMAGE}
 RUN mkdir -p /etc/ords/config/global
 
 # copy baseline ORDS settings into the image and grant ownership to the Oracle user (54321)
-COPY --chown=54321:0 ./ords-config/global/settings.xml /etc/ords/config/global/settings.xml
+COPY --chown=54321:0 ./containerized_oracle_development_environment/ords-config/global/settings.xml /etc/ords/config/global/settings.xml
