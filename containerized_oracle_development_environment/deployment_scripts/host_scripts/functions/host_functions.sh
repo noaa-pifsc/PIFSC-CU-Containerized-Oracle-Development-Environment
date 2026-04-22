@@ -32,7 +32,6 @@ function proj_host_deploy_container()
 function proj_host_deploy_container_elev_privs()
 {
 #	echo "running proj_host_deploy_container_elev_privs()"
-
 	if ! cds_shared_validate_required_vars "ENV_NAME" "COMPOSE_FILE" "SECRET_DATA_VAR_NAME" "SECRET_MAPPING_VAR_NAME" "BUILD_PATH"; then 
         echo "Error: proj_host_deploy_container_elev_privs() function argument validation failed" >&2
         return 1
@@ -41,6 +40,7 @@ function proj_host_deploy_container_elev_privs()
 	# process the stdin configuration data: parse and store in variables, construct the formatted variable identified by $SECRET_DATA_VAR_NAME
 	cds_host_process_stdin_secret_data "${SECRET_MAPPING_VAR_NAME}" "${SECRET_DATA_VAR_NAME}"
 
+	# deploy the CODE containers to the host server
 	proj_deploy_CODE_containers "${BUILD_PATH}" "${COMPOSE_FILE}"
 
 	echo "The containers have been started"

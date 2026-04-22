@@ -4,11 +4,20 @@ to do:
 		e.g. GCP shared compute instance running docker, but it will depend on performance
 
 	_ separate out the functionality into separate functions with defined naming convention
+		_ create CODE core scripts that are reused across forks
+		
+		_ implement parameters for all feasible functions that don't change across project-specific implementations
+		
+		
+	
 	_ update documentation
 		_ review the sections defined for CDD/CAD and implement the ones that are appropriate
 		_ naming conventions
 		_ implementation instructions
-	_ implement CDD/CDS functions where appropriate	
+	X implement CDD/CDS functions where appropriate	
+		
+		
+		
 		
 		
 		
@@ -21,21 +30,16 @@ to do:
 	
 	_ how to guarantee unique container naming so multiple CODE projects can run on the same server at the same time
 		_ need to also change the port number to avoid conflicts
-		_ needs to be updated in .env file
+			_ make the updates in the .env file
 
 	
 		
 	X use array arguments for CODE functions
-		_ passthrough the argument arrays to functions from within functions when appropriate
+		X passthrough the argument arrays to functions from within functions when appropriate
 		
 		X check if the docker compose calls should be updated in CDS to allow multiple -f arguments
 			X using COMPOSE_FILE special environment variable
-
-		_ other than that the CAD can be used for the linux host deployment method (with no automatic teardown)
-		
-	_ Update CODE to use CDS directly again
-		
-		
+	X Update CODE to use CDS directly again
 		_ Update CDS on all dependent projects:
 			_ CDD:
 				_ LHP
@@ -88,6 +92,8 @@ docker compose \
   down
 docker volume rm code-apex-static-vol
 docker volume rm code-db-vol
+docker volume rm code-ords-config-vol
+
 
 
 
