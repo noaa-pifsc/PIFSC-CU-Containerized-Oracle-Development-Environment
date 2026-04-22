@@ -82,8 +82,12 @@ git bash commands:
 
 
 		
-		# build and deploy the development scenario of the CODE
-		bash ./deployment_scripts/client_scripts/client_deploy_container.sh dev
+		# build and deploy the development scenario of the CODE (local)
+		bash ./deployment_scripts/client_scripts/client_deploy_container.sh dev local
+
+		# build and deploy the development scenario of the CODE (server)
+		bash ./deployment_scripts/client_scripts/client_deploy_container.sh dev server
+
 
 		docker compose \
 		  --env-file ./.env \
