@@ -33,6 +33,8 @@ to do:
 	
 	document
 		**** _ clearly indicate this is only intended for development and testing purposes
+			* Not security hardened, encouraged not to work with sensitive data in a shared environment (anyone with docker privileges can connect to your containers and access the data within it)
+			
 		
 		
 	

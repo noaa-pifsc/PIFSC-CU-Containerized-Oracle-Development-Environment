@@ -74,7 +74,7 @@ function proj_client_build_deploy_dev_environment ()
 		echo "This is a local deployment"
 
 		# export the environment variables used directly in the docker compose files:
-		cds_shared_export_env_vars "DB_IMAGE" "DB_HOST_PORT" "DBPORT" "ORACLE_PWD" "DBHOST" "DBSERVICENAME" "TARGET_APEX_VERSION" "APP_SCHEMA_NAME" "ORDS_IMAGE" 
+		cds_shared_export_env_vars "DB_IMAGE" "DB_HOST_PORT" "DBPORT" "ORACLE_PWD" "DBHOST" "DBSERVICENAME" "TARGET_APEX_VERSION" "APP_SCHEMA_NAME" "ORDS_IMAGE" "COMPOSE_PROJECT_NAME" "ORDS_HOST_PORT" "ENV_NAME" 
 
 		# deploy the containers locally:
 		proj_deploy_CODE_containers "${BUILD_PATH}" "${compose_file}"
@@ -88,7 +88,7 @@ function proj_client_build_deploy_dev_environment ()
 		fi
 
 		# declare COMPOSE_FILE as an environment variable so it can be used in the container deployment
-		export COMPOSE_FILE="${compose_file}"
+		COMPOSE_FILE="${compose_file}"
 
 		# declare environment variable string for the environment variables to be passed to the container host via the ssh call
 		local env_var_string="$(cds_shared_generate_ssh_env_vars_string "DB_IMAGE" "DB_HOST_PORT" "DBPORT" "ORACLE_PWD" "DBHOST" "DBSERVICENAME" "TARGET_APEX_VERSION" "APP_SCHEMA_NAME" "ORDS_IMAGE" "COMPOSE_FILE")"
