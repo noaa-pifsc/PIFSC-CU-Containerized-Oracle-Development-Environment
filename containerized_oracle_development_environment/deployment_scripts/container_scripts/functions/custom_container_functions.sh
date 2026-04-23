@@ -7,7 +7,7 @@ function proj_container_database_deploy_custom_scripts ()
 
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "secrets_var_name"; then
-        echo "Error: proj_container_database_deploy_custom_scripts() function required bash variable validation failed" >&2
+        echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
         return 1
 	fi
 	

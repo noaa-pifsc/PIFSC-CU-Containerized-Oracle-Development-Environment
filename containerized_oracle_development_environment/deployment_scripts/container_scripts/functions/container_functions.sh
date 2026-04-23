@@ -11,7 +11,7 @@ function proj_container_version_compare() {
 
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars	"version1" "version2"; then
-		echo "Error: proj_container_version_compare() function required bash variable validation failed" >&2
+		echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
 		return 1
 	fi
 	
@@ -52,7 +52,7 @@ function proj_container_check_database_initialized() {
 
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars	"sys_credentials" "APP_SCHEMA_NAME"; then
-		echo "Error: proj_container_check_database_initialized() function required bash variable validation failed" >&2
+		echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
 		return 1
 	fi
 
@@ -66,14 +66,14 @@ function proj_container_validate_apex_version_format() {
 
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars	"target_version"; then
-		echo "Error: proj_container_validate_apex_version_format() function required bash variable validation failed" >&2
+		echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
 		return 1
 	fi
 
 	# validate APEX version format (Strictly X.X, e.g., 23.2, 24.1)
 	# the regex ^[0-9]+\.[0-9]+$ ensures exactly one dot separating two integers.
 	if [[ ! "$target_version" =~ ^[0-9]+\.[0-9]+$ ]]; then
-		echo "ERROR: Invalid APEX version format: '$target_version'. Expected format: XX.X (e.g., 23.2)"
+		echo "Error: ${FUNCNAME[0]}() - Invalid APEX version format: '$target_version'. Expected format: XX.X (e.g., 23.2)"
 		exit 1
 	fi
 }
@@ -84,7 +84,7 @@ function proj_container_get_installed_apex_version() {
 	
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "sys_credentials"; then
-		echo "Error: proj_container_get_installed_apex_version() function required bash variable validation failed" >&2
+		echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
 		return 1
 	fi
 	
@@ -123,7 +123,7 @@ function proj_container_verify_apex_version_exists() {
 
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "apex_version" "apex_download_url"; then
-		echo "Error: proj_container_verify_apex_version_exists() function required bash variable validation failed" >&2
+		echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
 		return 1
 	fi
 
@@ -132,7 +132,7 @@ function proj_container_verify_apex_version_exists() {
 
 	# Use curl to check headers only, -f causes curl to fail on HTTP errors (like 404), -s is silent mode
 	if ! curl --output /dev/null --silent --head --fail "${apex_download_url}"; then
-		echo "ERROR: APEX version ${apex_version} does not exist at URL: ${apex_download_url}"
+		echo "ERROR: ${FUNCNAME[0]}() - APEX version ${apex_version} does not exist at URL: ${apex_download_url}"
 		echo "Please check the apex version number and try again."
 		exit 1
 	else
@@ -151,7 +151,7 @@ function proj_container_install_or_upgrade_apex() {
 	
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "sys_credentials" "sys_password"; then
-		echo "Error: proj_container_install_or_upgrade_apex() function required bash variable validation failed" >&2
+		echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
 		return 1
 	fi
 
@@ -210,13 +210,13 @@ function proj_container_check_apex_version_status()
 
 	# Validation check: ensure the argument is a valid array
 	if [[ "$(declare -p "${arg_array}" 2>/dev/null)" != "declare -A"* ]]; then
-		echo "Error: proj_container_check_apex_version_status() function argument '${arg_array}' is not a valid associative array." >&2
+		echo "Error: ${FUNCNAME[0]}() function argument '${arg_array}' is not a valid associative array." >&2
 		return 1
 	fi
 
 	# validate that the required function argument array elements exist
 	if ! cds_shared_validate_required_array_vals "${arg_array}" "version_status" "current_apex_version" "target_apex_version" "apex_static_dir" "out_skip_file_install_var_name" "out_skip_db_install_var_name"; then
-		echo "Error: proj_container_check_apex_version_status() function required secure array validation failed" >&2
+		echo "Error: ${FUNCNAME[0]}() function required secure array validation failed" >&2
 		return 1
 	fi
 	
@@ -227,7 +227,7 @@ function proj_container_check_apex_version_status()
 	# check the $version_status to determine if the apex database/files should be upgraded
 	if [ "$(cds_shared_get_array_val "${arg_array}" "version_status")" -eq 2 ]; then
 		# downgrade attempt detected, the target_apex_version is less than the current_apex_version
-		echo "ERROR: Downgrade detected! Current APEX version is $(cds_shared_get_array_val "${arg_array}" "current_apex_version"), but target is $(cds_shared_get_array_val "${arg_array}" "target_apex_version")."
+		echo "ERROR: ${FUNCNAME[0]}() - Downgrade detected! Current APEX version is $(cds_shared_get_array_val "${arg_array}" "current_apex_version"), but target is $(cds_shared_get_array_val "${arg_array}" "target_apex_version")."
 		echo "Downgrading APEX via this method is not supported. Exiting."
 		exit 1
 	elif [ "$(cds_shared_get_array_val "${arg_array}" "version_status")" -eq 0 ]; then
@@ -265,13 +265,13 @@ function proj_container_deploy_database_scripts ()
 
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "parsed_secrets_var_name" "DBHOST" "DBPORT" "DBSERVICENAME" "APP_SCHEMA_NAME"; then
-		echo "Error: proj_container_deploy_database_scripts() function required bash variable validation failed" >&2
+		echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
 		return 1
 	fi
 
 	# validate that the required function argument array elements exist
 	if ! cds_shared_validate_required_array_vals "${parsed_secrets_var_name}" "sys_password"; then
-		echo "Error: proj_container_deploy_database_scripts() function required secure array validation failed" >&2
+		echo "Error: ${FUNCNAME[0]}() function required secure array validation failed" >&2
 		return 1
 	fi
 
@@ -334,13 +334,13 @@ function proj_process_apex_version()
 
 	# Validation check: ensure the argument is a valid array
 	if [[ "$(declare -p "${arg_array}" 2>/dev/null)" != "declare -A"* ]]; then
-		echo "Error: proj_process_apex_version() function argument '${arg_array}' is not a valid associative array." >&2
+		echo "Error: ${FUNCNAME[0]}() function argument '${arg_array}' is not a valid associative array." >&2
 		return 1
 	fi
 
 	# validate that the required function argument array elements exist
 	if ! cds_shared_validate_required_array_vals "${arg_array}" "target_apex_version" "apex_download_url" "apex_static_dir" "skip_db_install_var_name" "skip_file_install_var_name" "sys_credentials"; then
-		echo "Error: proj_process_apex_version() function required secure array validation failed" >&2
+		echo "Error: ${FUNCNAME[0]}() function required secure array validation failed" >&2
 		return 1
 	fi
 
@@ -392,19 +392,19 @@ function proj_container_process_apex_install()
 
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars	"DBSERVICENAME" "TARGET_APEX_VERSION"; then
-		echo "Error: proj_container_process_apex_install() function required function argument validation failed" >&2
+		echo "Error: ${FUNCNAME[0]}() function required function argument validation failed" >&2
 		return 1
 	fi
 
 	# Validation check: ensure the argument is a valid array
 	if [[ "$(declare -p "${arg_array}" 2>/dev/null)" != "declare -A"* ]]; then
-		echo "Error: proj_container_process_apex_install() function argument '${arg_array}' is not a valid associative array." >&2
+		echo "Error: ${FUNCNAME[0]}() function argument '${arg_array}' is not a valid associative array." >&2
 		return 1
 	fi
 
 	# validate that the required function argument array elements exist
 	if ! cds_shared_validate_required_array_vals "${arg_array}" "skip_file_install" "skip_db_install" "apex_zip_path" "apex_download_url" "apex_static_dir" "sys_credentials" "sys_password"; then
-		echo "Error: proj_container_process_apex_install() function required secure array validation failed" >&2
+		echo "Error: ${FUNCNAME[0]}() function required secure array validation failed" >&2
 		return 1
 	fi
 	
@@ -415,7 +415,7 @@ function proj_container_process_apex_install()
 		echo "Downloading $(cds_shared_get_array_val "${arg_array}" "apex_download_url")..."
 		curl -L -o "$(cds_shared_get_array_val "${arg_array}" "apex_zip_path")" "$(cds_shared_get_array_val "${arg_array}" "apex_download_url")"
 		if [ $? -ne 0 ]; then
-			echo "ERROR: Download of APEX zip file failed."
+			echo "Error: ${FUNCNAME[0]}() - Download of APEX zip file failed."
 			exit 1
 		fi
 
@@ -424,7 +424,7 @@ function proj_container_process_apex_install()
 		echo "Unzipping $(cds_shared_get_array_val "${arg_array}" "apex_zip_path")..."
 		unzip -q "$(cds_shared_get_array_val "${arg_array}" "apex_zip_path")" -d /tmp
 		if [ $? -ne 0 ]; then
-			echo "ERROR: Failed to unzip APEX file."
+			echo "Error: ${FUNCNAME[0]}() - Failed to unzip APEX file."
 			exit 1
 		fi
 		
@@ -469,7 +469,7 @@ EOF
 			# update owner permissions on the docker volume to the oracle account so the static Apex files can be used by the ords container
 			chown -R 54321:0 "$(cds_shared_get_array_val "${arg_array}" "apex_static_dir")"/
 		else
-			echo "ERROR: Static file copy failed."
+			echo "Error: ${FUNCNAME[0]}() - Static file copy failed."
 		fi
 
 		# wait for background DB install to finish
@@ -586,18 +586,18 @@ EOF
 				if [ $? -eq 0 ]; then
 					echo "APEX setup completed successfully."
 				else
-					echo "ERROR: APEX setup failed."
+					echo "Error: ${FUNCNAME[0]}() - APEX setup failed."
 					exit 1
 				fi
 				
 			else
-				echo "ERROR: Background APEX database upgrade failed."
+				echo "Error: ${FUNCNAME[0]}() - Background APEX database upgrade failed."
 			fi
 		fi
 		
 		# Check the results of the background and foreground jobs 
 		if [ "${db_install_status}" -ne 0 ] || [ "${file_move_status}" -ne 0 ]; then
-			echo "ERROR: One or more upgrade tasks failed. Halting."
+			echo "Error: ${FUNCNAME[0]}() - One or more upgrade tasks failed. Halting."
 			exit 1
 		fi
 

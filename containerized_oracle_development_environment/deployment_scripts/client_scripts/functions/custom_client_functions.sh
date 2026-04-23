@@ -1,22 +1,5 @@
 #!/bin/bash
 
-# function to define the ssh environment variables for the container deployment server bash script
-# Accepts the following parameters: 
-# 1: the environment name
-function proj_client_generate_ssh_env_vars ()
-{
-	local env_name="${1}"
-
-	# validate the bash variable values
-	if ! cds_shared_validate_required_vars	"env_name"; then
-        echo "Error: proj_client_generate_ssh_env_vars() function required bash variable validation failed" >&2
-        return 1
-	fi
-	
-	# echo the local values natively and use the dynamic generatr for the global configuration constants (ENV_NAME, COMPOSE_FILE)
-	echo "ENV_NAME=\"${env_name}\" $(cds_shared_generate_ssh_env_vars_string "COMPOSE_FILE")"
-}
-
 # function to construct the compose file string for docker compose
 function proj_client_construct_compose_file_string ()
 {
@@ -30,7 +13,7 @@ function proj_client_construct_compose_file_string ()
 
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "env_name" "deploy_dest" "compose_file_var" "ords_enabled"; then
-        echo "Error: proj_client_construct_compose_file_string() function required bash variable validation failed" >&2
+        echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
         return 1
 	fi
 

@@ -56,10 +56,24 @@ to do:
 		X resolving issue with mounted volume on a linux host (switch to named volume)
 	
 	
+	_ update boilerplate functions to separate them into the core_engine directory and make all variables arguments (no references to global configuration variables)
+		* these functions are intended to be upgraded over time as requirements change or improvements are made
+		
+	
+	_ define boilerplate functions for CODE projects that are not intended to change across CODE forks
+		_ have these functions call the custom functions that will change across CODE forks
+	
+	
+	
+	
 	_ how to guarantee unique container naming so multiple CODE projects can run on the same server at the same time
 		_ need to also change the port number to avoid conflicts
-			_ make the updates in the .env file
+			_ make the updates custom_container_config.sh
 
+		_ test concurrent CODE instances on docker host
+		
+		
+		
 	
 		
 	X use array arguments for CODE functions
@@ -70,10 +84,14 @@ to do:
 	X Update CODE to use CDS directly again
 		_ Update CDS on all dependent projects:
 			_ CDD:
+				_ general improvements:
+					_ use ${FUNCNAME[0]} instead of hardcoding the function names in error messages
 				_ LHP
 				_ PRI
 				_ LCE
 			_ CAD:
+				_ general improvements:
+					_ use ${FUNCNAME[0]} instead of hardcoding the function names in error messages
 				_ PRI
 				_ SIA
 				_ PLW
@@ -112,7 +130,6 @@ git bash commands:
 		
 # shutdown all containers and delete all associated volumes too
 docker compose \
-  --env-file ./.env \
   -f CODE-db-deploy.yml \
   -f CODE-ords.yml \
   -f CODE-db-named-volume.yml \
@@ -144,6 +161,15 @@ down
 
 		# establish the connection to the docker server mapping the default ports so those access can be access on the client machine (make sure there are no containers using localhost that will cause a conflict)
 		ssh -N -L 1521:localhost:1521 -L 8181:localhost:8181 dev_docker
+
+
+		# shutdown the container (local) and retain volume
+		bash ./deployment_scripts/client_scripts/client_shutdown_container.sh dev local no
+
+
+		# shutdown the container (local) and remove volumes
+		bash ./deployment_scripts/client_scripts/client_shutdown_container.sh dev local yes
+
 
 
 	# Test:

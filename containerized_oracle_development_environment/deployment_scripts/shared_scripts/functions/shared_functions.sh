@@ -7,13 +7,16 @@
 #-----------------------------------------------------------------------------
 
 # function to deploy the CODE containers
+# the function accepts the following parameters:
+# 1: the build path for the container
+# 2: the formatted list of container compose files 
 function proj_deploy_CODE_containers ()
 {
 	local build_path="${1}"
 	local compose_file="${2}"
 
 	if ! cds_shared_validate_required_vars "build_path" "compose_file"; then 
-        echo "Error: proj_deploy_CODE_containers() function argument validation failed" >&2
+        echo "Error: ${FUNCNAME[0]}() function argument validation failed" >&2
         return 1
     fi
 
@@ -38,16 +41,38 @@ function proj_deploy_CODE_containers ()
 }
 
 
-# function that defines the environment variable bash block that will define the environment variables for inclusion when the build/run container bash scripts execute
-# Accepts 2 parameters: 
-# 1: the environment name
-# 2: the compose path include file string
-function proj_shared_define_env_vars_block()
-{
-	local env_name="${1}"
-	local compose_file="${2}"
 
-	# echo the strictly local runtime variables natively
-	echo "export ENV_NAME='${env_name}'"
-	echo "export COMPOSE_FILE='${compose_file}'"
+# function to shutdown the CODE containers
+# 1: the build path for the container
+# 2: the formatted list of container compose files 
+# 3: remove volume flag (yes, no)
+function proj_host_shutdown_CODE_containers ()
+{
+	local build_path="${1}"
+	local compose_file="${2}"
+	local rem_vol="${3}"
+
+	if ! cds_shared_validate_required_vars "build_path" "compose_file" "rem_vol"; then 
+        echo "Error: ${FUNCNAME[0]}() function argument validation failed" >&2
+        return 1
+    fi
+
+	# change to the designated build path so the containers can be stopped (if running) and started
+	cd "${build_path}"
+
+	if [ "${rem_vol}" == "yes" ]; then
+		echo "The rem_vol flag was yes, delete the volumes"
+	
+		local vol_flag_arg="-v"
+	else
+		echo "The rem_vol flag was no, do not delete the volumes"
+		local vol_flag_arg=""
+	fi
+
+	# declare COMPOSE_FILE as an environment variable
+	export COMPOSE_FILE="${compose_file}"
+	export COMPOSE_PROJECT_NAME
+
+	# remove the containers if they are already running using the injected COMPOSE_FILE
+	docker compose down "${vol_flag_arg}"
 }
