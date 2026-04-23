@@ -22,6 +22,8 @@ function proj_host_deploy_container()
 			["process_secrets"]="yes"
 			["persistent_container"]="yes"
 		)
+		
+	echo "the value of the arguments for ${FUNCNAME[0]}() are: $(cds_shared_dump_array_vals "func_args")"
 
 	# initialize and build/run the container on the host machine with the specified function arguments:
 	cds_host_deploy_container "func_args"	
@@ -69,6 +71,8 @@ function proj_host_shutdown_container()
 			["process_secrets"]="no"
 			["persistent_container"]="yes"
 		)
+
+	echo "the value of the arguments for ${FUNCNAME[0]}() are: $(cds_shared_dump_array_vals "func_args")"
 
 	# initialize and build/run the container on the host machine with the specified function arguments:
 	cds_host_deploy_container "func_args"	
