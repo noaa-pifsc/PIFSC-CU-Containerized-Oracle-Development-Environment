@@ -17,7 +17,7 @@ function proj_host_deploy_container()
 			["source_path"]="${HOST_SOURCE_PATH}"
 			["secret_var"]="${SECRET_DATA_VAR_NAME}"
 			["deploy_script_path"]="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../host_deploy_CODE_elev_privs.sh"
-			["env_block"]="$(cds_shared_generate_export_env_vars_block "DB_IMAGE" "DB_HOST_PORT" "DBPORT" "ORACLE_PWD" "DBHOST" "DBSERVICENAME" "TARGET_APEX_VERSION" "APP_SCHEMA_NAME" "ORDS_IMAGE" "COMPOSE_FILE" "COMPOSE_PROJECT_NAME" "ORDS_HOST_PORT" "REM_VOL")"
+			["env_block"]="$(cds_shared_generate_export_env_vars_block "DB_IMAGE" "DB_HOST_PORT" "DBPORT" "ORACLE_PWD" "DBHOST" "DBSERVICENAME" "TARGET_APEX_VERSION" "APP_SCHEMA_NAME" "ORDS_IMAGE" "COMPOSE_FILE" "COMPOSE_PROJECT_NAME" "ORDS_HOST_PORT")"
 			["secret_map"]="${SECRET_MAPPING_VAR_NAME}"
 			["process_secrets"]="yes"
 			["persistent_container"]="yes"
