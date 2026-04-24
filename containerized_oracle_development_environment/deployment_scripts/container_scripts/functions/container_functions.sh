@@ -220,17 +220,20 @@ function proj_container_check_apex_version_status()
 		return 1
 	fi
 	
+	# create a pointer to the arg_array variable to make it easy to access the argument array values
+	local -n arg_ref="${arg_array}"
+
 	# define variable references to the specified variable names
-	local -n out_skip_file_install_ref="$(cds_shared_get_array_val "${arg_array}" "out_skip_file_install_var_name")"
-	local -n out_skip_db_install_ref="$(cds_shared_get_array_val "${arg_array}" "out_skip_db_install_var_name")"
+	local -n out_skip_file_install_ref="${arg_ref[out_skip_file_install_var_name]}"
+	local -n out_skip_db_install_ref="${arg_ref[out_skip_db_install_var_name]}"
 
 	# check the $version_status to determine if the apex database/files should be upgraded
-	if [ "$(cds_shared_get_array_val "${arg_array}" "version_status")" -eq 2 ]; then
+	if [ "${arg_ref[version_status]}" -eq 2 ]; then
 		# downgrade attempt detected, the target_apex_version is less than the current_apex_version
 		echo "ERROR: ${FUNCNAME[0]}() - Downgrade detected! Current APEX version is $(cds_shared_get_array_val "${arg_array}" "current_apex_version"), but target is $(cds_shared_get_array_val "${arg_array}" "target_apex_version")."
 		echo "Downgrading APEX via this method is not supported. Exiting."
 		exit 1
-	elif [ "$(cds_shared_get_array_val "${arg_array}" "version_status")" -eq 0 ]; then
+	elif [ "${arg_ref[version_status]}" -eq 0 ]; then
 		# do not upgrade, target_apex_version and current_apex_version are equivalent
 		echo "APEX is already at the target version ($(cds_shared_get_array_val "${arg_array}" "current_apex_version"))."
 
@@ -340,32 +343,35 @@ function proj_process_apex_version()
 		return 1
 	fi
 
+	# create a pointer to the arg_array variable to make it easy to access the argument array values
+	local -n arg_ref="${arg_array}"
+
 	# declare local variables for the specified variable names
-	local -n skip_db_install_var="$(cds_shared_get_array_val "${arg_array}" "skip_db_install_var_name")"
-	local -n skip_file_install_var="$(cds_shared_get_array_val "${arg_array}" "skip_file_install_var_name")"
+	local -n skip_db_install_var="${arg_ref[skip_db_install_var_name]}"
+	local -n skip_file_install_var="${arg_ref[skip_file_install_var_name]}"
 
 	# Validate APEX version format (e.g., 23.2, 24.1), if it is invalid exit the function
-	proj_container_validate_apex_version_format "$(cds_shared_get_array_val "${arg_array}" "target_apex_version")"
+	proj_container_validate_apex_version_format "${arg_ref[target_apex_version]}"
 
 	# validate if the specified target_apex_version version actually exists on Oracle's site
-	proj_container_verify_apex_version_exists "$(cds_shared_get_array_val "${arg_array}" "target_apex_version")" "$(cds_shared_get_array_val "${arg_array}" "apex_download_url")"
+	proj_container_verify_apex_version_exists "${arg_ref[target_apex_version]}" "${arg_ref[apex_download_url]}"
 
 	# retrieve the current version of Apex by querying the databae
-	local current_apex_version="$(proj_container_get_installed_apex_version "$(cds_shared_get_array_val "${arg_array}" "sys_credentials")")"
+	local current_apex_version="$(proj_container_get_installed_apex_version "${arg_ref[sys_credentials]}")"
 	echo "Current Apex version: ${current_apex_version}"
 
 	# compare the current and target versions of apex and store the return value in version_status
 	local version_status=""
-	proj_container_version_compare "$(cds_shared_get_array_val "${arg_array}" "target_apex_version")" "${current_apex_version}" "version_status"
+	proj_container_version_compare "${arg_ref[target_apex_version]}" "${current_apex_version}" "version_status"
 	
 	# define the argument array for the proj_container_check_apex_version_status() function 
 	local -A apex_version_status_func_args=(
 			["version_status"]="${version_status}"
 			["current_apex_version"]="${current_apex_version}"
-			["target_apex_version"]="$(cds_shared_get_array_val "${arg_array}" "target_apex_version")"
-			["apex_static_dir"]="$(cds_shared_get_array_val "${arg_array}" "apex_static_dir")"
-			["out_skip_db_install_var_name"]="$(cds_shared_get_array_val "${arg_array}" "skip_db_install_var_name")"
-			["out_skip_file_install_var_name"]="$(cds_shared_get_array_val "${arg_array}" "skip_file_install_var_name")"
+			["target_apex_version"]="${arg_ref[target_apex_version]}"
+			["apex_static_dir"]="${arg_ref[apex_static_dir]}"
+			["out_skip_db_install_var_name"]="${arg_ref[skip_db_install_var_name]}"
+			["out_skip_file_install_var_name"]="${arg_ref[skip_file_install_var_name]}"
 		)
 	
 	# check the current/target version to determine if the DB and/or file apex installations should be executed
@@ -404,12 +410,15 @@ function proj_container_process_apex_install()
 		return 1
 	fi
 	
+	# create a pointer to the arg_array variable to make it easy to access the argument array values
+	local -n arg_ref="${arg_array}"
+
 	# check if the static Apex files should be installed
-	if [[ "$(cds_shared_get_array_val "${arg_array}" "skip_file_install")" -ne 1 ]]; then
+	if [[ "${arg_ref[skip_file_install]}" -ne 1 ]]; then
 
 		# the apex package does not dynamically download and install the apex installation package
 		echo "Downloading $(cds_shared_get_array_val "${arg_array}" "apex_download_url")..."
-		curl -L -o "$(cds_shared_get_array_val "${arg_array}" "apex_zip_path")" "$(cds_shared_get_array_val "${arg_array}" "apex_download_url")"
+		curl -L -o "${arg_ref[apex_zip_path]}" "${arg_ref[apex_download_url]}"
 		if [ $? -ne 0 ]; then
 			echo "Error: ${FUNCNAME[0]}() - Download of APEX zip file failed."
 			exit 1
@@ -418,7 +427,7 @@ function proj_container_process_apex_install()
 		echo "Apex upgrade package download complete."
 		
 		echo "Unzipping $(cds_shared_get_array_val "${arg_array}" "apex_zip_path")..."
-		unzip -q "$(cds_shared_get_array_val "${arg_array}" "apex_zip_path")" -d /tmp
+		unzip -q "${arg_ref[apex_zip_path]}" -d /tmp
 		if [ $? -ne 0 ]; then
 			echo "Error: ${FUNCNAME[0]}() - Failed to unzip APEX file."
 			exit 1
@@ -433,11 +442,11 @@ function proj_container_process_apex_install()
 		local file_move_status=0
 
 		# check if the Apex database installation should proceed
-		if [ "$(cds_shared_get_array_val "${arg_array}" "skip_db_install")" -eq 0 ]; then
+		if [ "${arg_ref[skip_db_install]}" -eq 0 ]; then
 			echo "Starting APEX DB installer (in background)..."
 
 			# Run the DB install in the background by adding '&'
-			sqlplus -s -l "$(cds_shared_get_array_val "${arg_array}" "sys_credentials")" <<EOF &
+			sqlplus -s -l "${arg_ref[sys_credentials]}" <<EOF &
 				WHENEVER SQLERROR EXIT SQL.SQLCODE
 				ALTER SESSION SET CONTAINER = ${DBSERVICENAME};
 				@apexins.sql SYSAUX SYSAUX TEMP /i/
@@ -452,10 +461,10 @@ EOF
 		echo "Copying APEX static images to shared volume (in foreground)..."
 		
 		# Clear out any old static Apex files 
-		rm -rf "$(cds_shared_get_array_val "${arg_array}" "apex_static_dir")"/*
+		rm -rf "${arg_ref[apex_static_dir]}"/*
 
 		# Move the contents of the images folder to the root of the volume
-		mv /tmp/apex/images/* "$(cds_shared_get_array_val "${arg_array}" "apex_static_dir")"/
+		mv /tmp/apex/images/* "${arg_ref[apex_static_dir]}"/
 
 		# store the results of the file move process in file_move_status so the result can be checked
 		local file_move_status=$? 
@@ -463,7 +472,7 @@ EOF
 			echo "Static files copied successfully."
 			
 			# update owner permissions on the docker volume to the oracle account so the static Apex files can be used by the ords container
-			chown -R 54321:0 "$(cds_shared_get_array_val "${arg_array}" "apex_static_dir")"/
+			chown -R 54321:0 "${arg_ref[apex_static_dir]}"/
 		else
 			echo "Error: ${FUNCNAME[0]}() - Static file copy failed."
 		fi
@@ -528,11 +537,11 @@ EOF
 				# run the sqlplus script using the SYS schema
 				echo "Unlocking/Initializing/Configuring APEX accounts..."
 				
-				sqlplus -s -l "$(cds_shared_get_array_val "${arg_array}" "sys_credentials")" <<EOF
+				sqlplus -s -l "${arg_ref[sys_credentials]}" <<EOF
 				WHENEVER SQLERROR EXIT SQL.SQLCODE
 				ALTER SESSION SET CONTAINER = ${DBSERVICENAME};
 				-- Use the same password for all internal accounts for simplicity
-				ALTER USER APEX_PUBLIC_USER IDENTIFIED BY "$(cds_shared_get_array_val "${arg_array}" "sys_password")" ACCOUNT UNLOCK;
+				ALTER USER APEX_PUBLIC_USER IDENTIFIED BY "${arg_ref[sys_password]}" ACCOUNT UNLOCK;
 				SET SERVEROUTPUT ON
 				
 				-- Switch to the APEX schema to perform admin tasks
@@ -599,6 +608,6 @@ EOF
 
 		# remove the apex installation files
 		echo "Cleaning up installer files..."
-		rm -rf /tmp/apex "$(cds_shared_get_array_val "${arg_array}" "apex_zip_path")"
+		rm -rf /tmp/apex "${arg_ref[apex_zip_path]}"
 	fi
 }
