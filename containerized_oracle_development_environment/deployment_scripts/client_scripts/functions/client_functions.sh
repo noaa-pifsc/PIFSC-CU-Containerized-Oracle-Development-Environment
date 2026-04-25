@@ -12,9 +12,9 @@ function proj_client_deploy_container ()
 	local rem_vol_var_name="rem_vol"
 	local passed_env_value="${1:-}"
 	local passed_deploy_value="${2:-}"
-	local passed_rem_vol="${3:-no}"
+	local passed_rem_vol_value="${3:-no}"
 	
-# 	echo "running proj_client_deploy_container(${1}, ${2}, ${3})"
+ 	echo "running proj_client_deploy_container(${1}, ${2}, ${3})"
 	
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars	"env_var_name" "dest_var_name"; then
@@ -70,6 +70,9 @@ function proj_client_build_deploy_dev_environment ()
 	# construct the COMPOSE_FILE value of included .yml files
 	proj_client_construct_compose_file_string "compose_file" "${env_name}" "${deploy_dest}" "${ORDS_ENABLED}"
 	
+	# declare COMPOSE_FILE as an environment variable so it can be used in the container deployment
+	COMPOSE_FILE="${compose_file}"
+
 	# Check if the secret file exists:
 	if [ -f "${BUILD_PATH}/secrets/secrets.sh" ]; then
 		# load the secrets
@@ -112,8 +115,7 @@ function proj_client_build_deploy_dev_environment ()
 			return 1
 		fi
 
-		# declare COMPOSE_FILE as an environment variable so it can be used in the container deployment
-		COMPOSE_FILE="${compose_file}"
+		# declare a variable for the rem_vol value so it can be passed to the server script as an environment variable
 		REM_VOL="${rem_vol}"
 
 		# declare environment variable string for the environment variables to be passed to the container host via the ssh call
@@ -263,6 +265,9 @@ function proj_client_shutdown_dev_environment ()
 	# construct the COMPOSE_FILE value of included .yml files
 	proj_client_construct_compose_file_string "compose_file" "${env_name}" "${deploy_dest}" "${ORDS_ENABLED}"
 	
+	# declare COMPOSE_FILE as an environment variable so it can be used in the container deployment
+	COMPOSE_FILE="${compose_file}"
+
 	# check if this is a local or server deployment:
 	if [[ "${deploy_dest}" == "local" ]]; then
 		echo "Shutdown the local deployment (${COMPOSE_PROJECT_NAME})"
@@ -281,8 +286,7 @@ function proj_client_shutdown_dev_environment ()
 			return 1
 		fi
 
-		# declare COMPOSE_FILE as an environment variable so it can be used in the container deployment
-		COMPOSE_FILE="${compose_file}"
+		# declare REM_VOL as an environment variable so it can be used in the container deployment
 		REM_VOL="${rem_vol}"
 
 		# declare environment variable string for the environment variables to be passed to the container host via the ssh call
