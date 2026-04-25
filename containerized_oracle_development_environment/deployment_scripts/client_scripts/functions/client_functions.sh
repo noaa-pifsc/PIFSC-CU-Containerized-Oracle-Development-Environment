@@ -14,7 +14,7 @@ function proj_client_deploy_container ()
 	local passed_deploy_value="${2:-}"
 	local passed_rem_vol="${3:-no}"
 	
-# 	echo "running proj_client_deploy_container(${1}, ${2})"
+# 	echo "running proj_client_deploy_container(${1}, ${2}, ${3})"
 	
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars	"env_var_name" "dest_var_name"; then
@@ -78,7 +78,6 @@ function proj_client_build_deploy_dev_environment ()
         echo "Error: ${FUNCNAME[0]}() function could not load the secrets/secrets.sh file" >&2
         return 1
 	fi
-	
 	
 	# check if this is a local or server deployment:
 	if [[ "${deploy_dest}" == "local" ]]; then

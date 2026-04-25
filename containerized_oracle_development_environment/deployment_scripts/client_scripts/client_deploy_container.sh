@@ -7,4 +7,4 @@
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/includes/include_client_resources.sh"
 
 # deploy the containers for the development environment
-proj_client_deploy_container "${1}" "${2}" "${3}"
+proj_client_deploy_container "${1}" "${2}" "${3:-no}"
