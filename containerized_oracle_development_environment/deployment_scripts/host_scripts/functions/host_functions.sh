@@ -53,6 +53,9 @@ function proj_host_deploy_container_elev_privs()
 
 	echo "The argument array is: $(cds_shared_dump_array_vals "host_deploy_stack_args")"
 
+	# export the database connection environment variables used directly in the docker compose files:
+	cds_shared_export_env_vars "DBPORT" "DBHOST" "DBSERVICENAME"
+
 	# execute the secret definitions and the container build/run process on the target folder using a privileged account
 	cds_shared_deploy_container_stack "host_deploy_stack_args"
 
