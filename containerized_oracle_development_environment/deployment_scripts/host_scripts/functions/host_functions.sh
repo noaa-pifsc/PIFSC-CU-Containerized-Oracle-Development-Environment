@@ -23,7 +23,7 @@ function proj_host_execute_container_scripts()
 			["target_user"]="${PRIV_USER}" 
 			["source_path"]="${HOST_SOURCE_PATH}"
 			["secret_var"]="${SECRET_DATA_VAR_NAME}"
-			["deploy_script_path"]="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../host_deploy_CODE_elev_privs.sh"
+			["deploy_script_path"]="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../host_execute_CODE_scripts_elev_privs.sh"
 			["env_block"]="$(cds_shared_generate_export_env_vars_block "COMPOSE_PROJECT_NAME" "DB_HOST_PORT" "ORDS_HOST_PORT" "DB_IMAGE" "ORDS_IMAGE" "TARGET_APEX_VERSION" "APP_SCHEMA_NAME" "COMPOSE_FILE" "STACK_NAME" "NETWORK_NAME" "REM_VOL" "SCRIPT_ACTION")"
 			["secret_map"]="${SECRET_MAPPING_VAR_NAME}"
 			["process_secrets"]="${process_secrets}"

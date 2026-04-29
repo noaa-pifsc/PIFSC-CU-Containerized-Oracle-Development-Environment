@@ -26,12 +26,13 @@ to do:
 			X implement docker secrets for ORACLE_PWD and map to all the necessary containers
 				X confirm that the secrets are passed in to the container_deploy_database.sh successfully
 		
-		_ combine the deploy and shutdown commands with branching logic for local and server deployments, this will simplify the code management and reduce the amount of calling client and host scripts
+		X combine the deploy and shutdown commands with branching logic for local and server deployments, this will simplify the code management and reduce the amount of calling client and host scripts
 		
 		_ replace the get_array_val() calls with the simple arg_ref element references to simplify the code and make it more readable (global change)
 		
-		_ check if --ignore-pull-failures is necessary for the docker compose pull execution
-
+		X check if --ignore-pull-failures is necessary for the docker compose pull execution
+			--ignore-buildable was used instead to ignore the custom images that need to be built when pulling images
+			
 		_ cds_shared_remove_container_stack was updated to accept a third argument: remove_volumes
 			_ this needs to be updated in CAD, CDD implementations
 		
@@ -161,76 +162,54 @@ to do:
 
 git bash commands:
 
+
+	# change into repo directory:
+	cd /c/Users/jesse.abdul/Documents/Version\ Control/Git/PIFSC-Containerized-Oracle-Development-Environment/containerized_oracle_development_environment
+
+
 	# Dev:
 
-		# stop and remove CODE containers and delete volumes
-		cd /c/Users/jesse.abdul/Documents/Version\ Control/Git/PIFSC-Containerized-Oracle-Development-Environment/containerized_oracle_development_environment
-		
-# shutdown all containers and delete all associated volumes too
-docker compose \
-  -f CODE-db-deploy.yml \
-  -f CODE-ords.yml \
-  -f CODE-db-named-volume.yml \
-  -f custom-docker-compose.yml \
-  down
-docker volume rm code-apex-static-vol
-docker volume rm code-db-vol
-docker volume rm code-ords-config-vol
-
-
-
-
-# shutdown all containers and retain named volumes
-docker compose \
---env-file ./.env \
--f CODE-db-deploy.yml \
--f CODE-ords.yml \
--f CODE-db-named-volume.yml \
--f custom-docker-compose.yml \
-down
-
-
-		
 		# build and deploy the development scenario of the CODE (local)
-		bash ./deployment_scripts/client_scripts/client_deploy_container.sh dev local
+		bash ./deployment_scripts/client_scripts/client_execute_CODE_scripts.sh deploy dev local
 
 		# build and deploy the development scenario of the CODE (server)
-		bash ./deployment_scripts/client_scripts/client_deploy_container.sh dev server
+		bash ./deployment_scripts/client_scripts/client_execute_CODE_scripts.sh deploy dev server
 
 		# establish the connection to the docker server mapping the default ports so those access can be access on the client machine (make sure there are no containers using localhost that will cause a conflict)
 		ssh -N -L 1521:localhost:1521 -L 8181:localhost:8181 dev_docker
 
 
 		# shutdown the container (local) and retain volume
-		bash ./deployment_scripts/client_scripts/client_shutdown_container.sh dev local no
+		bash ./deployment_scripts/client_scripts/client_execute_CODE_scripts.sh shutdown dev local no
 
 
 		# shutdown the container (local) and remove volumes
-		bash ./deployment_scripts/client_scripts/client_shutdown_container.sh dev local yes
+		bash ./deployment_scripts/client_scripts/client_execute_CODE_scripts.sh shutdown dev local yes
 
 		# shutdown the container (server) and retain volume
-		bash ./deployment_scripts/client_scripts/client_shutdown_container.sh dev server no
+		bash ./deployment_scripts/client_scripts/client_execute_CODE_scripts.sh shutdown dev server no
 
 
 		# shutdown the container (server) and remove volumes
-		bash ./deployment_scripts/client_scripts/client_shutdown_container.sh dev server yes
+		bash ./deployment_scripts/client_scripts/client_execute_CODE_scripts.sh shutdown dev server yes
 
 
 	# Test:
 
-		# stop and remove CODE containers and delete volumes
-		cd /c/Users/jesse.abdul/Documents/Version\ Control/Git/PIFSC-Containerized-Oracle-Development-Environment/containerized_oracle_development_environment
-		
-		
-		# shutdown all containers and delete all associated volumes too
-		docker compose \
-		  --env-file ./.env \
-		  -f CODE-db-deploy.yml \
-		  -f CODE-ords.yml \
-		  -f custom-docker-compose.yml \
-		  down -v
-		
-		# build and deploy the development scenario of the CODE
-		bash ./deployment_scripts/client_scripts/client_deploy_container.sh test
+		# build and deploy the test scenario of the CODE (local)
+		bash ./deployment_scripts/client_scripts/client_execute_CODE_scripts.sh deploy test local
+
+		# build and deploy the test scenario of the CODE (server)
+		bash ./deployment_scripts/client_scripts/client_execute_CODE_scripts.sh deploy test server
+
+		# establish the connection to the docker server mapping the default ports so those access can be access on the client machine (make sure there are no containers using localhost that will cause a conflict)
+		ssh -N -L 1521:localhost:1521 -L 8181:localhost:8181 dev_docker
+
+
+		# shutdown the container (local) 
+		bash ./deployment_scripts/client_scripts/client_execute_CODE_scripts.sh shutdown test local no
+
+		# shutdown the container (server)
+		bash ./deployment_scripts/client_scripts/client_execute_CODE_scripts.sh shutdown test server no
 
 troubleshooting tips:

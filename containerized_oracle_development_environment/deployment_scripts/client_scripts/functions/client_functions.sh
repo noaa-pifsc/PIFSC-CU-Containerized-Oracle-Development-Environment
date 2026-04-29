@@ -150,7 +150,7 @@ function proj_client_execute_container_scripts ()
 				["target_host"]="${HOSTNAME}"
 				["source_path"]="${HOST_SOURCE_PATH}"
 				["git_url"]="${GIT_URL}"
-				["ssh_cmd"]="${env_var_string} bash ${HOST_SCRIPTS_PATH}/host_deploy_CODE.sh"
+				["ssh_cmd"]="${env_var_string} bash ${HOST_SCRIPTS_PATH}/host_execute_CODE_scripts.sh"
 				["secret_var"]="${SECRET_DATA_VAR_NAME}"
 				["secret_map"]="${SECRET_MAPPING_VAR_NAME}"
 				["process_secrets"]="${process_secrets}"
