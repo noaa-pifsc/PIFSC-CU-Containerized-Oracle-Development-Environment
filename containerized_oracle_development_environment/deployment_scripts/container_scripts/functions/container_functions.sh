@@ -258,16 +258,11 @@ function proj_container_check_apex_version_status()
 
 # function that executes the container database deployment scripts
 # this includes upgrading apex to the specified version and executing database scripts when the database has not been initialized yet
-# the function accepts the following arguments:
-# 1: parsed_secrets_var_name: the variable name of the parsed secrets local associative array
+# the function accepts no arguments:
 function proj_container_deploy_database_scripts ()
 {
-	local parsed_secrets_var_name="${1}"
-	# declare a pointer to the parsed secrets associative array
-	local -n parsed_secrets_ref="${parsed_secrets_var_name}"
-
 	# validate the bash variable values
-	if ! cds_shared_validate_required_vars "parsed_secrets_var_name" "DBHOST" "DBPORT" "DBSERVICENAME" "APP_SCHEMA_NAME"; then
+	if ! cds_shared_validate_required_vars "DBHOST" "DBPORT" "DBSERVICENAME" "APP_SCHEMA_NAME"; then
 		echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
 		return 1
 	fi
@@ -309,7 +304,7 @@ function proj_container_deploy_database_scripts ()
 
 		# run the custom database deployment scripts:
 		# function that executes database scripts within the container
-		proj_container_database_deploy_custom_scripts "${parsed_secrets_var_name}"
+		proj_container_database_deploy_custom_scripts
 
 	else
 		echo "Database already initialized. Skipping deployment script."
