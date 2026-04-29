@@ -1,11 +1,8 @@
 services:
   code-ords:
-    depends_on:
-      # Wait for the deploy container to finish to
-      # ensure the static files are in place before ORDS starts.
-      - code-db-ords-deploy
     networks:
       - oracle-net
+    image: pifsc/code-ords:latest
     build:
       context: ..
       dockerfile: containerized_oracle_development_environment/Dockerfile.ords
@@ -18,9 +15,6 @@ services:
       - code-apex-static-vol:/opt/oracle/ords/static
     ports:
       - ${ORDS_HOST_PORT}:8080
-    image: ${ORDS_IMAGE}
-    # These variables tell ORDS how to connect to the DB
-    # to create its configuration on the first run.
     environment:
       - DBHOST=${DBHOST}
       - DBPORT=${DBPORT}

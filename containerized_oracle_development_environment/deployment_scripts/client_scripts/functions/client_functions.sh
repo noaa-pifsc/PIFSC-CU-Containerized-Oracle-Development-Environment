@@ -56,7 +56,7 @@ function proj_client_build_deploy_dev_environment ()
 	# build the list of compose files:
 	local env_name="${1}"
 	local deploy_dest="${2}"
-	local rem_vol="{3:-no}"
+	local rem_vol="${3:-no}"
 	
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "env_name" "deploy_dest" "BUILD_PATH" "ORDS_ENABLED"; then
