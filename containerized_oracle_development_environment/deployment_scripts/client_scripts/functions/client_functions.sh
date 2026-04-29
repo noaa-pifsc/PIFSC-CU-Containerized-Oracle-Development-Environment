@@ -29,7 +29,7 @@ function proj_client_deploy_container ()
 	cds_client_set_deploy_dest_var "${dest_var_name}" "${passed_deploy_value}"
 
 	# save/prompt for remove volume flag (yes, no)
-	proj_client_set_rem_vol_var "${rem_vol_var_name}" "${passed_rem_vol_value}"
+	cds_client_set_rem_vol_var "${rem_vol_var_name}" "${passed_rem_vol_value}"
 
 	# notify the user of the user-defined runtime value
 	echo "Runtime Argument Values:"
@@ -201,7 +201,7 @@ function proj_client_shutdown_container ()
 	cds_client_set_deploy_dest_var "${dest_var_name}" "${passed_deploy_value}"
 
 	# save/prompt for remove volume flag (yes, no)
-	proj_client_set_rem_vol_var "${rem_vol_var_name}" "${passed_rem_vol_value}"
+	cds_client_set_rem_vol_var "${rem_vol_var_name}" "${passed_rem_vol_value}"
 
 	# notify the user of the user-defined runtime value
 	echo "Runtime Argument Values:"
@@ -215,31 +215,6 @@ function proj_client_shutdown_container ()
 	# notify the user that the container has finished executing
 	echo "The docker container has been shutdown - environment name: ${!env_var_name}, deployment destination: ${!dest_var_name}, remove volume: ${!rem_vol_var_name}"
 }
-
-# this function initializes a local variable that will contain the rem_vol value for use in the script.
-# this function accepts the following parameters:
-# 1: out_var_name (the name of the local variable where the validated script type value will be stored)
-# 2: passed_value (optional: the script type value passed from the caller)
-function proj_client_set_rem_vol_var ()
-{
-    local out_var_name="${1}"
-    local passed_value="${2:-}"
-
-	# validate the bash variable values
-	if ! cds_shared_validate_required_vars	"out_var_name"; then
-        echo "Error: ${FUNCNAME[0]}() function required function argument validation failed" >&2
-        return 1
-	fi
-	
-    # Calls the helper with its specific parameters
-    cds_client_set_validated_var \
-        "${out_var_name}" \
-        "Enter remove volume flag (yes = remove all associated volumes, no = retain all associated volumes)" \
-        "(yes|no)" \
-        "yes or no" \
-        "${passed_value}"
-}
-
 
 # function that shuts down the containers for a environment
 # the function accepts the following arguments:

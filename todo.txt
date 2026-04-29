@@ -57,6 +57,7 @@ to do:
 	X implement CDD/CDS functions where appropriate	
 		
 		
+	_ change the docker compose deploy and shutdown functions to use the list of .yml files with a "-f" flag before it
 		
 		
 		
@@ -74,6 +75,8 @@ to do:
 	
 	_ define boilerplate functions for CODE projects that are not intended to change across CODE forks
 		_ have these functions call the custom functions that will change across CODE forks
+	
+	
 	
 	
 	
@@ -113,14 +116,20 @@ to do:
 				_ general improvements:
 					_ use ${FUNCNAME[0]} instead of hardcoding the function names in error messages
 					_ update cds_host_deploy_container function calls to set persistent_container flag
+					_ cds_host_cleanup_container_source_folder() accepts two parameters now (source_dir, target_user)
+					_ update the cds_shared_get_array_val() function calls to use the arg_ref approach
 
 				_ LHP
 				_ PRI
 				_ LCE
 			_ CAD:
 				_ general improvements:
-					_ use ${FUNCNAME[0]} instead of hardcoding the function names in error messages
+					X use ${FUNCNAME[0]} instead of hardcoding the function names in error messages
 					X update cds_host_deploy_container function calls to set persistent_container flag
+					X cds_host_cleanup_container_source_folder() accepts two parameters now (source_dir, target_user)
+					X ** check cds_shared_deploy_container_stack -> added rem_vol argument
+					X cds_shared_shutdown_container_compose -> rem_vol argument
+					_ update the cds_shared_get_array_val() function calls to use the arg_ref approach
 				_ PRI
 				_ SIA
 				_ PLW

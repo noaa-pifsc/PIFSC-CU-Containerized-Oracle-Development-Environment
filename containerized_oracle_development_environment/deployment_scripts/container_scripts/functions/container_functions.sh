@@ -230,26 +230,26 @@ function proj_container_check_apex_version_status()
 	# check the $version_status to determine if the apex database/files should be upgraded
 	if [ "${arg_ref[version_status]}" -eq 2 ]; then
 		# downgrade attempt detected, the target_apex_version is less than the current_apex_version
-		echo "ERROR: ${FUNCNAME[0]}() - Downgrade detected! Current APEX version is $(cds_shared_get_array_val "${arg_array}" "current_apex_version"), but target is $(cds_shared_get_array_val "${arg_array}" "target_apex_version")."
+		echo "ERROR: ${FUNCNAME[0]}() - Downgrade detected! Current APEX version is ${arg_ref[current_apex_version]}, but target is ${arg_ref[target_apex_version]}."
 		echo "Downgrading APEX via this method is not supported. Exiting."
 		exit 1
 	elif [ "${arg_ref[version_status]}" -eq 0 ]; then
 		# do not upgrade, target_apex_version and current_apex_version are equivalent
-		echo "APEX is already at the target version ($(cds_shared_get_array_val "${arg_array}" "current_apex_version"))."
+		echo "APEX is already at the target version (${arg_ref[current_apex_version]})."
 
 		# update the variable to indicate the apex database upgrade should be skipped
 		out_skip_db_install_ref=1
 		
 		# Check if static files are also in place
-		if [ -f "$(cds_shared_get_array_val "${arg_array}" "apex_static_dir")/apex_version.js" ]; then
+		if [ -f "${arg_ref[apex_static_dir]}/apex_version.js" ]; then
 			echo "Static files are in place. No upgrade needed."
 			# update the variable to indicate the apex file upgrade should be skipped
 			out_skip_file_install_ref=1
 		fi
 	else
 		# upgrade the apex version, target_apex_version is greater than the current_apex_version
-		echo "APEX version mismatch. Found: '$(cds_shared_get_array_val "${arg_array}" "current_apex_version")'"
-		echo "Starting APEX upgrade to $(cds_shared_get_array_val "${arg_array}" "target_apex_version")..."
+		echo "APEX version mismatch. Found: '${arg_ref[current_apex_version]}'"
+		echo "Starting APEX upgrade to ${arg_ref[target_apex_version]}..."
 		
 		# update the variable to indicate the apex database upgrade should be installed
 		out_skip_db_install_ref=0
@@ -417,7 +417,7 @@ function proj_container_process_apex_install()
 	if [[ "${arg_ref[skip_file_install]}" -ne 1 ]]; then
 
 		# the apex package does not dynamically download and install the apex installation package
-		echo "Downloading $(cds_shared_get_array_val "${arg_array}" "apex_download_url")..."
+		echo "Downloading ${arg_ref[apex_download_url]}..."
 		curl -L -o "${arg_ref[apex_zip_path]}" "${arg_ref[apex_download_url]}"
 		if [ $? -ne 0 ]; then
 			echo "Error: ${FUNCNAME[0]}() - Download of APEX zip file failed."
@@ -426,7 +426,7 @@ function proj_container_process_apex_install()
 
 		echo "Apex upgrade package download complete."
 		
-		echo "Unzipping $(cds_shared_get_array_val "${arg_array}" "apex_zip_path")..."
+		echo "Unzipping ${arg_ref[apex_zip_path]}..."
 		unzip -q "${arg_ref[apex_zip_path]}" -d /tmp
 		if [ $? -ne 0 ]; then
 			echo "Error: ${FUNCNAME[0]}() - Failed to unzip APEX file."
@@ -503,7 +503,7 @@ EOF
 							APEX_UTIL.reset_password(
 								p_user_name => 'ADMIN',
 								p_old_password => NULL,
-								p_new_password => '$(cds_shared_get_array_val "${arg_array}" "sys_password")',
+								p_new_password => '${arg_ref[sys_password]}',
 								p_change_password_on_first_use => FALSE
 							);
 							COMMIT;
@@ -521,7 +521,7 @@ EOF
 							APEX_INSTANCE_ADMIN.UNLOCK_USER(
 								p_workspace => 'INTERNAL',
 								p_username	=> 'ADMIN',
-								p_password	=> '$(cds_shared_get_array_val "${arg_array}" "sys_password")'
+								p_password	=> '${arg_ref[sys_password]}'
 							);
 							COMMIT;
 						EXCEPTION WHEN OTHERS THEN
@@ -568,7 +568,7 @@ EOF
 					APEX_UTIL.create_user(
 						p_user_name => 'ADMIN',
 						p_email_address => 'admin@localhost',
-						p_web_password=> '$(cds_shared_get_array_val "${arg_array}" "sys_password")',
+						p_web_password=> '${arg_ref[sys_password]}',
 						p_developer_privs => 'ADMIN:CREATE:DATA_LOADER:EDIT:HELP:MONITOR:SQL',
 						p_change_password_on_first_use => 'N' -- Ensure no forced change password
 					);
