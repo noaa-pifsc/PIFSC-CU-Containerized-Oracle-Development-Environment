@@ -40,10 +40,7 @@ services:
     deploy:
       replicas: 1 
       restart_policy:
-        condition: on-failure 
-        delay: 15s             # Wait 15 seconds before trying again to avoid log spam
-        max_attempts: 30       # Allow up to 30 attempts
-        window: 600s           # Extend the failure window to 10 minutes
+        condition: none 
 volumes:
   # Defines the new shared volume for the APEX static application files
   code-apex-static-vol:
