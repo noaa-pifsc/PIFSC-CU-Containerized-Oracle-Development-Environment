@@ -36,10 +36,15 @@ to do:
 		_ leverage the secret mapping variable and the DOCKER_COMPOSE files to create a parsed secrets local variable that can be used dynamically so we can generate the various connection strings
 			_ instead reference the secret value variable names since they provide the path to the secret
 		
+		_ ** re-examine restart policy for the code-db-ords-deploy container - it should probably retry on failure (5 times?)
+		
 		
 		_ created a new cds_shared_export_array_keys() function that exports environment variables from an array of values based on the list of fields
 			cds_shared_export_env_vars may be obsolete, but this needs to be determined after reviewing CDD and CAD functions
 		
+		_ check the volume deletion functionality on host server
+			shutdown with volume purge
+			deploy with volume purge
 	
 	document
 		**** _ clearly indicate this is only intended for development and testing purposes
