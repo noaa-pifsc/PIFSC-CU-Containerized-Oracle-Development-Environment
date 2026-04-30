@@ -23,6 +23,9 @@ function main()
 		["build_path"]="${BUILD_PATH}"
 		["secret_name_prefix"]="${COMPOSE_PROJECT_NAME}_"
 		["rem_vol"]="${REM_VOL}"
+		["dbport"]="${DBPORT}"
+		["dbhost"]="${DBHOST}"
+		["dbservicename"]="${DBSERVICENAME}"
 	)
 
 	# deploy the container on the container host using a privileged account

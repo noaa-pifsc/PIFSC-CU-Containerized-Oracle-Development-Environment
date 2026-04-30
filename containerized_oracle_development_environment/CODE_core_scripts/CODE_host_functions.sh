@@ -73,7 +73,7 @@ function code_host_execute_container_scripts_elev_privs()
     fi
 
 	# input validation:
-	if ! cds_shared_validate_required_array_vals "${arg_array}" "compose_path" "secret_map" "build_path" "stack_name" "network_name" "rem_vol"; then
+	if ! cds_shared_validate_required_array_vals "${arg_array}" "compose_path" "secret_map" "build_path" "stack_name" "network_name" "rem_vol" "dbport" "dbhost" "dbservicename"; then
         echo "Error: ${FUNCNAME[0]}() function argument validation failed" >&2
         return 1
     fi
