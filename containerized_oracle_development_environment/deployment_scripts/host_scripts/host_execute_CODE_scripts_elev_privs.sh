@@ -16,11 +16,11 @@ function main()
 {
 	# define the function arguments from the environment variables passed to this script and the global configuration variables
 	local -A host_execute_container_elev_privs_scripts_args=(
-		["compose_path"]="${COMPOSE_FILE}"
-		["secret_map"]="${SECRET_MAPPING_VAR_NAME}"
-		["build_path"]="${BUILD_PATH}"
 		["stack_name"]="${STACK_NAME}"
+		["secret_map"]="${SECRET_MAPPING_VAR_NAME}"
 		["network_name"]="${NETWORK_NAME}"
+		["compose_path"]="${COMPOSE_FILE}"
+		["build_path"]="${BUILD_PATH}"
 		["secret_name_prefix"]="${COMPOSE_PROJECT_NAME}_"
 		["rem_vol"]="${REM_VOL}"
 	)
