@@ -429,6 +429,9 @@ function proj_container_process_apex_install()
 		return 1
 	fi
 	
+	
+	echo "in proj_container_process_apex_install() the value of arg_array is: $(cds_shared_dump_array_vals ${arg_array})"
+	
 	# create a pointer to the arg_array variable to make it easy to access the argument array values
 	local -n arg_ref="${arg_array}"
 
