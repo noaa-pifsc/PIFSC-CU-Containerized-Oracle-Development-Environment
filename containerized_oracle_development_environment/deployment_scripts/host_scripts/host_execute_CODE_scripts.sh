@@ -27,6 +27,9 @@ function main()
 		["host_scripts_path"]="${HOST_SCRIPTS_PATH}"
 	)
 
+	echo "The environment variables for host_deploy_CODE.sh are:"
+	env
+
 	# initialize and build/run the container on the host machine with the specified function arguments:
 	code_host_execute_container_scripts "host_execute_container_scripts_args"
 }

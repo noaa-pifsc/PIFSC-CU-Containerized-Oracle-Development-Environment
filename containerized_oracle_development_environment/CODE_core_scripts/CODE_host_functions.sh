@@ -42,6 +42,8 @@ function code_host_execute_container_scripts()
 	# add any custom environment variables to the block
 	env_block+="$(proj_host_custom_export_env_vars_block)"
 
+	echo "The value of the env_block is: ${env_block}"
+
 	# declare the function arguments as a local variable
 	local -A func_args=(
 			["target_user"]="${arg_ref[priv_user]}" 
@@ -94,6 +96,9 @@ function code_host_execute_container_scripts_elev_privs()
 
 	# export the database connection environment variables used directly in the docker compose files:
 	cds_shared_export_array_keys "${arg_array}" "dbport" "dbhost" "dbservicename"
+
+	echo "before cds_shared_deploy_container_stack() is run, the environment variables are:"
+	env
 
 	# check the specified script action
 	if [[ "${arg_ref[script_action]}" == "deploy" ]]; then 
