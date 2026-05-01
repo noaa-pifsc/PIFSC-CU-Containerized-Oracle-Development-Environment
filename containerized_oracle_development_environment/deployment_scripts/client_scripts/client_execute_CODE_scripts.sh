@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Enforce Bash strict mode: exit on errors, unbound variables, and pipeline failures
-set -euo pipefail
+# set -euo pipefail
 
 # include the client functions
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/includes/include_client_resources.sh"

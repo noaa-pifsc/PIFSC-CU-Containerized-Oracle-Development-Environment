@@ -87,6 +87,9 @@ function code_client_process_arguments_execute_container_scripts ()
 	arg_ref[deploy_dest]="${!dest_var_name}"
 	arg_ref[rem_vol]="${!rem_vol_var_name}"
 
+	
+	echo "the code_client_execute_container_scripts() function arguments are: $(cds_shared_dump_array_vals "${arg_array}")"
+
 	# execute the specified script action on the CODE containers 
 	code_client_execute_container_scripts "${arg_array}"
 
@@ -205,6 +208,9 @@ function code_client_execute_container_scripts ()
 
 		# export the environment variables based on the list of fields
 		cds_shared_export_array_keys "${arg_array}" "compose_project_name" "db_host_port" "ords_host_port" "db_image" "ords_image" "target_apex_version" "app_schema_name" "dbport" "dbhost" "dbservicename" "stack_name" "network_name"
+
+		echo "The env values are:"
+		env
 
 		# export additional custom environment variables
 		proj_client_custom_export_env_vars 
