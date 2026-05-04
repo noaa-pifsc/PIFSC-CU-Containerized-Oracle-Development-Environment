@@ -1,8 +1,0 @@
-services:
-  db:
-    volumes:
-      - db-vol:/opt/oracle/oradata
-volumes:
-  db-vol:
-    name: db-vol
-    external: false

@@ -1,0 +1,56 @@
+services:
+  code-ords:
+    networks:
+      - oracle-net
+    image: pifsc/code-ords:latest
+    build:
+      context: ..
+      dockerfile: containerized_oracle_development_environment/Dockerfile.ords
+      args:
+        ORDS_IMAGE: ${ORDS_IMAGE}
+    volumes:
+      # define a new named volume for the ORDS configuration folder
+      - code-ords-config-vol:/etc/ords/config
+      # This points to the new shared Docker volume to allow the apex installation/upgrade to be handled by a separate container
+      - code-apex-static-vol:/opt/oracle/ords/static
+    ports:
+      - ${ORDS_HOST_PORT}:8080
+    environment:
+      - DBHOST=${DBHOST}
+      - DBPORT=${DBPORT}
+      - DBSERVICENAME=${DBSERVICENAME}
+    # Intercept the startup to wait for the deploy script's flag file, then inject the secret as explicit environment variables before starting ORDS.
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        echo 'Waiting for database deployment to finish:'
+        while [ ! -f /opt/oracle/ords/static/.deploy_ready ]; do
+          sleep 5
+          echo 'Still waiting for database deployment to finish...'
+        done
+        echo 'Database Deployment Completed! Injecting secrets and starting ORDS'
+        export ORACLE_PWD=$$(cat /run/secrets/oracle_pwd)
+        export ORDS_PWD=$$(cat /run/secrets/oracle_pwd)
+        docker-entrypoint.sh
+    secrets:
+      - oracle_pwd
+    deploy:
+      replicas: 1 
+      restart_policy:
+        condition: on-failure 
+        delay: 15s             # Wait 15 seconds before trying again to avoid log spam
+        max_attempts: 30       # Allow up to 30 attempts
+        window: 600s           # Extend the failure window to 10 minutes
+volumes:
+  # Defines the new shared volume for the APEX static application files
+  code-apex-static-vol:
+    external: false
+  code-ords-config-vol:
+    external: false
+networks: 
+  oracle-net:
+secrets:
+  oracle_pwd:
+    name: ${COMPOSE_PROJECT_NAME}_oracle_pwd
+    external: true
