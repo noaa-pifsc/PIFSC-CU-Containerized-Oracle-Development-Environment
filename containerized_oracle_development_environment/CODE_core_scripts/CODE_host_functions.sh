@@ -120,7 +120,7 @@ function code_host_execute_container_scripts_elev_privs()
 		# this is a shutdown action
 		
 		# shutdown the CODE containers to the host server associated with the $STACK_NAME
-		cds_shared_remove_container_stack "${arg_ref[stack_name]}" "${arg_ref[network_name]}" "${arg_ref[rem_vol]}"
+		cds_shared_remove_container_stack "${arg_ref[stack_name]}" "${arg_ref[network_name]}" "${arg_ref[rem_vol]}" "${arg_ref[build_path]}" "${arg_ref[compose_path]}"
 	fi
 
 	echo "The container script action has been completed"

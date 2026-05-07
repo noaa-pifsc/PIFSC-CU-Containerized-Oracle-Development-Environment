@@ -169,7 +169,7 @@ The PIFSC Containerized Oracle Developer Environment (CODE) project was develope
     -   deploy_dest: deployment destination - "local" for docker desktop CODE deployments and "server" for linux host deployments
     -   rem_vol: remove volume flag - "yes" to remove the volumes associated with the CODE container stack name or "no" to retain the volumes
         -   \*Note: if a volume is removed the data contained within it is lost, caution is advised to ensure that work is not lost or it's saved before the volume(s) are removed.
-        -   \*Note: this argument is ignored when env_name = "test"
+        -   \*Note: this argument is always "yes" when env_name = "test" to ensure that the apex and ords volumes don't incorrectly indicate that apex is already installed in the containers on test deployments
     -   Examples:
         -   Executing a deployment for a development environment locally without removing the volumes first: 
             -   `bash client_execute_CODE_scripts.sh deploy dev local no`

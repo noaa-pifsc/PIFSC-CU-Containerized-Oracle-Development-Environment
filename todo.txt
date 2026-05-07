@@ -68,6 +68,16 @@ to do:
 			_ when env_name = test then rem_vole = yes
 	
 		_ document the difference between dev and test scenarios
+		
+		_ if there is a scenario where the volumes need to be cleared manually - document it and provide the script and parameters to use
+			_ for example - apex static files are a higher version than the target apex version and the installed database version (think about these more)
+			
+			
+		
+		
+		business rules:
+			when the apex installation has been completed 
+		
 	
 		_ review the sections defined for CDD/CAD and implement the ones that are appropriate
 		X naming conventions
@@ -112,9 +122,36 @@ to do:
 				_ * add a test case for this
 				
 
-			
-			
-	
+		
+
+		dev
+			deploy 
+				rem_vol = yes (same as redeploy with rem_vol = yes)
+					remove all volumes
+					create all volumes
+					create all services
+			deploy
+				rem_vol = no
+					retain all volumes
+					create all services
+					
+		test
+			deploy
+				rem_vol = yes in all cases
+					remove apex, ords volumes
+					create all services
+					
+		if you have an existing db volume and no apex/ords volumes
+			it will check to see if the target apex version is installed on the database (it will validate as usual -> downgrade, upgrade, same version)
+				same version: install static files in volume
+				upgrade: install apex on db and static files in volume
+				downgrade: error
+			if apex is not installed on the db:
+				install: install apex on db and static files in volume
+				
+		** if you have an existing db volume and the existing apex/ords volumes from the test deployment, it may break the containers if there is a mismatch between the apex version in the volumes and the db
+			_ should we update the core CODE to detect this scenario?
+				_ **compare the apex version in the static files to the apex version in the database, if they don't match then initiate a reinstall of the apex static files to match the version in the database
 	
 	
 	
@@ -170,8 +207,15 @@ to do:
 					X ** check cds_shared_deploy_container_stack -> added rem_vol argument
 					X cds_shared_shutdown_container_compose -> rem_vol argument
 					_ update the cds_shared_get_array_val() function calls to use the arg_ref approach
-					_ cds_shared_remove_container_stack() was updated to accept a third argument: remove_volumes
+					_ cds_shared_remove_container_stack() was updated to accept the following arguments:
+						rem_vol
+						build_path
+						compose_path
+						
+						_ change to use array arguments (since there are 5 args now)
+						
 						_ this should be implemented as an option to allow volumes to be easily removed
+					_ update 
 				_ PRI
 				_ SIA
 				_ PLW
@@ -315,15 +359,28 @@ testing:
 	
 		X shutdown
 			X test
+				_ apex and ords volumes removed
 			
 			X dev
 				X REM_VOL
 					X yes
 					X no
+
+		_ special scenario:
+			ORDS_ENABLED = yes
+				_X deploy dev
+					_ verify ORDS/Apex login
+					_ verify DB connectivity
+				_ deploy test
+					_ ensure that apex and ords volumes are removed
+					_ ensure the containers are created properly
+					_ verify ORDS/Apex login
+					_ verify DB connectivity
+
 	L local:
 		L deploy
 			L test
-				LV installs db, ords, apex from scratch
+				L_V installs db, ords, apex from scratch
 					L verify ORDS/Apex login
 					L verify DB connectivity
 				L ORDS_ENABLED:
@@ -362,9 +419,26 @@ testing:
 							LV Create temp table and insert data
 		L shutdown
 			L test
+				_ apex and ords volumes removed
 			
 			LV dev
 				LV REM_VOL
 					LV yes
 					LV no
 		
+		_L special scenario:
+			ORDS_ENABLED = yes
+				L deploy dev
+					L verify ORDS/Apex login
+					L verify DB connectivity
+				_ deploy test
+					_ ensure that apex and ords volumes are removed, but db-vol still exists (not in use)
+					_ ensure the containers are created properly
+					_ verify ORDS/Apex login
+					_ verify DB connectivity
+				_ deploy dev
+					_ ensure db-vol still exists
+					_ * it will use the existing apex and ords volumes unless they are explicitly removed (they won't necessarily be in sync with the db-vol's apex/ords version - if any)
+					_ ** document this limitation
+						if you run CODE in the dev scenario and then run the test scenario it will automatically remove the apex and ords volumes because the db is built from scratch
+

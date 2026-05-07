@@ -245,7 +245,7 @@ function code_client_execute_container_scripts ()
 			# this is a shutdown script
 
 			# shutdown the CODE containers to the host server associated with the $STACK_NAME
-			cds_shared_remove_container_stack "${arg_ref[stack_name]}" "${arg_ref[network_name]}" "${rem_vol}"
+			cds_shared_remove_container_stack "${arg_ref[stack_name]}" "${arg_ref[network_name]}" "${arg_ref[rem_vol]:-no}" "${arg_ref[build_path]}" "${compose_file}"
 		fi
 	else
 		echo "This is a server deployment"
