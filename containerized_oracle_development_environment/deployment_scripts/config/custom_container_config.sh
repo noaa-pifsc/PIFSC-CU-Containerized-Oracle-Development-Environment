@@ -27,7 +27,7 @@
 ##### Project Configuration Variables: #####
 
 	# define the container git project URL
-	declare GIT_URL="git@github.com:noaa-pifsc/PIFSC-Containerized-Oracle-Development-Environment.git"
+	declare GIT_URL="--branch Branch_CODE_v1.4_CDD_install_swarm git@github.com:noaa-pifsc/PIFSC-Containerized-Oracle-Development-Environment.git"
 
 ##### Container Host Configuration Variables: #####
 

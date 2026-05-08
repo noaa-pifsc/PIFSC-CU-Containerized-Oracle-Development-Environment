@@ -29,9 +29,6 @@ function main()
 		["script_action"]="${SCRIPT_ACTION}"
 	)
 
-	echo "The environment variables for host_deploy_CODE.sh are:"
-	env
-
 	# deploy the container on the container host using a privileged account
 	code_host_execute_container_scripts_elev_privs "host_execute_container_elev_privs_scripts_args"
 }
