@@ -88,6 +88,8 @@ to do:
 		
 		_ document the stateless APEX installation, can switch between dev and test deployments and the oracle apex admin password, ords service account, and apex service account are all set using the defined $oracle_pwd secret value (secrets.sh)
 		
+		_ document why the apex configuration file is generated instead of using the CLI ords config commands
+			it took several seconds for each command, and this added over a minute to the startup time
 		
 		target apex version (TARGET_APEX_VERSION)
 		current apex version (DB)
