@@ -1,59 +1,48 @@
 #!/bin/bash
 
-# Define paths
-export CONFIG_DIR="/etc/ords/config"
-export ORDS_CONFIG="${CONFIG_DIR}"
+# Define resource paths
+CONFIG_DIR="/etc/ords/config"
 PW_FILE="/run/secrets/oracle_pwd"
 
-# Read the database secret into the shell environment
+# validate the database secret is loaded and configured for the ORDS container
 if [ ! -f "${PW_FILE}" ]; then
     echo "ERROR: Secret oracle_pwd was not found."
     exit 1
 fi
 
-# 2. Wait for the .deploy_ready_${DEPLOY_ID} file
-echo "The current deployment ID is: ${DEPLOY_ID}"
+# wait for the .deploy_ready_${DEPLOY_ID} file before configuring and starting the ORDS container
 echo "Waiting for database deployment to finish..."
-while [ ! -f /opt/oracle/ords/static/.deploy_ready_${DEPLOY_ID} ]; do 
+while [ ! -f "/opt/oracle/ords/static/.deploy_ready_${DEPLOY_ID}" ]; do 
   sleep 5
   echo "Still waiting for database deployment to finish..."
 done
-echo "Handshake received. Manually generating configuration files to ensure stateless reliability..."
+echo "The apex installation/upgrade has completed, configure the ORDS container"
 
-# Clean existing config to ensure absolute statelessness
-rm -rf "${CONFIG_DIR}/"*
-mkdir -p "${CONFIG_DIR}/global"
+# create the default database pool configuration folder
 mkdir -p "${CONFIG_DIR}/databases/default"
 
-# show the ORDS configuration variables
-echo "before any changes are made the configuration variables are: "
-ords --config "$CONFIG_DIR" config list
+# generate the global settings.xml configuration file
+echo "generate the global settings.xml configuration file"
+cat > "${CONFIG_DIR}/databases/default/pool.xml" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Generated dynamically for ORDS container based on database configuration values</comment>
+<entry key="db.connectionType">basic</entry>
+<entry key="db.hostname">${DBHOST}</entry>
+<entry key="db.port">${DBPORT}</entry>
+<entry key="db.servicename">${DBSERVICENAME}</entry>
+<entry key="db.username">ORDS_PUBLIC_USER</entry>
+<entry key="feature.sdw">true</entry>
+<entry key="plsql.gateway.mode">proxied</entry>
+<entry key="restEnabledSql.active">true</entry>
+<entry key="security.requestValidationFunction">ords_util.authorize_plsql_gateway</entry>
+</properties>
+EOF
 
+# define the db.password securely with the secret value
+echo "define the db password"
+ords --config "${CONFIG_DIR}" config secret --password-stdin db.password < "${PW_FILE}"
 
-# generate the database pool configuration:
-echo "generate the database pool configuration"
-ords --config "$CONFIG_DIR" config --db-pool default set db.ConnectionType "basic"
-ords --config "$CONFIG_DIR" config --db-pool default set db.hostname "${DBHOST}"
-ords --config "$CONFIG_DIR" config --db-pool default set db.port "${DBPORT}"
-ords --config "$CONFIG_DIR" config --db-pool default set db.servicename "${DBSERVICENAME}"
-ords --config "$CONFIG_DIR" config --db-pool default set db.username "ORDS_PUBLIC_USER"
-
-ords --config "$CONFIG_DIR" config --db-pool default set feature.sdw "true"
-ords --config "$CONFIG_DIR" config --db-pool default set plsql.gateway.mode "proxied"
-ords --config "$CONFIG_DIR" config --db-pool default set restEnabledSql.active "true"
-ords --config "$CONFIG_DIR" config --db-pool default set security.requestValidationFunction "ords_util.authorize_plsql_gateway"
-
-# Pipe the password into the command to satisfy the interactive prompt
-ords --config "$CONFIG_DIR" config secret --password-stdin db.password < "${PW_FILE}"
-
-# set the global configuration:
-ords --config "$CONFIG_DIR" config set database.api.enabled true --global
-ords --config "$CONFIG_DIR" config set standalone.static.context.path "/i" --global
-ords --config "$CONFIG_DIR" config set standalone.static.path "/opt/oracle/ords/static" --global
-
-# show the ORDS configuration variables
-echo "after the changes are made the configuration variables are: "
-ords --config "$CONFIG_DIR" config list
-
-echo "Handing off to official docker-entrypoint.sh..."
-exec docker-entrypoint.sh --config "$CONFIG_DIR" serve
+echo "Use the official docker-entrypoint.sh to start the ords container"
+exec docker-entrypoint.sh --config "${CONFIG_DIR}" serve
