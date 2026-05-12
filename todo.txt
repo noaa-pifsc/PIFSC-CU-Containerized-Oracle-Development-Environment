@@ -1,9 +1,18 @@
 
 to do:
-	update the configuration so users can specify a unique container name so it won't conflict with other containers on the same server (could allow multiple people to use a different shared container host for development)
+
+	X redo test cases to nest the verification steps under the appropriate headings
+		5/11/26: use server version
+
+	X test case for test deployment, rem_vol = yes, ords_enabled = no
+		X (No Need) This will still remove the apex static volume because it's associated with CODE-db-deploy.yml
+
+
+	X update the configuration so users can specify a unique container name so it won't conflict with other containers on the same server (could allow multiple people to use a different shared container host for development)
 		e.g. GCP shared compute instance running docker, but it will depend on performance
 
-	_ for server deployments, should we omit the mount volumes altogether?
+	X for server deployments, should we omit the mount volumes altogether?
+		NO
 
 	X separate out the functionality into separate functions with defined naming convention
 		X create CODE core scripts that are reused across forks
@@ -44,27 +53,105 @@ to do:
 		X created a new cds_shared_export_array_keys() function that exports environment variables from an array of values based on the list of fields
 			_ cds_shared_export_env_vars may be obsolete, but this needs to be determined after reviewing CDD and CAD functions
 		
-		_ check the volume deletion functionality on host server
-			shutdown with volume purge
-			deploy with volume purge
+		X check the volume deletion functionality on host server
+			X shutdown with volume purge
+			X deploy with volume purge
+	
+		
+		_ look to automate the deployment of the various database scripts in the CODE forks
+			_ we could specify the relative script path and then the db secrets (username, password) that are supplied with the database script.  If they can be specified in array arguments then a bash function might be able to loop through the database scripts and specify the credentials
+			
+
+		_ place the .deploy_ready in a subfolder to not clutter up the apex static files folder
+		
+		_ create separate secret variables for the various apex and ords accounts 
+			apex admin, ords_public_user, apex_public_user, 
+
+
+		folder structure:
+			README.md
+			CODE_core
+				functions
+				scripts
+				templates
+				modules
+					CDS
+			projects
+				orchestration_manifests
+					project-name
+						project.env (recursively references parent project.env)
+							- load parent .env file
+							- add project-name (folder) to PROJECT_INHERITANCE
+							- add sql path, sql script, username, password to DB_MIGRATION_MAP (for each database script that is executed)
+							- add any custom environment variables that will be passed via environment variable to the other scripts to CUSTOM_ENV_VARS
+							- add any custom .yml files to COMPOSE_FILES 
+						overrides.yml
+						hooks
+							pre-deploy.sh
+							post-deploy.sh
+				modules
+					project-name (git submodules)
+
+
+		
 	
 	document
 		**** _ clearly indicate this is only intended for development and testing purposes
 			* Not security hardened, encouraged not to work with sensitive data in a shared environment (anyone with docker privileges can connect to your containers and access the data within it)
 			
 		
-		_ the custom_container_config.sh configuration that is stored on the client machine is used when deploying to the server (passed via environment variables)
+		X the custom_container_config.sh configuration that is stored on the client machine is used when deploying to the server (passed via environment variables)
 		
-		docker swarm init to initialize docker swarm
+		X docker swarm init to initialize docker swarm
 	
-	_ update documentation
+		X secrets.sh will only set the oracle admin password on the initial DB container run, after that it is only used to connect to the database
+			X same goes for the data/app schema deployment scripts
+	
+		X new installations can take up to 30 minutes depending on the resources allocated to the docker host
+		
+		
+		_ when rem_vol = yes it will remove all volumes associated with the stack
+			_ when env_name = test then rem_vole = yes
+	
+		_ document the difference between dev and test scenarios
+		
+		_ if there is a scenario where the volumes need to be cleared manually - document it and provide the script and parameters to use
+			_ for example - apex static files are a higher version than the target apex version and the installed database version (think about these more)
+			
+		_ ** document that the only scenario where the volumes need to be removed is when the database needs to be reset
+			Either because the data needs to be replaced/re-seeded or a lower apex version than what is installed on the databse needs to be used:
+			
+				explicit shutdown/removal:
+					bash ./deployment_scripts/client_scripts/client_execute_CODE_scripts.sh shutdown dev local yes
+				explicit shutdown/removal/deploy:
+					bash ./deployment_scripts/client_scripts/client_execute_CODE_scripts.sh deploy dev local yes
+			
+		_ the apex admin account and ORDS_PUBLIC_USER accounts are reset on each deployment using the secrets.sh file
+		
+		_ document the stateless APEX installation, can switch between dev and test deployments and the oracle apex admin password, ords service account, and apex service account are all set using the defined $oracle_pwd secret value (secrets.sh)
+		
+		_ document why the apex configuration file is generated instead of using the CLI ords config commands
+			it took several seconds for each command, and this added over a minute to the startup time
+		
+		target apex version (TARGET_APEX_VERSION)
+		current apex version (DB)
+		current apex version (static files)
+		
+		
+		
+		business rules:
+			when the apex installation has been completed 
+		
+	
 		_ review the sections defined for CDD/CAD and implement the ones that are appropriate
-		_ naming conventions
-		_ implementation instructions
+		X naming conventions
+		X implementation instructions
+
+
 	X implement CDD/CDS functions where appropriate	
 		
 		
-	_ change the docker compose deploy and shutdown functions to use the list of .yml files with a "-f" flag before it
+	X change the docker compose deploy and shutdown functions to use the list of .yml files with a "-f" flag before it
 		
 		
 		
@@ -76,21 +163,66 @@ to do:
 		X resolving issue with mounted volume on a linux host (switch to named volume)
 	
 	
-	_ update boilerplate functions to separate them into the core_engine directory and make all variables arguments (no references to global configuration variables)
+	X update boilerplate functions to separate them into the core_engine directory and make all variables arguments (no references to global configuration variables)
 		* these functions are intended to be upgraded over time as requirements change or improvements are made
 		
 	
-	_ define boilerplate functions for CODE projects that are not intended to change across CODE forks
-		_ have these functions call the custom functions that will change across CODE forks
+	X define boilerplate functions for CODE projects that are not intended to change across CODE forks
+		X have these functions call the custom functions that will change across CODE forks
+	
+	
+	
+	how do we handle the apex static volume?
+		test defines the apex static volume and ords volume
+			if the dev volumes were not removed then the apex static files will be there including the temp file that causes ords to start right away
+			solution: automatically clear the associated volumes when test version starts up
+		
+		dev defines all 3 volumes
+			when it restarts the apex static volume will still be there, so ords will start right away because of the temp file
+			
+			if a test run executes and then the dev executes again then the db volume will be there but the other 2 volumes won't be. 
+				Apex will be installed on the db and the script will detect the absence of the apex static files and copy those files again
+
+				_ * add a test case for this
+				
+
+		
+
+		dev
+			deploy 
+				rem_vol = yes (same as redeploy with rem_vol = yes)
+					remove all volumes
+					create all volumes
+					create all services
+			deploy
+				rem_vol = no
+					retain all volumes
+					create all services
+					
+		test
+			deploy
+				rem_vol = yes in all cases
+					remove apex, ords volumes
+					create all services
+					
+		if you have an existing db volume and no apex/ords volumes
+			it will check to see if the target apex version is installed on the database (it will validate as usual -> downgrade, upgrade, same version)
+				same version: install static files in volume
+				upgrade: install apex on db and static files in volume
+				downgrade: error
+			if apex is not installed on the db:
+				install: install apex on db and static files in volume
+				
+		** if you have an existing db volume and the existing apex/ords volumes from the test deployment, it may break the containers if there is a mismatch between the apex version in the volumes and the db
+			_ should we update the core CODE to detect this scenario?
+				_ **compare the apex version in the static files to the apex version in the database, if they don't match then initiate a reinstall of the apex static files to match the version in the database
 	
 	
 	
 	
-	
-	
-	_ how to guarantee unique container naming so multiple CODE projects can run on the same server at the same time
-		_ need to also change the port number to avoid conflicts
-			_ make the updates custom_container_config.sh
+	X how to guarantee unique container naming so multiple CODE projects can run on the same server at the same time
+		X need to also change the port number to avoid conflicts
+			X make the updates custom_container_config.sh
 				COMPOSE_PROJECT_NAME
 				DB_HOST_PORT
 				ORDS_HOST_PORT
@@ -139,8 +271,15 @@ to do:
 					X ** check cds_shared_deploy_container_stack -> added rem_vol argument
 					X cds_shared_shutdown_container_compose -> rem_vol argument
 					_ update the cds_shared_get_array_val() function calls to use the arg_ref approach
-					_ cds_shared_remove_container_stack() was updated to accept a third argument: remove_volumes
+					_ cds_shared_remove_container_stack() was updated to accept the following arguments:
+						rem_vol
+						build_path
+						compose_path
+						
+						_ change to use array arguments (since there are 5 args now)
+						
 						_ this should be implemented as an option to allow volumes to be easily removed
+					_ update 
 				_ PRI
 				_ SIA
 				_ PLW
@@ -223,3 +362,284 @@ git bash commands:
 		bash ./deployment_scripts/client_scripts/client_execute_CODE_scripts.sh shutdown test server no
 
 troubleshooting tips:
+
+
+
+
+
+
+
+
+
+
+
+Key:
+	L => laptop
+	V => Virtual Machine
+
+testing:
+	_X server:
+		X deploy
+			X test
+				X ORDS_ENABLED:
+					X yes
+						X installs db, ords, apex from scratch
+							X verify ORDS/Apex login
+							X verify DB connectivity
+								X Create temp table and insert data
+						X validation:
+							X invalid TARGET_APEX_VERSION (format fails - 24.3.1)
+							X incorrect TARGET_APEX_VERSION (does not exist - 24.6)
+						X REM_VOL
+							X yes - remove apex static volume
+							X no - retain all volumes
+					X no
+						X REM_VOL
+							X yes - remove apex static volume
+								X verify DB connectivity
+							X no
+								X verify DB connectivity
+			X dev
+				X ORDS_ENABLED:
+					X yes
+						X installs db, ords, apex from scratch
+							X verify ORDS/Apex login
+							X verify DB connectivity
+								X Create temp table and insert data
+						X (same TARGET_APEX_VERSION) resume db, ords, apex
+							X verify ORDS/Apex login
+							X verify DB connectivity
+								X verify temp table
+						X (increase TARGET_APEX_VERSION) resume db, ords, apex
+							X verify ORDS/Apex login
+							X verify DB connectivity
+								X verify temp table
+						X REM_VOL
+							X yes - remove all volumes
+								X verify ORDS/Apex login
+								X verify DB connectivity
+									X Create temp table and insert data
+							X no - retain all volumes
+						X validation:
+							X decrease TARGET_APEX_VERSION (downgrade error)
+							X invalid TARGET_APEX_VERSION (format fails - 24.3.1)
+							X incorrect TARGET_APEX_VERSION (does not exist - 24.6)
+					X no - ORDS container does not run
+						X initial
+							X verify DB connectivity
+							X Create temp table and insert data
+						X restart
+							X verify DB connectivity
+							X verify temp table
+						X REM_VOL
+							X yes - remove all volumes
+								X verify ORDS/Apex login
+								X verify DB connectivity
+									X Create temp table and insert data
+							X no - retain all volumes
+		X shutdown
+			X test
+				X REM_VOL
+					X yes
+						ORDS_ENABLED:
+							X yes: remove apex static volume
+							X no: remove apex static volume
+					X no
+						ORDS_ENABLED:
+							X yes: retain volumes
+							X no: retain volumes
+			X dev
+				X REM_VOL
+					X yes
+						ORDS_ENABLED:
+							X yes: remove apex static and db volumes
+							X no: remove apex static and db volumes
+					X no
+						ORDS_ENABLED:
+							X yes: retain volumes
+							X no: retain volumes
+
+		_ special scenarios:
+			X ORDS enabled:
+				X 1 (upgrade apex static files version only):
+					X deploy dev - version 23.1
+						X verify ORDS/Apex login
+						X verify DB connectivity
+							X create table/insert test data
+					
+					X test dev rem_vol = no
+						(install version 23.2: files and db)
+						X verify ORDS/Apex login
+						X verify DB connectivity
+					
+					X deploy dev - version 23.1
+						(upgrade files only, no need to install database)
+						X verify ORDS/Apex login
+						X verify DB connectivity
+							X verify database values from initial dev run are still in the database
+					
+				
+				X 2 (upgrade db apex version only): 
+					X deploy dev - version 23.1
+						X verify ORDS/Apex login
+						X verify DB connectivity
+							X create table/insert test data
+					
+					X remove apex static volume: 
+						(shutdown test rem_vol = yes)
+						X confirm apex static dir volume is removed
+
+					X deploy dev - version 23.1
+						(install static files only)
+						X verify ORDS/Apex login
+						X verify DB connectivity
+							X verify database values from initial dev run are still in the database
+					
+
+			X ORDS not enabled:
+				X 1 (verify dev DB data is retained):
+					X deploy dev
+						X verify DB connectivity
+							X create table/insert test data
+					
+					X deploy test
+						X verify DB connectivity
+					
+					X deploy dev
+						X verify DB connectivity
+							X verify database values from initial dev run are still in the database
+					
+	_ local:
+		_ deploy
+			L test
+				L installs db, ords, apex from scratch
+					L verify ORDS/Apex login
+					L verify DB connectivity
+				L ORDS_ENABLED:
+					L yes
+						L validation:
+							L invalid TARGET_APEX_VERSION (format fails - 24.3.1)
+							L incorrect TARGET_APEX_VERSION (does not exist - 24.6)
+					L no
+						L verify DB connectivity
+
+				L REM_VOL
+					L yes - remove all volumes
+						L ORDS enabled = yes
+							L verify ORDS/Apex login
+							L verify DB connectivity
+								L Create temp table and insert data
+						L ORDS enabled = no
+							L verify DB connectivity
+					L no - retain all volumes
+			L dev
+				L installs db, ords, apex from scratch
+					L verify ORDS/Apex login
+					L verify DB connectivity
+						L Create temp table and insert data
+				L (same TARGET_APEX_VERSION) resume db, ords, apex
+					L verify ORDS/Apex login
+					L verify DB connectivity
+						L verify temp table
+				L (increase TARGET_APEX_VERSION) resume db, ords, apex
+					L verify ORDS/Apex login
+					L verify DB connectivity
+						L verify temp table
+				L ORDS_ENABLED:
+					L yes
+						L validation:
+							L decrease TARGET_APEX_VERSION
+							L invalid TARGET_APEX_VERSION (format fails - 24.3.1)
+							L incorrect TARGET_APEX_VERSION (does not exist - 24.6)
+					L no - ORDS container does not run
+						L initial
+							L verify DB connectivity
+							L Create temp table and insert data
+						L restart
+							L verify DB connectivity
+							L verify temp table
+						
+				L REM_VOL
+					L yes - remove all volumes
+						L verify ORDS/Apex login
+						L verify DB connectivity
+							L Create temp table and insert data
+					L no - retain all volumes
+					
+		_ shutdown
+			_ test
+				_ REM_VOL
+					L yes (deletes only apex static volume)
+						ords enabled = yes
+							
+						ords enabled = no
+							
+					_ no 
+			
+			L dev
+				L REM_VOL
+					L yes
+					L no
+		
+		L special_ scenarios:
+			ORDS enabled:
+				L 1 (upgrade apex static files version only):
+					L deploy dev - version 23.1
+						L verify ORDS/Apex login
+						L verify DB connectivity
+							L create table/insert test data
+					
+					L test dev rem_vo_ = no
+						(install version 23.2: files and db)
+						L verify ORDS/Apex login
+						L verify DB connectivity
+					
+					L deploy dev - version 23.1
+						(upgrade database only, no need to install static files)
+						L verify ORDS/Apex login
+						L verify DB connectivity
+							L verify database values from initial dev run are still in the database
+					
+				
+				L 2 (upgrade db apex version only): 
+					L deploy dev - version 23.1
+						L verify ORDS/Apex login
+						L verify DB connectivity
+							L create table/insert test data
+					
+					L remove apex static volume: 
+						(shutdown test rem_vol = yes)
+						L confirm apex static dir volume is removed
+
+					L deploy dev - version 23.1
+						(instal_ static files only)
+						L verify ORDS/Apex login
+						L verify DB connectivity
+							L verify database values from initial dev run are still in the database
+					
+
+			ORDS not enabled:
+				_ 1 (upgrade apex static files version only):
+					_ deploy dev
+						_ verify DB connectivity
+							_ create table/insert test data
+					
+					_ deploy test
+						_ verify DB connectivity
+					
+					_ deploy dev
+						_ verify DB connectivity
+							_ verify database values from initial dev run are still in the database
+					
+				
+				_ 2 (upgrade db apex version only): 
+					_ deploy dev
+						_ verify DB connectivity
+							_ create table/insert test data
+					
+					_ deploy test
+						_ verify DB connectivity
+					
+					_ deploy dev
+						_ verify DB connectivity
+							_ verify database values from initial dev run are still in the database

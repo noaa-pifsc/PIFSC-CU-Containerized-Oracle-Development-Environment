@@ -114,13 +114,16 @@ function code_host_execute_container_scripts_elev_privs()
 				["rem_vol"]="${arg_ref[rem_vol]}"
 			)
 
+		# generate and export a timestamp to uniquely identify this deployment, this environment variable is defined in the code-ords and code-db-ords-deploy containers
+		export DEPLOY_ID="$(date +%s)"
+
 		# execute the secret definitions and the container build/run process on the target folder using a privileged account
 		cds_shared_deploy_container_stack "host_deploy_stack_args"
 	else
 		# this is a shutdown action
 		
 		# shutdown the CODE containers to the host server associated with the $STACK_NAME
-		cds_shared_remove_container_stack "${arg_ref[stack_name]}" "${arg_ref[network_name]}" "${arg_ref[rem_vol]}"
+		cds_shared_remove_container_stack "${arg_ref[stack_name]}" "${arg_ref[network_name]}" "${arg_ref[rem_vol]}" "${arg_ref[build_path]}" "${arg_ref[compose_path]}"
 	fi
 
 	echo "The container script action has been completed"

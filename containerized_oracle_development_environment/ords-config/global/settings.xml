@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
-<properties>
-<comment>Saved on Mon Apr 20 23:16:53 UTC 2026</comment>
-<entry key="mongo.enabled">true</entry>
-<entry key="standalone.access.log">/tmp/ords_access_logs/</entry>
-<entry key="standalone.static.context.path">/i</entry>
-<entry key="standalone.static.path">/opt/oracle/ords/static</entry>
-</properties>

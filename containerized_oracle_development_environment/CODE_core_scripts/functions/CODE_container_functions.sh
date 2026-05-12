@@ -4,7 +4,7 @@
 # 1: first version in the format: [0-9]+(\.[0-9]+)+ 
 # 2: second version in the format: [0-9]+(\.[0-9]+)+ 
 # 3: Name of the variable to store the result of the comparison: contains 0 if $1 = $2, contains 1 if $1 > $2, contains 2 if $1 < $2
-function proj_container_version_compare() {
+function code_container_version_compare() {
 	version1="${1}"
 	version2="${2}"
 	local -n out_compare_result_ref="${3}"
@@ -48,7 +48,7 @@ function proj_container_version_compare() {
 # the function accepts the following parameters:
 # 1: the formatted system credentials for the container oracle database instance
 # 2: app_schema_name - the schema name that is checked for existence on the database to determine if the database has already been initialized
-function proj_container_check_database_initialized() {
+function code_container_check_database_initialized() {
 	local sys_credentials="${1}"
 	local app_schema_name="${2}"
 
@@ -65,7 +65,7 @@ function proj_container_check_database_initialized() {
 # function to validate the apex version using a regular expression
 # the function accepts the following parameters:
 # 1: target_version that is being validated using a regular expression
-function proj_container_validate_apex_version_format() {
+function code_container_validate_apex_version_format() {
 	local target_version="$1"
 
 	# validate the bash variable values
@@ -74,10 +74,10 @@ function proj_container_validate_apex_version_format() {
 		return 1
 	fi
 
-	# validate APEX version format (Strictly X.X, e.g., 23.2, 24.1)
+	# validate Apex version format (Strictly X.X, e.g., 23.2, 24.1)
 	# the regex ^[0-9]+\.[0-9]+$ ensures exactly one dot separating two integers.
 	if [[ ! "$target_version" =~ ^[0-9]+\.[0-9]+$ ]]; then
-		echo "Error: ${FUNCNAME[0]}() - Invalid APEX version format: '$target_version'. Expected format: XX.X (e.g., 23.2)"
+		echo "Error: ${FUNCNAME[0]}() - Invalid Apex version format: '$target_version'. Expected format: XX.X (e.g., 23.2)"
 		exit 1
 	fi
 }
@@ -85,7 +85,7 @@ function proj_container_validate_apex_version_format() {
 # function to retrieve the currently installed apex version
 # the function accepts the following parameters:
 # 1: the formatted system credentials for the container oracle database instance
-function proj_container_get_installed_apex_version() {
+function code_container_get_installed_apex_version() {
 	local sys_credentials="${1}"
 	
 	# validate the bash variable values
@@ -96,7 +96,7 @@ function proj_container_get_installed_apex_version() {
 	
 	# use 'whenever sqlerror exit failure' to catch DB errors
 	# direct stderr to /dev/null to avoid capturing error text in the variable
-	# query for the current apex version number, if APEX is not installed this query will fail with an ORA- error
+	# query for the current apex version number, if Apex is not installed this query will fail with an ORA- error
 	local apex_version
 	apex_version=$(sqlplus -s -l "${sys_credentials}" <<EOF 2>/dev/null
 		set heading off feedback off pagesize 0 verify off
@@ -121,7 +121,7 @@ EOF
 # the function accepts the following arguments:
 # 1: is the target apex version
 # 2: is the apex download URL that will be checked
-function proj_container_verify_apex_version_exists() {
+function code_container_verify_apex_version_exists() {
 
 	local apex_version="${1}"
 	local apex_download_url="${2}"
@@ -137,11 +137,11 @@ function proj_container_verify_apex_version_exists() {
 
 	# Use curl to check headers only, -f causes curl to fail on HTTP errors (like 404), -s is silent mode
 	if ! curl --output /dev/null --silent --head --fail "${apex_download_url}"; then
-		echo "ERROR: ${FUNCNAME[0]}() - APEX version ${apex_version} does not exist at URL: ${apex_download_url}"
+		echo "ERROR: ${FUNCNAME[0]}() - Apex version ${apex_version} does not exist at URL: ${apex_download_url}"
 		echo "Please check the apex version number and try again."
 		exit 1
 	else
-		echo "The APEX version ${apex_version} confirmed valid and available for download."
+		echo "The Apex version ${apex_version} confirmed valid and available for download."
 	fi
 }
 
@@ -151,12 +151,14 @@ function proj_container_verify_apex_version_exists() {
 # 2: sys_password: oracle admin password
 # 3: target_apex_version: the specified apex version for the ords container
 # 4: dbservicename: the service name for the database container
-function proj_container_install_or_upgrade_apex() {
+# 5: deploy_id: the datestamp of the current deployment to uniquely identify it to the code-ords container
+function code_container_install_or_upgrade_apex() {
 
 	local sys_credentials="${1}"
 	local sys_password="${2}"
 	local target_apex_version="${3}"
 	local dbservicename="${4}"
+	local deploy_id="${5}"
 	
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "sys_credentials" "sys_password" "target_apex_version" "dbservicename"; then
@@ -173,10 +175,10 @@ function proj_container_install_or_upgrade_apex() {
 	echo "Target Apex version: ${target_apex_version}"
 
 	# initialize local variables to track if the Apex upgrade should be installed in the database (skip_db_install) and if the static apex files should be updated (skip_file_install)
-	local skip_db_install=0
-	local skip_file_install=0
+	local skip_db_install
+	local skip_file_install
 
-	# define the function arguments for proj_process_apex_version()
+	# define the function arguments for code_container_process_apex_version()
 	local -A process_apex_func_args=(
 			["target_apex_version"]="${target_apex_version}"
 			["apex_download_url"]="${apex_download_url}"
@@ -187,9 +189,9 @@ function proj_container_install_or_upgrade_apex() {
 		)
 
 	# process the apex version to determine which installations (if any) will be executed
-	proj_process_apex_version "process_apex_func_args"
+	code_container_process_apex_version "process_apex_func_args"
 	
-	# define the function arguments for proj_container_process_apex_install()
+	# define the function arguments for code_container_process_apex_install()
 	local -A install_upgrade_func_args=(
 			["skip_file_install"]="${skip_file_install}"
 			["skip_db_install"]="${skip_db_install}"
@@ -200,10 +202,11 @@ function proj_container_install_or_upgrade_apex() {
 			["sys_password"]="${sys_password}"
 			["dbservicename"]="${dbservicename}"
 			["target_apex_version"]="${target_apex_version}"
+			["deploy_id"]="${deploy_id}"
 		)
 
 	# process the apex install/upgrade
-	proj_container_process_apex_install "install_upgrade_func_args"
+	code_container_process_apex_install "install_upgrade_func_args"
 }
 
 # function to check the apex version to determine if the apex database upgrade 
@@ -214,7 +217,7 @@ function proj_container_install_or_upgrade_apex() {
 # apex_static_dir: the file directory for the apex static application files
 # out_skip_file_install_var_name: the variable name that will contain a 1 if the apex file upgrade should be skipped and 0 if the apex file upgrade should be installed
 # out_skip_db_install_var_name: the variable name that will contain a 1 if the apex DB upgrade should be skipped and 0 if the apex DB upgrade should be installed
-function proj_container_check_apex_version_status()
+function code_container_check_apex_version_status()
 {
 	# store the function array argument
 	local arg_array="${1}"
@@ -238,32 +241,39 @@ function proj_container_check_apex_version_status()
 	local -n out_skip_file_install_ref="${arg_ref[out_skip_file_install_var_name]}"
 	local -n out_skip_db_install_ref="${arg_ref[out_skip_db_install_var_name]}"
 
+	# set the default values for the file/db installation flag variables
+	out_skip_file_install_ref=0
+	out_skip_db_install_ref=0
+
 	# check the $version_status to determine if the apex database/files should be upgraded
 	if [ "${arg_ref[version_status]}" -eq 2 ]; then
 		# downgrade attempt detected, the target_apex_version is less than the current_apex_version
-		echo "ERROR: ${FUNCNAME[0]}() - Downgrade detected! Current APEX version is ${arg_ref[current_apex_version]}, but target is ${arg_ref[target_apex_version]}."
-		echo "Downgrading APEX via this method is not supported. Exiting."
+		echo "ERROR: ${FUNCNAME[0]}() - Downgrade detected! Current Apex version is ${arg_ref[current_apex_version]}, but target is ${arg_ref[target_apex_version]}."
+		echo "Downgrading Apex via this method is not supported. Exiting."
 		exit 1
 	elif [ "${arg_ref[version_status]}" -eq 0 ]; then
 		# do not upgrade, target_apex_version and current_apex_version are equivalent
-		echo "APEX is already at the target version (${arg_ref[current_apex_version]})."
+		echo "Apex is already at the target version (${arg_ref[current_apex_version]})."
 
 		# update the variable to indicate the apex database upgrade should be skipped
 		out_skip_db_install_ref=1
 		
-		# Check if static files are also in place
-		if [ -f "${arg_ref[apex_static_dir]}/apex_version.js" ]; then
-			echo "Static files are in place. No upgrade needed."
-			# update the variable to indicate the apex file upgrade should be skipped
-			out_skip_file_install_ref=1
-		fi
+		# determine if the apex file installation should be processed and return the flag value (1|0) to out_skip_file_install_ref 
+		code_container_check_apex_file_install "out_skip_file_install_ref" "${arg_ref[apex_static_dir]}" "${arg_ref[target_apex_version]}"
+
+		echo "The value of out_skip_file_install_ref is: ${out_skip_file_install_ref}"
 	else
 		# upgrade the apex version, target_apex_version is greater than the current_apex_version
-		# echo "DEBUG: APEX version mismatch. Found: '${arg_ref[current_apex_version]}'"
-		echo "Starting APEX upgrade to ${arg_ref[target_apex_version]}..."
+		# echo "DEBUG: Apex version mismatch. Found: '${arg_ref[current_apex_version]}'"
+		echo "Starting DB Apex upgrade to ${arg_ref[target_apex_version]}..."
 		
 		# update the variable to indicate the apex database upgrade should be installed
 		out_skip_db_install_ref=0
+
+		# determine if the apex file installation should be processed and return the flag value (1|0) to out_skip_file_install_ref 
+		code_container_check_apex_file_install "out_skip_file_install_ref" "${arg_ref[apex_static_dir]}" "${arg_ref[target_apex_version]}"
+		
+		echo "The value of out_skip_file_install_ref is: ${out_skip_file_install_ref}"
 	fi
 }
 
@@ -276,7 +286,9 @@ function proj_container_check_apex_version_status()
 # app_schema_name: the schema name that is checked for existence on the database to determine if the database has already been initialized
 # target_apex_version: target version of apex that is being used by the ords container
 # oracle_pwd_file: the file location for the oracle admin password secret
-function proj_container_deploy_database_scripts ()
+# ords_enabled: flag to indicate if the ords container is enabled (yes) or not (no)
+# deploy_id: the datestamp of the current deployment to uniquely identify it to the code-ords container
+function code_container_deploy_database_scripts ()
 {
 	# store the function array argument
 	local arg_array="${1}"
@@ -288,7 +300,7 @@ function proj_container_deploy_database_scripts ()
     fi
 
 	# input validation:
-	if ! cds_shared_validate_required_array_vals "${arg_array}" "dbhost" "dbport" "dbservicename" "app_schema_name" "oracle_pwd_file"; then 
+	if ! cds_shared_validate_required_array_vals "${arg_array}" "dbhost" "dbport" "dbservicename" "app_schema_name" "oracle_pwd_file" "ords_enabled" "deploy_id"; then 
         echo "Error: ${FUNCNAME[0]}() function argument validation failed" >&2
         return 1
     fi
@@ -317,20 +329,17 @@ function proj_container_deploy_database_scripts ()
 	# log that the database is ready for the automated apex install/upgrade and custom schema/database object deployment
 	echo "Database is ready!"
 	
-	# install or upgrade the apex container installation (if target_apex_version is defined):
-	if [ -n "${arg_ref[target_apex_version]}" ]; then
-		echo "target_apex_version is defined, install/upgrade apex"
-		proj_container_install_or_upgrade_apex "${sys_credentials}" "${sys_password}" "${arg_ref[target_apex_version]}" "${arg_ref[dbservicename]}"
+	# install or upgrade the apex container installation (if target_apex_version is defined and ords_enabled = yes):
+	if [[ "${arg_ref[ords_enabled]}" == "yes" && -n "${arg_ref[target_apex_version]}" ]]; then
+		echo "target_apex_version is defined and ORDS is enabled, install/upgrade apex"
+		code_container_install_or_upgrade_apex "${sys_credentials}" "${sys_password}" "${arg_ref[target_apex_version]}" "${arg_ref[dbservicename]}" "${arg_ref[deploy_id]}"
 	else
-		echo "target_apex_version is not defined, skip apex install/upgrade process"
+		echo "target_apex_version is not defined or ORDS is not enabled, skip apex install/upgrade process"
 	fi
-
-	# apex has finished installing, create the /apex-static/.deploy_ready file to indicate that the ords container can start now:
-	touch /apex-static/.deploy_ready
 
 #	echo "Checking if the database has been initialized (schema: ${APP_SCHEMA_NAME})..."
 	# Check if the database is initialized by querying DBA_USERS
-	if ! proj_container_check_database_initialized "${sys_credentials}" "${arg_ref[app_schema_name]}"; then
+	if ! code_container_check_database_initialized "${sys_credentials}" "${arg_ref[app_schema_name]}"; then
 		echo "Database is not initialized, run the custom database and/or application deployment scripts"
 
 		# run the custom database deployment scripts:
@@ -351,7 +360,7 @@ function proj_container_deploy_database_scripts ()
 # skip_db_install_var_name: the name of the variable that indicates if the apex database installation will be processed
 # skip_file_install_var_name: the name of the variable that indicates if the apex file installation will be processed
 # sys_credentials: formatted system database credentials
-function proj_process_apex_version()
+function code_container_process_apex_version()
 {
 	# store the function array argument
 	local arg_array="${1}"
@@ -375,21 +384,22 @@ function proj_process_apex_version()
 	local -n skip_db_install_var="${arg_ref[skip_db_install_var_name]}"
 	local -n skip_file_install_var="${arg_ref[skip_file_install_var_name]}"
 
-	# Validate APEX version format (e.g., 23.2, 24.1), if it is invalid exit the function
-	proj_container_validate_apex_version_format "${arg_ref[target_apex_version]}"
+	# Validate Apex version format (e.g., 23.2, 24.1), if it is invalid exit the function
+	code_container_validate_apex_version_format "${arg_ref[target_apex_version]}"
 
 	# validate if the specified target_apex_version version actually exists on Oracle's site
-	proj_container_verify_apex_version_exists "${arg_ref[target_apex_version]}" "${arg_ref[apex_download_url]}"
+	code_container_verify_apex_version_exists "${arg_ref[target_apex_version]}" "${arg_ref[apex_download_url]}"
 
 	# retrieve the current version of Apex by querying the databae
-	local current_apex_version="$(proj_container_get_installed_apex_version "${arg_ref[sys_credentials]}")"
+	local current_apex_version="$(code_container_get_installed_apex_version "${arg_ref[sys_credentials]}")"
+	
 	# echo "DEBUG: Current Apex version: ${current_apex_version}"
 
 	# compare the current and target versions of apex and store the return value in version_status
 	local version_status=""
-	proj_container_version_compare "${arg_ref[target_apex_version]}" "${current_apex_version}" "version_status"
+	code_container_version_compare "${arg_ref[target_apex_version]}" "${current_apex_version}" "version_status"
 	
-	# define the argument array for the proj_container_check_apex_version_status() function 
+	# define the argument array for the code_container_check_apex_version_status() function 
 	local -A apex_version_status_func_args=(
 			["version_status"]="${version_status}"
 			["current_apex_version"]="${current_apex_version}"
@@ -400,7 +410,7 @@ function proj_process_apex_version()
 		)
 	
 	# check the current/target version to determine if the DB and/or file apex installations should be executed
-	proj_container_check_apex_version_status "apex_version_status_func_args"
+	code_container_check_apex_version_status "apex_version_status_func_args"
 }
 
 # function that processes the apex db and file installation
@@ -414,7 +424,8 @@ function proj_process_apex_version()
 # sys_password: oracle admin password
 # dbservicename: the database service name for the database container
 # target_apex_version: the specified apex version for the ords container
-function proj_container_process_apex_install()
+# deploy_id: the datestamp of the current deployment to uniquely identify it to the code-ords container
+function code_container_process_apex_install()
 {
 	# store the function array argument
 	local arg_array="${1}"
@@ -426,48 +437,34 @@ function proj_container_process_apex_install()
 	fi
 
 	# validate that the required function argument array elements exist
-	if ! cds_shared_validate_required_array_vals "${arg_array}" "skip_file_install" "skip_db_install" "apex_zip_path" "apex_download_url" "apex_static_dir" "sys_credentials" "sys_password" "dbservicename" "target_apex_version"; then
+	if ! cds_shared_validate_required_array_vals "${arg_array}" "skip_file_install" "skip_db_install" "apex_zip_path" "apex_download_url" "apex_static_dir" "sys_credentials" "sys_password" "dbservicename" "target_apex_version" "deploy_id"; then
 		echo "Error: ${FUNCNAME[0]}() function required secure array validation failed" >&2
 		return 1
 	fi
 	
 	
-	# echo "DEBUG: in proj_container_process_apex_install() the value of arg_array is: $(cds_shared_dump_array_vals ${arg_array})"
+	# echo "DEBUG: in code_container_process_apex_install() the value of arg_array is: $(cds_shared_dump_array_vals ${arg_array})"
 	
 	# create a pointer to the arg_array variable to make it easy to access the argument array values
 	local -n arg_ref="${arg_array}"
 
-	# check if the static Apex files should be installed
-	if [[ "${arg_ref[skip_file_install]}" -ne 1 ]]; then
+	# check if either Apex installation is required
+	if [[ "${arg_ref[skip_file_install]}" -eq 0 || "${arg_ref[skip_db_install]}" -eq 0 ]]; then
 
-		# the apex package does not dynamically download and install the apex installation package
-		echo "Downloading ${arg_ref[apex_download_url]}..."
-		curl -L -o "${arg_ref[apex_zip_path]}" "${arg_ref[apex_download_url]}"
-		if [ $? -ne 0 ]; then
-			echo "Error: ${FUNCNAME[0]}() - Download of APEX zip file failed."
-			exit 1
-		fi
-
-		echo "Apex upgrade package download complete."
-		
-		echo "Unzipping ${arg_ref[apex_zip_path]}..."
-		unzip -q "${arg_ref[apex_zip_path]}" -d /tmp
-		if [ $? -ne 0 ]; then
-			echo "Error: ${FUNCNAME[0]}() - Failed to unzip APEX file."
-			exit 1
-		fi
-		
-		# change the current directory so the Apex installation can proceed normally with the relative paths
-		cd /tmp/apex
+		# download and unzip the apex installer
+		code_container_download_unzip_apex_installer "${arg_ref[apex_download_url]}" "${arg_ref[apex_zip_path]}"
 
 		# initialize the local variables to support the parallel installation of Apex in the DB and the file system (docker volume)
 		local db_install_pid=0
 		local db_install_status=0
-		local file_move_status=0
+		local file_install_status=0
 
 		# check if the Apex database installation should proceed
 		if [ "${arg_ref[skip_db_install]}" -eq 0 ]; then
-			echo "Starting APEX DB installer (in background)..."
+			echo "Starting Apex DB installer..."
+
+			# change the current directory so the Apex installation can proceed normally with the relative paths
+			cd /tmp/apex
 
 			# Run the DB install in the background by adding '&'
 			sqlplus -s -l "${arg_ref[sys_credentials]}" <<EOF &
@@ -481,157 +478,308 @@ EOF
 			echo "Skipping Apex database installation since the version is already the same"
 		fi
 
-		# copy the Apex static images to the shared docker volume in the foreground
-		echo "Copying APEX static images to shared volume (in foreground)..."
+		# check if the apex file installation should proceed
+		if [[ "${arg_ref[skip_file_install]}" -eq 0 ]]; then
 		
-		# Clear out any old static Apex files 
-		rm -rf "${arg_ref[apex_static_dir]}"/*
-
-		# Move the contents of the images folder to the root of the volume
-		mv /tmp/apex/images/* "${arg_ref[apex_static_dir]}"/
-
-		# store the results of the file move process in file_move_status so the result can be checked
-		local file_move_status=$? 
-		if [ "${file_move_status}" -eq 0 ]; then
-			echo "Static files copied successfully."
-			
-			# update owner permissions on the docker volume to the oracle account so the static Apex files can be used by the ords container
-			chown -R 54321:0 "${arg_ref[apex_static_dir]}"/
+			# install the apex static files
+			code_container_install_apex_static_files "${arg_ref[apex_static_dir]}" "file_install_status"
 		else
-			echo "Error: ${FUNCNAME[0]}() - Static file copy failed."
+			echo "Skipping Apex file installation since the version is already the same"
 		fi
 
 		# wait for background DB install to finish
 		if [ "${db_install_pid}" -ne 0 ]; then
-			echo "Waiting for APEX DB install (PID: ${db_install_pid}) to finish..."
-			wait "${db_install_pid}"
-				local db_install_status=$?	# store the result of the Apex database installation in a new variable
+			echo "Waiting for Apex DB install (PID: ${db_install_pid}) to finish..."
+			wait "${db_install_pid}" # wait for the apex database installation background process to finish
+			db_install_status=$?	# store the result of the Apex database installation in a new variable
 
 			# check if the database installation 
 			if [ "${db_install_status}" -eq 0 ]; then
-				echo "APEX database upgrade successful."
-				
-				# declare the variable to store the version status code returned by the proj_container_version_compare() function
-				local version_status
-				
-				# check if the target apex version is less than 23.2
-				proj_container_version_compare "${arg_ref[target_apex_version]}" "23.2" "version_status"
-				
-				if [ "${version_status}" -eq 2 ]; then 
-					# apex version is 23.1 or older
-
-					# define a PL/SQL block to unlock the apex admin using the APEX_UTIL.RESET_PASSWORD procedure
-					UNLOCK_BLOCK="
-						BEGIN
-							APEX_UTIL.set_security_group_id(10);
-							APEX_UTIL.reset_password(
-								p_user_name => 'ADMIN',
-								p_old_password => NULL,
-								p_new_password => '${arg_ref[sys_password]}',
-								p_change_password_on_first_use => FALSE
-							);
-							COMMIT;
-						EXCEPTION WHEN OTHERS THEN
-							 NULL;
-						END;
-					"
-				
-				else
-					# apex version is 23.2 or higher
-					
-					# define a PL/SQL block to unlock the apex admin using the APEX_INSTANCE_ADMIN.UNLOCK_USER procedure
-					UNLOCK_BLOCK="
-						BEGIN
-							APEX_INSTANCE_ADMIN.UNLOCK_USER(
-								p_workspace => 'INTERNAL',
-								p_username	=> 'ADMIN',
-								p_password	=> '${arg_ref[sys_password]}'
-							);
-							COMMIT;
-						EXCEPTION WHEN OTHERS THEN
-							 -- Fallback or ignore if user doesn't exist yet (should not happen here)
-							 NULL;
-						END;
-					"
-				
-				fi
-				
-				# The APEX upgrade completed, unlock the APEX_PUBLIC_USER account and attempt to create the APEX instance admin account or if it already exists then reset the password to sys_password
-
-				# run the sqlplus script using the SYS schema
-				echo "Unlocking/Initializing/Configuring APEX accounts..."
-				
-				sqlplus -s -l "${arg_ref[sys_credentials]}" <<EOF
-				WHENEVER SQLERROR EXIT SQL.SQLCODE
-				ALTER SESSION SET CONTAINER = ${arg_ref[dbservicename]};
-				-- Use the same password for all internal accounts for simplicity
-				ALTER USER APEX_PUBLIC_USER IDENTIFIED BY "${arg_ref[sys_password]}" ACCOUNT UNLOCK;
-				SET SERVEROUTPUT ON
-				
-				-- Switch to the APEX schema to perform admin tasks
-				DECLARE
-					v_apex_schema VARCHAR2(30);
-				BEGIN
-					SELECT schema INTO v_apex_schema FROM dba_registry WHERE comp_id = 'APEX';
-					EXECUTE IMMEDIATE 'ALTER SESSION SET CURRENT_SCHEMA = ' || dbms_assert.enquote_name(v_apex_schema);
-				END;
-				/
-
-				-- Disable Strong Password Requirement (For Dev Environment)
-				BEGIN
-					APEX_INSTANCE_ADMIN.SET_PARAMETER('STRONG_SITE_ADMIN_PASSWORD', 'N');
-					COMMIT;
-				END;
-				/
-
-				-- Set the ADMIN password for the INTERNAL workspace (based on ORACLE_PWD variable defined in .env file)
-				BEGIN
-					DBMS_OUTPUT.PUT_LINE('Create the APEX admin user');
-				
-					APEX_UTIL.set_security_group_id(10);
-					APEX_UTIL.create_user(
-						p_user_name => 'ADMIN',
-						p_email_address => 'admin@localhost',
-						p_web_password=> '${arg_ref[sys_password]}',
-						p_developer_privs => 'ADMIN:CREATE:DATA_LOADER:EDIT:HELP:MONITOR:SQL',
-						p_change_password_on_first_use => 'N' -- Ensure no forced change password
-					);
-
-					DBMS_OUTPUT.PUT_LINE('APEX admin user created successfully');
-
-					COMMIT;
-				EXCEPTION WHEN OTHERS THEN
-					-- If apex admin user already exists, just reset the password (based on ORACLE_PWD variable defined in .env file)
-
-					-- Run the appropriate unlock/reset block
-					${UNLOCK_BLOCK}
-
-					COMMIT;
-				END;
-				/
-				exit;
-EOF
-				# check the result of the sqlplus commands
-				if [ $? -eq 0 ]; then
-					echo "APEX setup completed successfully."
-				else
-					echo "Error: ${FUNCNAME[0]}() - APEX setup failed."
-					exit 1
-				fi
-				
+				echo "Apex database upgrade was successful"
 			else
-				echo "Error: ${FUNCNAME[0]}() - Background APEX database upgrade failed."
+				echo "Error: ${FUNCNAME[0]}() - Apex database upgrade failed."
+				exit 1
 			fi
 		fi
 		
-		# Check the results of the background and foreground jobs 
-		if [ "${db_install_status}" -ne 0 ] || [ "${file_move_status}" -ne 0 ]; then
-			echo "Error: ${FUNCNAME[0]}() - One or more upgrade tasks failed. Halting."
+		# Check the results of the apex installation
+		if [ "${file_install_status}" -ne 0 ]; then
+			echo "Error: ${FUNCNAME[0]}() - Apex file installation failed. Halting."
 			exit 1
 		fi
 
 		# remove the apex installation files
 		echo "Cleaning up installer files..."
 		rm -rf /tmp/apex "${arg_ref[apex_zip_path]}"
+	fi
+
+	# Ensure database users match ORDS config every time
+	# retrieve the current apex version
+	local current_apex_version="$(code_container_get_installed_apex_version "${arg_ref[sys_credentials]}")"
+
+	# check if the current version of apex is not 0.0 (indicates it's not installed)
+	if [[ "${current_apex_version}" != "0.0" ]]; then
+
+		# configure the apex administrator/service accounts in the database
+		code_container_configure_apex_admin "${arg_ref[target_apex_version]}" "${arg_ref[sys_password]}" "${arg_ref[sys_credentials]}" "${arg_ref[dbservicename]}"
+	fi
+
+	# apex has finished installing, create the /apex-static/.deploy_read_${arg_ref[deploy_id]} file to indicate that the ords container can start now:
+	echo "Create the new deployment metadata file to indicate that the apex installation has completed: /apex-static/deployments/.deploy_ready_${arg_ref[deploy_id]}"
+
+	mkdir -p "/apex-static/deployments/"	# create the deployments subfolder to not clutter up the apex static folder
+	touch "/apex-static/deployments/.deploy_ready_${arg_ref[deploy_id]}"	
+}
+
+# function that moves the static application files to the designated folder
+# the function accepts the following arguments:
+# 1: apex_static_dir: the mount path for the shared apex static files volume
+# 2: file_install_status_name: the variable name that stores the file_install_status value (0 when successful, 1 if not)
+function code_container_install_apex_static_files ()
+{
+	local apex_static_dir="${1}"
+	local file_install_status_name="${1}"
+	local -n file_install_status_ref="${2}"
+
+	# validate the bash variable values
+	if ! cds_shared_validate_required_vars	"apex_static_dir" "file_install_status_name"; then
+        echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
+        return 1
+	fi
+
+	# copy the Apex static images to the shared docker volume in the foreground
+	echo "Copying Apex static images to shared volume..."
+	
+	# Clear out any old static Apex files 
+	rm -rf "${apex_static_dir}"/*
+
+	# Move the contents of the images folder to the root of the volume
+	mv /tmp/apex/images/* "${apex_static_dir}"/
+
+	# store the results of the file move process in file_install_status so the result can be checked
+	local file_install_status=$? 
+	if [ "${file_install_status}" -eq 0 ]; then
+		echo "Static files copied successfully."
+		
+		# update owner permissions on the docker volume to the oracle account so the static Apex files can be used by the ords container
+		chown -R 54321:0 "${apex_static_dir}"/
+	else
+		echo "Error: ${FUNCNAME[0]}() - Static file copy failed."
+	fi
+}
+
+# function to download the specified apex installer and unzip it for db/file installations
+# the function accepts the following parameters:
+# 1: apex_download_url: the dynamic download url for the specified apex version
+# 2: apex_zip_path: the path for the dynamic apex zip file local download
+function code_container_download_unzip_apex_installer()
+{
+	local apex_download_url="${1}"
+	local apex_zip_path="${2}"
+
+	# validate the bash variable values
+	if ! cds_shared_validate_required_vars	"apex_download_url" "apex_zip_path"; then
+        echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
+        return 1
+	fi
+
+	# the apex package does not dynamically download and install the apex installation package
+	echo "Downloading ${apex_download_url}..."
+	curl -L -o "${apex_zip_path}" "${apex_download_url}"
+	if [ $? -ne 0 ]; then
+		echo "Error: ${FUNCNAME[0]}() - Download of Apex zip file failed."
+		exit 1
+	fi
+
+	echo "Apex upgrade package download complete."
+	
+	echo "Unzipping ${apex_zip_path}..."
+	unzip -q "${apex_zip_path}" -d /tmp
+	if [ $? -ne 0 ]; then
+		echo "Error: ${FUNCNAME[0]}() - Failed to unzip Apex file."
+		exit 1
+	fi
+}
+
+# this function configures the apex administrator/service accounts in the database
+# This function accepts the following parameters as elements in the specified array name  (arg_array):
+# 1: target_apex_version: the specified apex version for the ords container
+# 2: sys_password: oracle admin password
+# 3: sys_credentials: formatted system database credentials
+# 4: dbservicename: the database service name for the database container
+function code_container_configure_apex_admin()
+{
+	local target_apex_version="${1}"
+	local sys_password="${2}"
+	local sys_credentials="${3}"
+	local dbservicename="${4}"
+
+	# validate the bash variable values
+	if ! cds_shared_validate_required_vars	"target_apex_version" "sys_password" "sys_credentials" "dbservicename"; then
+        echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
+        return 1
+	fi
+
+	# declare the variable to store the version status code returned by the code_container_version_compare() function
+	local version_status
+	
+	# check if the target apex version is less than 23.2
+	code_container_version_compare "${target_apex_version}" "23.2" "version_status"
+	
+	if [ "${version_status}" -eq 2 ]; then 
+		# apex version is 23.1 or less
+
+		# define a PL/SQL block to unlock the apex admin using the APEX_UTIL.RESET_PASSWORD procedure
+		UNLOCK_BLOCK="
+			BEGIN
+				APEX_UTIL.set_security_group_id(10);
+				APEX_UTIL.reset_password(
+					p_user_name => 'ADMIN',
+					p_old_password => NULL,
+					p_new_password => '${sys_password}',
+					p_change_password_on_first_use => FALSE
+				);
+				COMMIT;
+			EXCEPTION WHEN OTHERS THEN
+				 NULL;
+			END;
+		"
+	
+	else
+		# apex version is 23.2 or higher
+		
+		# define a PL/SQL block to unlock the apex admin using the APEX_INSTANCE_ADMIN.UNLOCK_USER procedure
+		UNLOCK_BLOCK="
+			BEGIN
+				APEX_INSTANCE_ADMIN.UNLOCK_USER(
+					p_workspace => 'INTERNAL',
+					p_username	=> 'ADMIN',
+					p_password	=> '${sys_password}'
+				);
+				COMMIT;
+			EXCEPTION WHEN OTHERS THEN
+				 -- Fallback or ignore if user doesn't exist yet (should not happen here)
+				 NULL;
+			END;
+		"
+	
+	fi
+	
+	# The Apex upgrade completed, unlock the APEX_PUBLIC_USER account and attempt to create the Apex instance admin account or if it already exists then reset the password to sys_password
+
+	# run the sqlplus script using the SYS schema
+	echo "Unlocking/Initializing/Configuring Apex accounts..."
+	
+	sqlplus -s -l "${sys_credentials}" <<EOF
+	WHENEVER SQLERROR EXIT SQL.SQLCODE
+	ALTER SESSION SET CONTAINER = ${dbservicename};
+	-- Update the APEX_PUBLIC_USER and ORDS_PUBLIC_USER schema passwords to the system password, query the database to confirm the schema exists before attempting to set the password 
+	BEGIN
+		-- query for the APEX_PUBLIC_USER and ORDS_PUBLIC_USER users in the database, if they exist update the password to the user-specified admin password
+		for rec in (SELECT USERNAME from DBA_USERS where USERNAME IN ('APEX_PUBLIC_USER', 'ORDS_PUBLIC_USER')) LOOP
+			--set the current schema password
+			EXECUTE IMMEDIATE 'ALTER USER '||rec.USERNAME||' IDENTIFIED BY "${sys_password}" ACCOUNT UNLOCK';
+		END LOOP;
+	END;
+	/
+	SET SERVEROUTPUT ON
+	
+	-- Switch to the Apex schema to perform admin tasks
+	DECLARE
+		v_apex_schema VARCHAR2(30);
+	BEGIN
+		SELECT schema INTO v_apex_schema FROM dba_registry WHERE comp_id = 'APEX';
+		EXECUTE IMMEDIATE 'ALTER SESSION SET CURRENT_SCHEMA = ' || dbms_assert.enquote_name(v_apex_schema);
+	END;
+	/
+
+	-- Disable Strong Password Requirement (For Dev Environment)
+	BEGIN
+		APEX_INSTANCE_ADMIN.SET_PARAMETER('STRONG_SITE_ADMIN_PASSWORD', 'N');
+		COMMIT;
+	END;
+	/
+
+	-- Set the ADMIN password for the INTERNAL workspace (based on ORACLE_PWD variable)
+	BEGIN
+		DBMS_OUTPUT.PUT_LINE('Create the Apex admin user');
+	
+		APEX_UTIL.set_security_group_id(10);
+		APEX_UTIL.create_user(
+			p_user_name => 'ADMIN',
+			p_email_address => 'admin@localhost',
+			p_web_password=> '${sys_password}',
+			p_developer_privs => 'ADMIN:CREATE:DATA_LOADER:EDIT:HELP:MONITOR:SQL',
+			p_change_password_on_first_use => 'N' -- Ensure no forced change password
+		);
+
+		DBMS_OUTPUT.PUT_LINE('Apex admin user created successfully');
+
+		COMMIT;
+	EXCEPTION WHEN OTHERS THEN
+		-- If apex admin user already exists, just reset the password (based on ORACLE_PWD variable defined in .env file)
+
+		-- Run the appropriate unlock/reset block
+		${UNLOCK_BLOCK}
+
+		COMMIT;
+	END;
+	/
+	exit;
+EOF
+
+	# check the result of the sqlplus commands
+	if [ $? -eq 0 ]; then
+		echo "Apex setup completed successfully."
+	else
+		echo "Error: ${FUNCNAME[0]}() - Apex setup failed."
+		exit 1
+	fi
+
+}
+
+
+# this function checks if the apex file version is the same as the target_apex_version, if so it will return out_skip_file_install=1 to indicate that the file installation should be skipped, if not it will return out_skip_file_install=0
+# the function accepts the following arguments:
+# 1: skip_file_install_var_name: the name of the variable to store the 
+# 2: 
+function code_container_check_apex_file_install ()
+{
+	local skip_file_install_var_name="${1}"
+	local apex_static_dir="${2}"
+	local target_apex_version="${3}"
+
+	# validate the bash variable values
+	if ! cds_shared_validate_required_vars "skip_file_install_var_name" "apex_static_dir" "target_apex_version"; then
+		echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
+		return 1
+	fi
+
+	# define a pointer to the local variable that indicates if the apex file installation should be skipped or not
+	local -n skip_file_install_ref="${1}"
+
+	# Check if static files are also in place
+	if [ -f "${arg_ref[apex_static_dir]}/apex_version.txt" ]; then
+		# static Apex files are in place
+
+		echo "Apex files are in place, check if the version matches the target_apex_version"
+
+		# parse the apex version number for the static application files from the apex_version.txt static file
+		apex_static_files_ver=$(grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' "${arg_ref[apex_static_dir]}/apex_version.txt")
+
+		echo "The value of the apex_static_files_ver is: ${apex_static_files_ver}" 
+
+		# check if the apex files version matches the target apex version
+		if [[ "${arg_ref[target_apex_version]}" == "${apex_static_files_ver}" ]]; then
+			# the apex files version is the same as the target apex version
+		
+			echo "The version of the Apex files and the target apex version are the same, do not install the apex static files"
+		
+			# update the variable to indicate the apex file upgrade should be skipped
+			out_skip_file_install_ref=1
+		else
+			echo "The version of the Apex static files is not the same as the target apex version, download and install the static files"
+			out_skip_file_install_ref=0
+		fi
 	fi
 }

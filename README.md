@@ -116,12 +116,12 @@ The PIFSC Containerized Oracle Developer Environment (CODE) project was develope
     -   Update the forked project in the working directory
         -   Update the [README.md](./README.md) to reference all of the repositories that are used to build the image and deploy the container
     -   Update the [custom_container_config.sh](./containerized_oracle_development_environment/src/deployment_scripts/config/custom_container_config.sh) to specify the appropriate variables for the new project-specific CODE implementation
-    -   Update [custom_secret_config.sh](./containerized_oracle_development_environment/deployment_scripts/config/custom_secret_config.sh) to add additional secret values that are used when deploying the database schemas/objects and/or apex applications
-        -   The array element values should correspond to the secret variables specified in secrets.sh. The array element names should correspond to the actual secret names used in the given container.
-    -   Update the [secrets template](./containerized_oracle_development_environment/secrets/secrets.template.sh) file to include placeholder variables for any secret values used inside of the CODE project.
         -   APP_SCHEMA_NAME is the database schema that will be used to check if the database schemas have been installed, this only applies to the [development runtime scenario](#development)
         -   DB_IMAGE is the path to the database image used to build the database contianer (db container)
         -   ORDS_IMAGE is the path to the ORDS image used to build the ORDS/Apex container (ords container)
+    -   Update [custom_secret_config.sh](./containerized_oracle_development_environment/deployment_scripts/config/custom_secret_config.sh) to add additional secret values that are used when deploying the database schemas/objects and/or apex applications
+        -   The array element values should correspond to the secret variables specified in secrets.sh. The array element names should correspond to the actual secret names used in the given container.
+    -   Update the [secrets template](./containerized_oracle_development_environment/secrets/secrets.template.sh) file to include placeholder variables for any secret values used inside of the CODE project.
     -   Add git submodules in a designated folder (e.g. modules) for any git repository dependencies that the given project has
     -   Update [custom-docker-compose.yml](./containerized_oracle_development_environment/custom-docker-compose.yml) to define volumes to mount the corresponding submodule repository folders necessary to deploy the database(s)/apex application(s) 
     -   Update the [custom_client_functions.sh](./containerized_oracle_development_environment/deployment_scripts/client_functions/custom_client_functions.sh) file to update the following functions with the appropriate code for the corresponding project-specific CODE implementation:
@@ -141,9 +141,9 @@ The PIFSC Containerized Oracle Developer Environment (CODE) project was develope
     -   Most upstream file updates can be accepted without changes, except for the following files that should be merged (to integrate any appropriate upstream updates) or rejected (Keep HEAD revision) based on their function:
         -   Merge:
             -   [README.md](./README.md) to reference any changes in the upstream README.md that are relevant
-        -   Reject:
+        -   Reject (unless there are additional variables defined):
             -   [custom_container_config.sh](./containerized_oracle_development_environment/src/deployment_scripts/config/custom_container_config.sh)
-            -   [custom_secret_config.sh](./containerized_oracle_development_environment/deployment_scripts/config/custom_secret_config.sh)
+        -   Reject (unless there are additional functions defined):
             -   [custom_client_functions.sh](./containerized_oracle_development_environment/deployment_scripts/client_functions/custom_client_functions.sh)
             -   [custom_container_functions.sh](./containerized_oracle_development_environment/deployment_scripts/container_functions/custom_container_functions.sh)
             -   [custom_host_functions.sh](./containerized_oracle_development_environment/deployment_scripts/host_functions/custom_host_functions.sh)
@@ -154,19 +154,26 @@ The PIFSC Containerized Oracle Developer Environment (CODE) project was develope
     -   Within the project repository create the necessary bash file with the secret values for each database instance: secrets.sh in the [secrets folder](./containerized_oracle_development_environment/secrets/)
 	    -   \*Note: There is a [secrets template](./containerized_oracle_development_environment/secrets/secrets.template.sh) file that can be used to create the secrets.sh file for each database instance 
         -   \*Note: the actual secret files should not be committed to the repository for security purposes, a [.gitignore](./containerized_oracle_development_environment/.gitignore) file has been added to the repository to prevent these sensitive files from being included in git.  
+        -   \*Note: the secrets.sh will only set the oracle passwords on the initial database container run, on subsequent runs it is only used to connect to the database schemas
     -   Update the [custom_container_config.sh](./containerized_oracle_development_environment/deployment_scripts/config/custom_container_config.sh) to define the bash variables with the appropriate values, there are comments defined for each variable to indicate how they affect the deployed CODE containers.
         -   To allow multiple developers to use CODE concurrently on the same container host, update the three variables identified in the top section: COMPOSE_PROJECT_NAME, DB_HOST_PORT, and ORDS_HOST_PORT to have unique values
--   ### Development Machine (Docker Desktop)
-    -   (One-time setup) Setup docker swarm: `docker swarm init`
+        -   \*Note: When server deployments are executed the custom_container_config.sh values on the client machine are used instead of the custom_container_config.sh value that are saved in the server's cloned CODE repository, the values are transmitted to the server using environment variables
+    -   Setup docker swarm (one-time setup): `docker swarm init`
 
 ## Executing the CODE Project
--   \*Note: The variables listed below are global bash variables that are defined in the configuration files of the given project-specific CAD implementation.
+-   \*Note: The variables listed below are global bash variables that are defined in the configuration files of the given project-specific CODE implementation.
 -   Following the [Setup](#setup) process, execute the [client_execute_CODE_scripts.sh](./containerized_oracle_development_environment/deployment_scripts/client_scripts/client_execute_CODE_scripts.sh) script using bash and specify the appropriate script parameters:
     -   script_action: the type of script that is executed - "deploy" for CODE containers deployments and "shutdown" for shutting down the CODE containers
     -   env_name: environment name - "dev" for development, "test" for testing purposes)
+        -   \*Note: when the env_name is "dev" it will retain the database across CODE container restarts
     -   deploy_dest: deployment destination - "local" for docker desktop CODE deployments and "server" for linux host deployments
     -   rem_vol: remove volume flag - "yes" to remove the volumes associated with the CODE container stack name or "no" to retain the volumes
         -   \*Note: if a volume is removed the data contained within it is lost, caution is advised to ensure that work is not lost or it's saved before the volume(s) are removed.
+    -   Examples:
+        -   Executing a deployment for a development environment locally without removing the volumes first: 
+            -   `bash client_execute_CODE_scripts.sh deploy dev local no`
+        -   Executing a shutdown for a development environment on the server and remove the associated volumes: 
+            -   `bash client_execute_CODE_scripts.sh shutdown dev server yes`
 -   ### Runtime Scenarios:
     -   There are two different runtime scenarios implemented in this project
     -   Both scenarios implement a docker volume for the Apex static files (apex-static-vol) that are used in the Apex upgrade process
@@ -178,8 +185,10 @@ The PIFSC Containerized Oracle Developer Environment (CODE) project was develope
         -   (env_name = "dev") This scenario retains the database across container restarts, this is intended for database and application development purposes
         -   This scenario implements a docker volume for the database files (code-db-vol) to retain the database data across container restarts
         -   The $TARGET_APEX_VERSION variable defined in the [custom_container_config.sh](./containerized_oracle_development_environment/deployment_scripts/config/custom_container_config.sh) can only be increased once an apex container is upgraded, it can't be used to downgrade an existing Apex version.  If a downgrade is required the database volume (code-db-vol) needs to be deleted and then the container must be run again.  
+        -   \*Note: the initial container run can take up to approximately 30 minutes depending on the resources allocated to the container platform software since the database is initialized and when $ORDS_ENABLED is "yes" it also installs Apex on the ORDS container
     -   #### Test:
         -   (env_name = "test") This scenario does not retain the database across container restarts, this is intended to test the deployment process of schemas and applications
+        -   \*Note: the container run process can take up to approximately 30 minutes depending on the resources allocated to the container platform software since the database is initialized and when $ORDS_ENABLED is "yes" it also installs Apex on the ORDS container
 -   A log file for each client script execution is saved in [deployment_script_logs](./container_application_deployment_template/deployment_script_logs) and is named client_deploy_application.sh.$(date +%Y%m%d_%H%M%S).log based on the date/time the script is executed.  This file will include the output from the remote host and container scripts
 
 ## Container Architecture
@@ -194,6 +203,8 @@ The PIFSC Containerized Oracle Developer Environment (CODE) project was develope
 
 ## Connection Information
 For the following connections refer to the [custom_container_config.sh](./containerized_oracle_development_environment/deployment_scripts/config/custom_container_config.sh) configuration file and the secrets.sh for the corresponding values
+-   \*Note: For server deployments the following command can create an SSH tunnel between the server and the developer workstation to allow the following URLs to connect to the corresponding server endpoints (where the variable references match the runtime values when the CODE containers were deployed):
+    -   `ssh -N -L ${ORDS_HOST_PORT}:localhost:${ORDS_HOST_PORT} -L ${DB_HOST_PORT}:localhost:${DB_HOST_PORT} dev_docker`
 -   Database connections:
     -   hostname: localhost:${DB_HOST_PORT}/${DBSERVICENAME}
     -   username: SYSTEM or SYS AS SYSDBA
@@ -211,7 +222,7 @@ For the following connections refer to the [custom_container_config.sh](./contai
 -   Strict Local Variable Scoping (No Global Leakage): Within the container runtime, secret values are parsed directly into strictly scoped local associative arrays. Secret values are never stored in floating global variables or the container's exported environment, effectively shielding them from potential exposure via container introspection tools or error dumps.
 -   Decoupled Configuration Adapter Pattern: The core CODE engine enforces a strict Separation of Concerns. It remains completely independent of project-specific global variables. It only operates on strictly validated associative arrays passed from the client adapter, ensuring that the engine itself cannot inadvertently expose or mishandle project-specific configurations.
 -   Secure Connection String Generation: When dynamically generating database connection strings, the CODE framework retrieves values safely from the locally scoped secrets array and strictly quotes the passwords. This prevents special characters inside the database credentials from corrupting the connection string or breaking the SQL execution pipeline.
--   Immutable Shell Executions: When elevating privileges to run container commands, CAD utilizes rigid Heredocs (<<EOF) to pipe commands into the new shell. This creates an immutable execution block that safely separates the runtime variables from the raw secret payload.
+-   Immutable Shell Executions: When elevating privileges to run container commands, CODE utilizes rigid Heredocs (<<EOF) to pipe commands into the new shell. This creates an immutable execution block that safely separates the runtime variables from the raw secret payload.
 
 ## License
 See the [LICENSE.md](./LICENSE.md) for details
