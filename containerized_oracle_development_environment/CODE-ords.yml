@@ -6,7 +6,7 @@ services:
     volumes:
       # This points to the new shared Docker volume to allow the apex installation/upgrade to be handled by a separate container
       - code-apex-static-vol:/opt/oracle/ords/static
-      # Mount the configuration script (ensure the file exists in your project directory)
+      # Mount the configuration script
       - ./CODE_core_scripts/ords_scripts/ords_startup.sh:/usr/local/bin/ords_startup.sh
     ports:
       - target: 8080

@@ -378,7 +378,7 @@ Key:
 	V => Virtual Machine
 
 testing:
-	_X server:
+	X server:
 		X deploy
 			X test
 				X ORDS_ENABLED:
@@ -459,7 +459,7 @@ testing:
 							X yes: retain volumes
 							X no: retain volumes
 
-		_ special scenarios:
+		X special scenarios:
 			X ORDS enabled:
 				X 1 (upgrade apex static files version only):
 					X deploy dev - version 23.1
@@ -510,7 +510,7 @@ testing:
 							X verify database values from initial dev run are still in the database
 					
 	_ local:
-		_ deploy
+		L deploy
 			L test
 				L installs db, ords, apex from scratch
 					L verify ORDS/Apex login
@@ -566,20 +566,29 @@ testing:
 							L Create temp table and insert data
 					L no - retain all volumes
 					
-		_ shutdown
-			_ test
-				_ REM_VOL
+		L shutdown
+			L test
+				L REM_VOL
 					L yes (deletes only apex static volume)
-						ords enabled = yes
+						L ords enabled = yes
 							
-						ords enabled = no
+						L ords enabled = no
 							
-					_ no 
+					L no (retain all volumes)
+						L ords enabled = yes
+							
+						L ords enabled = no
 			
 			L dev
 				L REM_VOL
 					L yes
+						ORDS_ENABLED:
+							L yes: remove apex static and db volumes
+							L no: remove apex static and db volumes
 					L no
+						ORDS_ENABLED:
+							L yes: retain volumes
+							L no: retain volumes
 		
 		L special_ scenarios:
 			ORDS enabled:
@@ -618,28 +627,15 @@ testing:
 							L verify database values from initial dev run are still in the database
 					
 
-			ORDS not enabled:
-				_ 1 (upgrade apex static files version only):
-					_ deploy dev
-						_ verify DB connectivity
-							_ create table/insert test data
+			L ORDS not enabled:
+				L 1 (verify dev DB data is retained):
+					L deploy dev
+						L verify DB connectivity
+							L create table/insert test data
 					
-					_ deploy test
-						_ verify DB connectivity
+					L deploy test
+						L verify DB connectivity
 					
-					_ deploy dev
-						_ verify DB connectivity
-							_ verify database values from initial dev run are still in the database
-					
-				
-				_ 2 (upgrade db apex version only): 
-					_ deploy dev
-						_ verify DB connectivity
-							_ create table/insert test data
-					
-					_ deploy test
-						_ verify DB connectivity
-					
-					_ deploy dev
-						_ verify DB connectivity
-							_ verify database values from initial dev run are still in the database
+					L deploy dev
+						L verify DB connectivity
+							L verify database values from initial dev run are still in the database
