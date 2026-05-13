@@ -762,18 +762,18 @@ function code_container_check_apex_file_install ()
 	local -n skip_file_install_ref="${1}"
 
 	# Check if static files are also in place
-	if [ -f "${arg_ref[apex_static_dir]}/apex_version.txt" ]; then
+	if [ -f "${apex_static_dir}/apex_version.txt" ]; then
 		# static Apex files are in place
 
 		echo "Apex files are in place, check if the version matches the target_apex_version"
 
 		# parse the apex version number for the static application files from the apex_version.txt static file
-		apex_static_files_ver=$(grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' "${arg_ref[apex_static_dir]}/apex_version.txt")
+		apex_static_files_ver=$(grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' "${apex_static_dir}/apex_version.txt")
 
 		echo "The value of the apex_static_files_ver is: ${apex_static_files_ver}" 
 
 		# check if the apex files version matches the target apex version
-		if [[ "${arg_ref[target_apex_version]}" == "${apex_static_files_ver}" ]]; then
+		if [[ "${target_apex_version}" == "${apex_static_files_ver}" ]]; then
 			# the apex files version is the same as the target apex version
 		
 			echo "The version of the Apex files and the target apex version are the same, do not install the apex static files"
@@ -797,6 +797,8 @@ function code_container_check_apex_file_install ()
 # 2: db_scripts_map: the name of an array with each element containing encoded values with the "|" character as the delimiter: sql path (within container)|sql script file|User Secret Name|Password Secret Name|Script Password Secret (optional when a password is injected into the script - examples include a CREATE USER command) 
 function code_container_deploy_custom_database_scripts()
 {
+	echo "running code_container_deploy_custom_database_scripts()"
+
 	# store the function array argument
 	local arg_array="${1}"
 	local db_scripts_map="${2}"
@@ -825,8 +827,13 @@ function code_container_deploy_custom_database_scripts()
 	# define a pointer for the db_scripts_map array:
 	local -n db_scripts_map_ref="${db_scripts_map}"
 
+
+
 	# loop through each of the database commands
 	for entry in "${db_scripts_map_ref[@]}"; do
+
+		echo "The value of entry is: ${entry}"
+		
 		# parse the pipe-delimited string and store them in separate variables
         IFS='|' read -r script_path script_command user_secret_name pass_secret_name script_password_secret <<< "$entry"
 	

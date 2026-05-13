@@ -201,6 +201,8 @@ to do:
 		**** _ clearly indicate this is only intended for development and testing purposes
 			* Not security hardened, encouraged not to work with sensitive data in a shared environment (anyone with docker privileges can connect to your containers and access the data within it)
 			
+		_ contribution guidelines for this project
+			how to fork and submit pull requests or attempt to push changes upstream (think through the scenarios)
 		
 		X the custom_container_config.sh configuration that is stored on the client machine is used when deploying to the server (passed via environment variables)
 		
