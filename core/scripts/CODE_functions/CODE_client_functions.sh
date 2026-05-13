@@ -203,7 +203,7 @@ function code_client_execute_container_scripts ()
 	
 	# check if this is a local or server deployment:
 	if [[ "${arg_ref[deploy_dest]}" == "local" ]]; then
-		echo "This is a local deployment"
+		# this is a local deployment
 
 		# input validation:
 		if ! cds_shared_validate_required_array_vals "${arg_array}" "compose_project_name" "db_host_port" "ords_host_port" "db_image" "ords_image" "target_apex_version" "app_schema_name" "dbport" "dbhost" "dbservicename" "stack_name" "network_name"; then
@@ -247,7 +247,7 @@ function code_client_execute_container_scripts ()
 			cds_shared_remove_container_stack "${arg_ref[stack_name]}" "${arg_ref[network_name]}" "${arg_ref[rem_vol]:-no}" "${arg_ref[build_path]}" "${compose_file}"
 		fi
 	else
-		echo "This is a server deployment"
+		# this is a server deployment
 		
 		# input validation:
 		if ! cds_shared_validate_required_array_vals "${arg_array}" "hostname" "host_source_path" "git_url" "host_scripts_path" "secret_data_var_name"; then
@@ -336,11 +336,8 @@ function code_client_construct_compose_file_string ()
 	# shift the array to process the project-specific .yml files
 	shift 4
 
-	# loop through the keys to add the project-specific .yml files
+	# loop through the remaining arguments to add the project-specific .yml files
     for key in "$@"; do
-
-		echo "The current compose file is: ${key}"	
-
 		# append the current compose file
 		out_compose_file_ref="${out_compose_file_ref}${compose_sep}${key}"
     done	

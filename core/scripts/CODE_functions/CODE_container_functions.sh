@@ -133,7 +133,7 @@ function code_container_verify_apex_version_exists() {
 	fi
 
 	# Validate if the apex version actually exists on Oracle's site ---
-	echo "Verifying existence of apex version ${apex_version} on Oracle download site..."
+#	echo "Verifying existence of apex version ${apex_version} on Oracle download site..."
 
 	# Use curl to check headers only, -f causes curl to fail on HTTP errors (like 404), -s is silent mode
 	if ! curl --output /dev/null --silent --head --fail "${apex_download_url}"; then
@@ -261,7 +261,7 @@ function code_container_check_apex_version_status()
 		# determine if the apex file installation should be processed and return the flag value (1|0) to out_skip_file_install_ref 
 		code_container_check_apex_file_install "out_skip_file_install_ref" "${arg_ref[apex_static_dir]}" "${arg_ref[target_apex_version]}"
 
-		echo "The value of out_skip_file_install_ref is: ${out_skip_file_install_ref}"
+#		echo "The value of out_skip_file_install_ref is: ${out_skip_file_install_ref}"
 	else
 		# upgrade the apex version, target_apex_version is greater than the current_apex_version
 		# echo "DEBUG: Apex version mismatch. Found: '${arg_ref[current_apex_version]}'"
@@ -273,7 +273,7 @@ function code_container_check_apex_version_status()
 		# determine if the apex file installation should be processed and return the flag value (1|0) to out_skip_file_install_ref 
 		code_container_check_apex_file_install "out_skip_file_install_ref" "${arg_ref[apex_static_dir]}" "${arg_ref[target_apex_version]}"
 		
-		echo "The value of out_skip_file_install_ref is: ${out_skip_file_install_ref}"
+#		echo "The value of out_skip_file_install_ref is: ${out_skip_file_install_ref}"
 	fi
 }
 
@@ -528,7 +528,7 @@ EOF
 	fi
 
 	# apex has finished installing, create the /apex-static/.deploy_read_${arg_ref[deploy_id]} file to indicate that the ords container can start now:
-	echo "Create the new deployment metadata file to indicate that the apex installation has completed: /apex-static/deployments/.deploy_ready_${arg_ref[deploy_id]}"
+#	echo "Create the new deployment metadata file to indicate that the apex installation has completed: /apex-static/deployments/.deploy_ready_${arg_ref[deploy_id]}"
 
 	mkdir -p "/apex-static/deployments/"	# create the deployments subfolder to not clutter up the apex static folder
 	touch "/apex-static/deployments/.deploy_ready_${arg_ref[deploy_id]}"	
@@ -765,12 +765,12 @@ function code_container_check_apex_file_install ()
 	if [ -f "${apex_static_dir}/apex_version.txt" ]; then
 		# static Apex files are in place
 
-		echo "Apex files are in place, check if the version matches the target_apex_version"
+#		echo "Apex files are in place, check if the version matches the target_apex_version"
 
 		# parse the apex version number for the static application files from the apex_version.txt static file
 		apex_static_files_ver=$(grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' "${apex_static_dir}/apex_version.txt")
 
-		echo "The value of the apex_static_files_ver is: ${apex_static_files_ver}" 
+#		echo "The value of the apex_static_files_ver is: ${apex_static_files_ver}" 
 
 		# check if the apex files version matches the target apex version
 		if [[ "${target_apex_version}" == "${apex_static_files_ver}" ]]; then
@@ -830,8 +830,6 @@ function code_container_deploy_custom_database_scripts()
 	# loop through each of the database commands
 	for entry in "${db_scripts_map_ref[@]}"; do
 
-		echo "The value of entry is: ${entry}"
-		
 		# parse the pipe-delimited string and store them in separate variables
         IFS='|' read -r script_path script_command user_secret_name pass_secret_name script_password_secret <<< "$entry"
 	
@@ -853,8 +851,6 @@ function code_container_deploy_custom_database_scripts()
 		# construct the connection string:
 		local connection_string="${username}/${password}@${arg_ref[dbhost]}:${arg_ref[dbport]}/${arg_ref[dbservicename]}"
 
-		echo "Execute the SQL Script - The values are: ${script_path}, ${script_command}, ${user_secret_name}, ${pass_secret_name}, ${pass_secret}"
-
 		# change to the script_path to run the script_command
 		cd "${script_path}"
 		
@@ -863,11 +859,11 @@ sqlplus -s /nolog <<EOF
 ${script_command} "${connection_string}" "${pass_secret}"
 EOF
 	
-	# check return code for sqlplus query
-	if [ $? -ne 0 ]; then
-		echo "Error: SQL execution failed for ${script_command}"
-		return 1
-	fi	
+		# check return code for sqlplus query
+		if [ $? -ne 0 ]; then
+			echo "Error: SQL execution failed for ${script_command}"
+			return 1
+		fi	
 	
 	done
 }

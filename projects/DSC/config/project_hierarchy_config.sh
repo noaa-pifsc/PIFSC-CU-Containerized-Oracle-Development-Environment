@@ -1,7 +1,5 @@
 #!/bin/bash
 
-	echo "loading project_hierarchy_config.sh"
-
 	# define the array to track the fork hierarchy, the first element is the direct CODE fork and every subsequent element is the fork of the previous element. This corresponds to the folder name of the project in the /projects folder
 	PROJECT_INHERITANCE+=("DSC")
 
@@ -17,6 +15,7 @@
 	# define the array of compose files that are used by the individual projects (specify the path relative to the core/build directory
 	COMPOSE_FILES+=("../../projects/DSC/build/dsc_secrets.yml")
 	
+	# add the DSC secrets
 	SECRET_MAPPING_ARR+=(
 		["dsc_pwd"]="DSC_PWD"
 		["dsc_user"]="DSC_USER"
