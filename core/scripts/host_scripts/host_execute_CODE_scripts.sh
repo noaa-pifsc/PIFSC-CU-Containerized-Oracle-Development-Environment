@@ -23,8 +23,10 @@ function main()
 		["secret_mapping_var_name"]="${SECRET_MAPPING_VAR_NAME}"
 		["build_path"]="${BUILD_PATH}"
 		["script_action"]="${SCRIPT_ACTION}"
-		["env_block"]="$(cds_shared_generate_export_env_vars_block "COMPOSE_PROJECT_NAME" "DB_HOST_PORT" "ORDS_HOST_PORT" "DB_IMAGE" "ORDS_IMAGE" "TARGET_APEX_VERSION" "APP_SCHEMA_NAME" "COMPOSE_FILE" "STACK_NAME" "NETWORK_NAME" "REM_VOL" "SCRIPT_ACTION" "ORDS_ENABLED")"
+		["env_block"]="$(cds_shared_generate_export_env_vars_block "COMPOSE_PROJECT_NAME" "DB_HOST_PORT" "ORDS_HOST_PORT" "DB_IMAGE" "ORDS_IMAGE" "TARGET_APEX_VERSION" "APP_SCHEMA_NAME" "COMPOSE_FILE" "STACK_NAME" "NETWORK_NAME" "REM_VOL" "SCRIPT_ACTION" "ORDS_ENABLED" "DBPORT" "DBHOST" "DBSERVICENAME")"
 		["host_scripts_path"]="${HOST_SCRIPTS_PATH}"
+		["projects_path"]="${PROJECTS_PATH}"
+		["project_inheritance_var"]="PROJECT_INHERITANCE"
 	)
 
 	# initialize and build/run the container on the host machine with the specified function arguments:

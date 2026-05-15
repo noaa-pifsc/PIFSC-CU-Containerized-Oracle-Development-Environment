@@ -28,6 +28,8 @@
 # host_scripts_path: container server CODE source folder's host scripts path
 # secret_data_var_name: variable to store the name of the configuration data variable that is passed via STDIN that contains secret values
 # compose_file_array: name of an array that stores the compose files for each individual CODE project
+# project_inheritance_var: array variable name
+# projects_path: is the absolute path to the /projects folder in the root repository directory
 function code_client_process_arguments_execute_container_scripts ()
 {
 	# store the function array argument
@@ -40,7 +42,7 @@ function code_client_process_arguments_execute_container_scripts ()
     fi
 
 	# input validation:
-	if ! cds_shared_validate_required_array_vals "${arg_array}" "ords_enabled" "build_path" "secret_mapping_var_name" "compose_project_name" "db_host_port" "ords_host_port" "db_image" "ords_image" "target_apex_version" "app_schema_name" "dbport" "dbhost" "dbservicename" "stack_name" "network_name" "config_dir" "hostname" "host_source_path" "git_url" "host_scripts_path" "secret_data_var_name" "compose_file_array"; then
+	if ! cds_shared_validate_required_array_vals "${arg_array}" "ords_enabled" "build_path" "secret_mapping_var_name" "compose_project_name" "db_host_port" "ords_host_port" "db_image" "ords_image" "target_apex_version" "app_schema_name" "dbport" "dbhost" "dbservicename" "stack_name" "network_name" "config_dir" "hostname" "host_source_path" "git_url" "host_scripts_path" "secret_data_var_name" "compose_file_array" "project_inheritance_var" "projects_path"; then
         echo "Error: ${FUNCNAME[0]}() function argument validation failed" >&2
         return 1
     fi
@@ -156,6 +158,8 @@ function code_client_get_compose_separator()
 # host_scripts_path: container server CODE source folder's host scripts path
 # secret_data_var_name: variable to store the name of the configuration data variable that is passed via STDIN that contains secret values
 # compose_file_array: name of an array that stores the compose files for each individual CODE project
+# project_inheritance_var: array variable name
+# projects_path: is the absolute path to the /projects folder in the root repository directory
 function code_client_execute_container_scripts ()
 {
 	# store the function array argument
@@ -168,7 +172,7 @@ function code_client_execute_container_scripts ()
     fi
 
 	# input validation:
-	if ! cds_shared_validate_required_array_vals "${arg_array}" "script_action" "env_name" "deploy_dest" "rem_vol" "ords_enabled" "build_path" "secret_mapping_var_name" "compose_file_array"; then
+	if ! cds_shared_validate_required_array_vals "${arg_array}" "script_action" "env_name" "deploy_dest" "rem_vol" "ords_enabled" "build_path" "secret_mapping_var_name" "compose_file_array" "project_inheritance_var" "projects_path"; then
         echo "Error: ${FUNCNAME[0]}() function argument validation failed" >&2
         return 1
     fi
@@ -191,10 +195,6 @@ function code_client_execute_container_scripts ()
 		if [ -f "${arg_ref[build_path]}/../../secrets/secrets.sh" ]; then
 			# load the secrets
 			source "${arg_ref[build_path]}"/../../secrets/secrets.sh
-
-			# load any custom scripts that define configuration/secret variables
-			proj_client_custom_load_scripts
-			
 		else
 			echo "Error: ${FUNCNAME[0]}() function could not load the secrets/secrets.sh file" >&2
 			return 1
@@ -214,9 +214,11 @@ function code_client_execute_container_scripts ()
 		# export the environment variables based on the list of fields
 		cds_shared_export_array_keys "${arg_array}" "compose_project_name" "db_host_port" "ords_host_port" "db_image" "ords_image" "target_apex_version" "app_schema_name" "dbport" "dbhost" "dbservicename" "stack_name" "network_name" "ords_enabled"
 		
-
 		# export additional custom environment variables
-		proj_client_custom_export_env_vars 
+		cds_shared_export_env_vars "${CUSTOM_ENV_VARS[@]}"
+
+		# execute any pre-client hooks
+		code_shared_run_project_hooks "pre" "client_local" "${arg_ref[project_inheritance_var]}" "${arg_ref[projects_path]}"
 
 		# check the script_action value to determine if this is a deployment or shutdown script
 		if [[ "${script_action}" == "deploy" ]]; then
@@ -246,6 +248,10 @@ function code_client_execute_container_scripts ()
 			# shutdown the CODE containers to the host server associated with the $STACK_NAME
 			cds_shared_remove_container_stack "${arg_ref[stack_name]}" "${arg_ref[network_name]}" "${arg_ref[rem_vol]:-no}" "${arg_ref[build_path]}" "${compose_file}"
 		fi
+		
+		# execute any post-client hooks
+		code_shared_run_project_hooks "post" "client_local" "${arg_ref[project_inheritance_var]}" "${arg_ref[projects_path]}"
+		
 	else
 		# this is a server deployment
 		
@@ -262,7 +268,7 @@ function code_client_execute_container_scripts ()
 		local env_var_string="$(cds_shared_generate_ssh_env_vars_string_from_array_keys "${arg_array}" "compose_project_name" "db_host_port" "ords_host_port" "db_image" "ords_image" "target_apex_version" "app_schema_name" "priv_user" "compose_file" "stack_name" "network_name" "rem_vol" "script_action" "ords_enabled")"
 
 		# add the custom environment variables to the env_var_string variable
-		env_var_string+="$(proj_client_custom_string_env_vars)"
+		env_var_string+="$(cds_shared_generate_ssh_env_vars_string ${CUSTOM_ENV_VARS[@]})"
 #		echo "The value of the env_var_string is: ${env_var_string}"
 
 		# assign the value of the process_secrets variable based on the script action value
@@ -283,8 +289,15 @@ function code_client_execute_container_scripts ()
 				["process_secrets"]="${process_secrets}"
 			)
 			
+		# execute any pre-client/server deployment hooks
+		code_shared_run_project_hooks "pre" "client_server" "${arg_ref[project_inheritance_var]}" "${arg_ref[projects_path]}"
+			
 		# deploy the containers to the remote server
 		cds_client_execute_remote_deployment "remote_deploy_args"
+
+		# execute any post-client/server deployment hooks
+		code_shared_run_project_hooks "post" "client_server" "${arg_ref[project_inheritance_var]}" "${arg_ref[projects_path]}"
+
 	fi
 }
 

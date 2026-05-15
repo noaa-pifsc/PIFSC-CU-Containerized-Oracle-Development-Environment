@@ -1,19 +1,60 @@
 
 to do:
 
+	_ implement branch protection for all CODE forks
+	
+	
+
 	_ fix logs function call - it's missing or not working
 	
-	_ implement the cascading includes (specify the parent folder name and it will automatically include the corresponding files - depending on which configuration file is being loaded)
+	X implement the cascading includes (specify the parent folder name and it will automatically include the corresponding files - depending on which configuration file is being loaded)
+		X implemented in the configuration include file
+			X specify the parent folder name as a variable
+			X run a function to include the upstream parent configuration before the current configuration is loaded (recursive processing with array elements added after the recursive function is processed
+
+	_ print out the hierarchy for the user so they are aware of the inheritance relationship
+
+	_ implement CAS parameterized create schemas/apex user scripts
+
+	_ update CODE function for DB_MAPPING (allow multiple secrets to be injected)
+	
+	
+	_ can we use a pointer approach to all of the loops? YES
+		X maintain the .active_project and the $parent_project_folder variables.
+			X The framework can automatically start at the .sactive_project folder and read the parent_project_folder variable from the deepest fork, then move to the parent folder and repeat the process
+			
+			X This can automatically build the PROJECT_INHERITANCE by prepending each array element to the start of the array so the first element is the highest parent, and the last element is the deepest fork
+				X first element added is the $parent_folder of the .active_project's parent folder
+				X second element added is $parent_folder of the active project
+				X third element added is .active_project
+			
+			X recursive function
+				code_shared_define_project_inheritance()
+					parameters:
+						project_name
+						projects folder path
+						array name
+			
+					initial execution:
+						parameter is .active_project ACTIVE_PROJECT_NAME variable
+						next execution is 
+					
+					stop condition:
+						parent project config file doesn't exist or the variable is blank
+						
+			
 
 
 	implement workflow:
 
 
 		functions:
-			code_shared_run_lifecycle_hook (): loop through PROJECT_INHERITANCE array and run the corresponding client/host/container and pre/post hook script
+			X code_shared_run_lifecycle_hook (): loop through PROJECT_INHERITANCE array and run the corresponding client/host/container and pre/post hook script
+				_ document the updated scope values
 
 
-			implement the hooks for each execution platform (client, host, container)
+
+			X implement the hooks for each execution platform (client, host, container)
 			
 			push DSC CODE changes back to CODE
 
@@ -279,6 +320,13 @@ to do:
 					
 	
 	document
+
+		_ SOP for defining the project_parent_config for a new forked folder.  You can simply copy the value from the .active_project file and use that before that file is updated to the new fork's project folder
+
+		_ diagram and document the overall execution process for the local and server deployments so we can also identify the hooks, where they are run, and the main action associated with each scope
+		
+		_ document the new project_parent_config.sh
+			_ defines the project folder for the parent, this must be defined in order for the dependencies to be deployed properly
 	
 		_ document the different scenarios:
 			_ fork and customize for data system, forking to build on dependencies to leverage the existing forks

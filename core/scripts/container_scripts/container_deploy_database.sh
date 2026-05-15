@@ -20,6 +20,8 @@ function main()
 			["ords_enabled"]="${ORDS_ENABLED}"
 			["deploy_id"]="${DEPLOY_ID}"
 			["db_scripts_map"]="DB_SCRIPTS_MAP"
+			["projects_path"]="${PROJECTS_PATH}"
+			["project_inheritance_var"]="PROJECT_INHERITANCE"
 		)
 
 	# Execute the database orchestration scripts, passing the secure vault by name

@@ -10,7 +10,19 @@
 	CONFIG_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 	# determine where the designated container subfolder in the local filesystem is (/core/scripts/build):
-	BUILD_PATH="${CONFIG_DIR}/../../build/"
+	BUILD_PATH="${CONFIG_DIR}/../../build"
+	
+	# define the path to the /core repository subfolder
+	CORE_PATH="${CONFIG_DIR}/../.."
+
+	# define the path to the /core/config repository subfolder
+	CORE_CONFIG_PATH="${CONFIG_DIR}/../../config"
+
+	# define the path to the root repository folder
+	ROOT_PATH="${CONFIG_DIR}/../../.."
+
+	# define the path to the /projects folder
+	PROJECTS_PATH="${CONFIG_DIR}/../../../projects"
 
 ##### Container Project Configuration Variables: #####
 

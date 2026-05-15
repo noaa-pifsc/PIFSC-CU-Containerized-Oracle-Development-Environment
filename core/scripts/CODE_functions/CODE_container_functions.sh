@@ -289,6 +289,8 @@ function code_container_check_apex_version_status()
 # ords_enabled: flag to indicate if the ords container is enabled (yes) or not (no)
 # deploy_id: the datestamp of the current deployment to uniquely identify it to the code-ords container
 # db_scripts_map: the name of an array with each element containing encoded values with the "|" character as the delimiter: sql path (within container)|sql script file|User Secret Name|Password Secret Name
+# projects_path: the absolute path to the /projects folder in the root repository directory
+# project_inheritance_var: array variable name that stores the inheritance information for the different forked CODE projects related to the current project
 function code_container_deploy_database_scripts ()
 {
 	# store the function array argument
@@ -301,7 +303,7 @@ function code_container_deploy_database_scripts ()
     fi
 
 	# input validation:
-	if ! cds_shared_validate_required_array_vals "${arg_array}" "dbhost" "dbport" "dbservicename" "app_schema_name" "oracle_pwd_file" "ords_enabled" "deploy_id" "db_scripts_map"; then 
+	if ! cds_shared_validate_required_array_vals "${arg_array}" "dbhost" "dbport" "dbservicename" "app_schema_name" "oracle_pwd_file" "ords_enabled" "deploy_id" "db_scripts_map" "projects_path" "project_inheritance_var"; then 
         echo "Error: ${FUNCNAME[0]}() function argument validation failed" >&2
         return 1
     fi
@@ -343,11 +345,14 @@ function code_container_deploy_database_scripts ()
 	if ! code_container_check_database_initialized "${sys_credentials}" "${arg_ref[app_schema_name]}"; then
 		echo "Database is not initialized, run the custom database and/or application deployment scripts"
 
-		# run the custom database deployment scripts:
-		# function that executes database scripts within the container
+		# execute any pre-container hooks
+		code_shared_run_project_hooks "post" "container" "${arg_ref[project_inheritance_var]}" "${arg_ref[projects_path]}"
 
+		# run the custom database deployment scripts:
 		code_container_deploy_custom_database_scripts "${arg_array}" "${arg_ref[db_scripts_map]}"
-		
+
+		# execute any post-container hooks
+		code_shared_run_project_hooks "post" "container" "${arg_ref[project_inheritance_var]}" "${arg_ref[projects_path]}"		
 	else
 		echo "Database already initialized. Skipping deployment script."
 	fi
