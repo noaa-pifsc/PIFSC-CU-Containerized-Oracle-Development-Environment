@@ -18,4 +18,4 @@ source "${CURR_DIR}/../../CODE_functions/CODE_shared_functions.sh"
 source "${CURR_DIR}/../../CODE_functions/CODE_container_functions.sh"
 
 # load the CODE and active project configurations
-code_shared_load_CODE_config "${CURR_DIR}" "container" "PROJECT_INHERITANCE" 
+code_shared_load_CODE_config "${CURR_DIR}" "container" "PROJECT_INHERITANCE"

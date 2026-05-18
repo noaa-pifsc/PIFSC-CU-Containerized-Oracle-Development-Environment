@@ -840,7 +840,7 @@ function code_container_deploy_custom_database_scripts()
 	
 		# split the pipe-delimited string into a temporary array
         IFS='|' read -ra elements <<< "$entry"
-
+	
 		# extract the first four fixed elements
 		local script_path=$(echo "${elements[0]}" | xargs)
 		local script_command=$(echo "${elements[1]}" | xargs)
@@ -876,7 +876,7 @@ function code_container_deploy_custom_database_scripts()
 sqlplus -s /nolog <<EOF
 ${script_command} "${connection_string}" ${sql_args[@]}
 EOF
-
+	
 		# check return code for sqlplus query
 		if [ $? -ne 0 ]; then
 			echo "Error: SQL execution failed for ${script_command}"
