@@ -1,8 +1,5 @@
 #!/bin/bash
 
-	# define the array to track the fork hierarchy, the first element is the direct CODE fork and every subsequent element is the fork of the previous element. This corresponds to the folder name of the project in the /projects folder
-	# Example: PROJECT_INHERITANCE+=("DSC")
-
 	# define the database scripts mapping using the pipe character as a delimiter
 	# The elements should contain encoded values with the "|" character as the delimiter: sql path (within container)|sql script file|User Secret Name|Password Secret Name|Script Password Secret (optional when a password is injected into the script - examples include a CREATE USER command) 
 	# Example 1:	DB_SCRIPTS_MAP+=("${BUILD_PATH}../../projects/DSC/modules/DSC/SQL|@dev_container_setup/create_docker_schemas.sql|oracle_admin_user|oracle_pwd|dsc_pwd")
