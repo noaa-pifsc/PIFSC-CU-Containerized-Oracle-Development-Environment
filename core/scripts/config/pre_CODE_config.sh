@@ -52,7 +52,7 @@
 	PROJECT_INHERITANCE=()
 
 	# define the database scripts mapping using the pipe character as a delimiter
-	# The elements should contain encoded values with the "|" character as the delimiter: sql path (within container)|sql script file|User Secret Name|Password Secret Name|Script Password Secret (optional when a password is injected into the script - examples include a CREATE USER command) 
+	# The elements should contain encoded values with the "|" character as the delimiter: sql path (within container)|sql script file|User Secret Name|Password Secret Name|Script Password Secrets (this can be one or more optional pipe-delimited secret names when a password is injected into the script - examples include a CREATE USER command) 
 	DB_SCRIPTS_MAP=()
 
 	# define the array of non-sensitive environment variable names that are exported for use in the container

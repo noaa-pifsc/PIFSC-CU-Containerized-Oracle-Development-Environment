@@ -36,7 +36,7 @@ function code_shared_run_project_hooks ()
 	# Iterate over the project_inheritance elements and attempt to execute the hooks for each project in order to respect their dependencies
 	for project_name in "${project_inheritance[@]}"; do
 		
-		echo "processing the ${hook_script_name} hook for ${project_name}"
+#		echo "processing the ${hook_script_name} hook for ${project_name}"
 		
 		# check if the matching hook script file exists in the current project folder
 		if [[ -f "${projects_path}/${project_name}/hooks/${hook_script_name}" ]]; then
@@ -60,7 +60,7 @@ function code_shared_define_project_inheritance()
 	local project_name="${2}"
 	local projects_path="${3}"
 	
-	echo "running code_shared_define_project_inheritance($@)"
+#	echo "running code_shared_define_project_inheritance($@)"
 	
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "project_inheritance_var" "projects_path"; then
@@ -150,7 +150,7 @@ function code_shared_load_CODE_config()
 	local execution_type="${2}"
 	local project_inheritance_var="${3}"
 	
-	echo "running code_shared_load_CODE_config($@)"
+#	echo "running code_shared_load_CODE_config($@)"
 	
 	# validate the bash variable values
 	if ! cds_shared_validate_required_vars "include_dir_path" "execution_type" "project_inheritance_var"; then
@@ -174,12 +174,12 @@ function code_shared_load_CODE_config()
 		# include the projects/.active_project to define which project folder is the active project (defines ACTIVE_PROJECT_NAME variable)
 		source "${projects_path}/.active_project"
 
-		echo "The value of ACTIVE_PROJECT_NAME is: ${ACTIVE_PROJECT_NAME}"
+#		echo "The value of ACTIVE_PROJECT_NAME is: ${ACTIVE_PROJECT_NAME}"
 
 		# define the project hierarchy relationship from the $ACTIVE_PROJECT_NAME and the project_parent_config.sh configuration files
 		code_shared_define_project_inheritance "${project_inheritance_var}" "${ACTIVE_PROJECT_NAME}" "${projects_path}"
 
-		echo "The value of project_inheritance is: ${project_inheritance[@]}"
+#		echo "The value of project_inheritance is: ${project_inheritance[@]}"
 
 		local active_project_config_path="${projects_path}/${ACTIVE_PROJECT_NAME}/config"
 	fi
