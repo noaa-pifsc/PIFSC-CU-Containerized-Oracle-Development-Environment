@@ -217,6 +217,8 @@ function code_client_execute_container_scripts ()
 		# export additional custom environment variables
 		cds_shared_export_env_vars "${CUSTOM_ENV_VARS[@]}"
 
+		echo "execute any pre-client_local hooks"
+
 		# execute any pre-client hooks
 		code_shared_run_project_hooks "pre" "client_local" "${arg_ref[project_inheritance_var]}" "${arg_ref[projects_path]}"
 

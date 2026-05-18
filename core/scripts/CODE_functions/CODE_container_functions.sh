@@ -802,7 +802,7 @@ function code_container_check_apex_file_install ()
 # 2: db_scripts_map: the name of an array with each element containing encoded values with the "|" character as the delimiter: sql path (within container)|sql script file|User Secret Name|Password Secret Name|Script Password Secret (optional when a password is injected into the script - examples include a CREATE USER command) 
 function code_container_deploy_custom_database_scripts()
 {
-#	echo "running code_container_deploy_custom_database_scripts(${1}, ${2})"
+	echo "running code_container_deploy_custom_database_scripts($@)"
 
 	# store the function array argument
 	local arg_array="${1}"
@@ -834,6 +834,7 @@ function code_container_deploy_custom_database_scripts()
 
 	# loop through each of the database commands
 	for entry in "${db_scripts_map_ref[@]}"; do
+		echo "process the current database command: ${entry}"
 
 		# parse the pipe-delimited string and store them in separate variables
         IFS='|' read -r script_path script_command user_secret_name pass_secret_name script_password_secret <<< "$entry"

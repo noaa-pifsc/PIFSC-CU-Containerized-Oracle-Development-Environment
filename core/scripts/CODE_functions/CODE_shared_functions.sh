@@ -9,7 +9,7 @@
 #	 -	host_prep: For server CODE deployments, the main action is running the host deployment process with the privileged container user
 #	 -	host_deploy: For server CODE deployments, the main action is building and deploying the CODE container stack
 # 	 -	container: The main action is executing the database scripts to update the database and/or install apex application(s)
-# 3: project_inheritance array variable name that stores the inheritance information for the different forked CODE projects related to the current project
+# 3: project_inheritance_var: array variable name that stores the inheritance information for the different forked CODE projects related to the current project
 # 4: projects_path is the absolute path to the /projects folder in the root repository directory
 function code_shared_run_project_hooks ()
 {
@@ -31,7 +31,7 @@ function code_shared_run_project_hooks ()
 	
 	# generate the hook script name
 	local hook_script_name="${hook_timing}_${hook_scope}_hook.sh"
-
+	
 	local project_name
 	# Iterate over the project_inheritance elements and attempt to execute the hooks for each project in order to respect their dependencies
 	for project_name in "${project_inheritance[@]}"; do
@@ -39,24 +39,22 @@ function code_shared_run_project_hooks ()
 		echo "processing the ${hook_script_name} hook for ${project_name}"
 		
 		# check if the matching hook script file exists in the current project folder
-		if [[ -f "${projects_path}/${project_name}/${hook_script_name}" ]]; then
+		if [[ -f "${projects_path}/${project_name}/hooks/${hook_script_name}" ]]; then
 			# the hook script exists, execute it now:
-			echo "the project-specific hook script exists: ${projects_path}/${project_name}/${hook_script_name}"
+			# echo "the project-specific hook script exists: ${projects_path}/${project_name}/hooks/${hook_script_name}"
 
 			# execute the specified hook script
-			source "${projects_path}/${project_name}/${hook_script_name}"
+			source "${projects_path}/${project_name}/hooks/${hook_script_name}"
 		fi
 	done
 }
-
-echo "hello world 1"
 
 # this function uses the .active_project file and the $parent_project variable values for each parent project folder to generate the PROJECT_INHERITANCE that can be used to process all of the project-specific in a specific sequence to respect the dependencies
 # this function accepts the following arguments:
 # 1: project_inheritance array variable name
 # 2: project name is the name of a specific project folder within the repository's /projects/ folder
 # 3: projects_path is the absolute path to the repository's /projects/ folder
-function code_shared_define_project_inheritance()
+function code_shared_define_project_inheritance()
 {
 	local project_inheritance_var="${1}"
 	local project_name="${2}"
@@ -102,9 +100,6 @@ function code_shared_define_project_inheritance()
 	fi
 }
 
-echo "hello world 2"
-
-
 # this function will loop through all of the project-specific configuration files and load them in the order they are defined in, based on the project_inheritance array variable
 # this function accepts the following arguments:
 # 1: project_inheritance array variable name that contains all of the project folder names, ordered from the highest parent to the deepest fork
@@ -129,7 +124,7 @@ function code_shared_load_project_config_files ()
 	# Iterate over the project_inheritance elements and attempt to execute the hooks for each project in order to respect their dependencies
 	for project_name in "${project_inheritance[@]}"; do
 		
-		echo "processing the ${hook_script_name} hook for ${project_name}"
+		echo "processing the project inheritance configuration (${configuration_file_name}) for ${project_name}"
 		
 		# check if the matching configuration file exists in the current project folder
 		if [[ -f "${projects_path}/${project_name}/config/${configuration_file_name}" ]]; then
@@ -143,9 +138,6 @@ function code_shared_load_project_config_files ()
 	done
 
 }
-
-echo "hello world 3"
-
 
 # this function loads the standard and default CODE configuration files and if the .active_project file is defined it will load the active project configuration
 # the function accepts the following arguments:
@@ -187,7 +179,7 @@ function code_shared_load_CODE_config()
 		# define the project hierarchy relationship from the $ACTIVE_PROJECT_NAME and the project_parent_config.sh configuration files
 		code_shared_define_project_inheritance "${project_inheritance_var}" "${ACTIVE_PROJECT_NAME}" "${projects_path}"
 
-#		echo "The value of project_inheritance is: ${project_inheritance[@]}"
+		echo "The value of project_inheritance is: ${project_inheritance[@]}"
 
 		local active_project_config_path="${projects_path}/${ACTIVE_PROJECT_NAME}/config"
 	fi
@@ -212,5 +204,3 @@ function code_shared_load_CODE_config()
 		source "${core_config_path}/post_CODE_config.sh"
 	fi
 }
-
-echo "hello world 4"

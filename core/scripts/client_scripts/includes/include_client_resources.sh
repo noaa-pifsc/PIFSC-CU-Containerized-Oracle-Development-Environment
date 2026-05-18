@@ -17,5 +17,8 @@ source "${CURR_DIR}/../../../modules/CDS/src/CDS_client_functions.sh"
 source "${CURR_DIR}/../../CODE_functions/CODE_shared_functions.sh"
 source "${CURR_DIR}/../../CODE_functions/CODE_client_functions.sh"
 
+# include the container configuration variables
+source "${CURR_DIR}/../../config/pre_CODE_config.sh"
+
 # load the CODE and active project configurations
 code_shared_load_CODE_config "${CURR_DIR}" "client" "PROJECT_INHERITANCE"
