@@ -324,6 +324,8 @@ to do:
 	
 	document
 
+		_ document that apex dependencies can be implemented as well, they use the same ords server
+
 		_ SOP for defining the project_parent_config for a new forked folder.  You can simply copy the value from the .active_project file and use that before that file is updated to the new fork's project folder
 
 		_ diagram and document the overall execution process for the local and server deployments so we can also identify the hooks, where they are run, and the main action associated with each scope
@@ -385,8 +387,9 @@ to do:
 					event_context_hook.sh where event is pre/post and context is client, host, container
 				secrets.sh -> define the required secret variable values for the given CODE fork
 				
-				** _ do we define a variable that defines the parent folder so the script can dynamically include the configuration file of the parent folder instead of hard coding the reference?
-				_ ** do we also establish a repo_root variable that will make the relative paths easier to define (less ../ will also help readability)
+				** X do we define a variable that defines the parent folder so the script can dynamically include the configuration file of the parent folder instead of hard coding the reference? -> YES
+					
+				X ** do we also establish a repo_root variable that will make the relative paths easier to define (less ../ will also help readability)
 
 				test dev and test deployments
 				
@@ -421,7 +424,6 @@ to do:
 		
 		
 		_ when rem_vol = yes it will remove all volumes associated with the stack
-			_ when env_name = test then rem_vole = yes
 	
 		_ document the difference between dev and test scenarios
 		

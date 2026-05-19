@@ -180,7 +180,7 @@ function code_shared_load_CODE_config()
 		# define the project hierarchy relationship from the $ACTIVE_PROJECT_NAME and the project_parent_config.sh configuration files
 		code_shared_define_project_inheritance "${project_inheritance_var}" "${ACTIVE_PROJECT_NAME}" "${projects_path}"
 
-#		echo "The value of project_inheritance is: ${project_inheritance[@]}"
+		echo "The value of project_inheritance is: ${project_inheritance[@]}"
 
 		local active_project_config_path="${projects_path}/${ACTIVE_PROJECT_NAME}/config"
 	fi
