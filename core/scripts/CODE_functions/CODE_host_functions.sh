@@ -9,7 +9,7 @@
 # env_block: formatted string of environment variable definitions that are passed to the bash script executed as the privileged user (priv_user)
 # secret_mapping_var_name: the name of the configuration data variable that is passed via STDIN that contains secret values
 # host_scripts_path: path to the folder where the host bash scripts are contained
-# project_linear_dependencies_var: array variable name that stores the inheritance information for the different forked CODE projects related to the current project
+# project_linear_dependencies_var: array variable name that stores the dependency information for the different forked CODE projects related to the current project
 # projects_path: is the absolute path to the /projects folder in the root repository directory
 function code_host_execute_container_scripts()
 {
@@ -82,7 +82,7 @@ function code_host_execute_container_scripts()
 # dbhost: The internal container database name
 # dbservicename: The internal container database service name
 # secret_name_prefix: string to prepend to each secret name, this helps to prevent duplicate secret names during concurrent container deployments
-# project_linear_dependencies_var: array variable name that stores the inheritance information for the different forked CODE projects related to the current project
+# project_linear_dependencies_var: array variable name that stores the dependency information for the different forked CODE projects related to the current project
 # projects_path: is the absolute path to the /projects folder in the root repository directory
 function code_host_execute_container_scripts_elev_privs()
 {

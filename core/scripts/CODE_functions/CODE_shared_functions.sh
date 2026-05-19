@@ -9,7 +9,7 @@
 #	 -	host_prep: For server CODE deployments, the main action is running the host deployment process with the privileged container user
 #	 -	host_deploy: For server CODE deployments, the main action is building and deploying the CODE container stack
 # 	 -	container: The main action is executing the database scripts to update the database and/or install apex application(s)
-# 3: project_linear_dependencies_var: array variable name that stores the inheritance information for the different forked CODE projects related to the current project
+# 3: project_linear_dependencies_var: array variable name that stores the dependency information for the different forked CODE projects related to the current project
 # 4: projects_path is the absolute path to the /projects folder in the root repository directory
 function code_shared_run_project_hooks ()
 {
@@ -96,7 +96,7 @@ function code_shared_define_project_linear_dependencies()
 			fi
 		fi
 
-		# add the $project_name to the project inheritance array
+		# add the $project_name to the project dependency array
 		project_linear_dependencies+=("${project_name}")
 	fi
 }
@@ -125,7 +125,7 @@ function code_shared_load_project_config_files ()
 	# Iterate over the project_linear_dependencies elements and attempt to execute the hooks for each project in order to respect their dependencies
 	for project_name in "${project_linear_dependencies[@]}"; do
 		
-		echo "processing the project inheritance configuration (${configuration_file_name}) for ${project_name}"
+		echo "processing the project linear dependency configuration (${configuration_file_name}) for ${project_name}"
 		
 		# check if the matching configuration file exists in the current project folder
 		if [[ -f "${projects_path}/${project_name}/config/${configuration_file_name}" ]]; then
