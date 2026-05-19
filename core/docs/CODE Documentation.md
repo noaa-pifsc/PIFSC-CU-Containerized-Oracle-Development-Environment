@@ -129,7 +129,7 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
     -   The parent/fork relationship is established by the [project_parent_config.sh](../templates/project_name/config/project_parent_config.sh) file in each project folder's configuration files. The $PROJECT_FOLDER_NAME variable defines the folder name of the corresponding parent project folder in the [/projects/](../../projects) folder
     -   #### Configuration Arrays:
         -   Each time the CODE framework runs it will iterate through the defined hierarchy configuration arrays and perform the defined actions
-        -   The configuration arrays are defined in the corresponding project's config/project_hierarchy_config.sh file:
+        -   The configuration arrays are defined in the corresponding project's config/project_manifest_config.sh file:
             -   PROJECT_INHERITANCE defines the order of the cascading fork dependencies starting with the foundational dependencies and ending with the current forked CODE repository
             -   CUSTOM_ENV_VARS defines custom environment variables that will be declared based on the corresponding bash variables so they are available to the containers and client/host scripts
 			-   DB_SCRIPTS_MAP defines specific database scripts and their corresponding credentials so they can be executed within the code-db-ords-deploy container 
@@ -213,7 +213,7 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
         -   #### Forked Project Customization
             -   Rename and update the [projects/$ACTIVE_PROJECT_NAME/build/secrets.template.yml](../templates/project_name/build/secrets.template.yml) template file to define any additional secrets for the code-db-ords-deploy container and any configuration overrides for containers that are being added for the forked repository
             -   Add any repository dependencies as git submodules in the [modules](../modules) subfolder
-            -   Update the [projects/$ACTIVE_PROJECT_NAME/config/project_hierarchy_config.sh](../templates/project_name/config/project_hierarchy_config.sh) configuration file with the basic information about the forked CODE implementation:
+            -   Update the [projects/$ACTIVE_PROJECT_NAME/config/project_manifest_config.sh](../templates/project_name/config/project_manifest_config.sh) configuration file with the basic information about the forked CODE implementation:
                 -   PROJECT_INHERITANCE should add an array element with the $ACTIVE_PROJECT_NAME 
                 -   DB_SCRIPTS_MAP: add an array element for each automated database deployment script that will be run on deployments with the corresponding secret names
                 -   CUSTOM_ENV_VARS array values for any custom environment names that need to be transmitted to any of the containers on startup

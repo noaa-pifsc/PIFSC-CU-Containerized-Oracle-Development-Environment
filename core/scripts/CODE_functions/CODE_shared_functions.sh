@@ -105,7 +105,7 @@ function code_shared_define_project_linear_dependencies()
 # this function accepts the following arguments:
 # 1: project_linear_dependencies array variable name that contains all of the project folder names, ordered from the highest parent to the deepest fork
 # 2: projects_path is the absolute path to the /projects folder in the root repository directory
-# 3: configuration file name of the type of configuration file that is being loaded (project_hierarchy_config.sh, project_runtime_config.sh)
+# 3: configuration file name of the type of configuration file that is being loaded (project_manifest_config.sh, project_runtime_config.sh)
 function code_shared_load_project_config_files ()
 {
 	local project_linear_dependencies_var="${1}"
@@ -143,7 +143,7 @@ function code_shared_load_project_config_files ()
 # this function loads the standard and default CODE configuration files and if the .active_project file is defined it will load the active project configuration
 # the function accepts the following arguments:
 # 1: include_directory path, this will be used to load the resources based on their relative paths
-# 2: execution_type: (client, host, container) to indicate if the function is being executed on a client which loads the bash variables defined in default_CODE_config.sh and the project-specific runtime configuration files, or on the host which loads only the project hierarchy configuration and pre/post CODE configuration files, or on the container that loads only the project hierarchy configuration and pre CODE configuration files
+# 2: execution_type: (client, host, container) to indicate if the function is being executed on a client which loads the bash variables defined in default_CODE_config.sh and the project-specific runtime configuration files, or on the host which loads only the project linear dependency configuration and pre/post CODE configuration files, or on the container that loads only the project linear dependency configuration and pre CODE configuration files
 # 3: project_linear_dependencies array variable name
 function code_shared_load_CODE_config()
 {
@@ -165,9 +165,6 @@ function code_shared_load_CODE_config()
 	local projects_path="${include_dir_path}/../../../../projects"
 	local core_config_path="${include_dir_path}/../../../scripts/config"
 
-	# include the container configuration variables
-	source "${core_config_path}/pre_CODE_config.sh"
-
 	# check if the .active_project is defined
 	if [[ -f "${projects_path}/.active_project" ]]; then
 		# the .active_project is defined, load the corresponding project-specific configuration files
@@ -175,16 +172,18 @@ function code_shared_load_CODE_config()
 		# include the projects/.active_project to define which project folder is the active project (defines ACTIVE_PROJECT_NAME variable)
 		source "${projects_path}/.active_project"
 
-#		echo "The value of ACTIVE_PROJECT_NAME is: ${ACTIVE_PROJECT_NAME}"
-
-		# define the project hierarchy relationship from the $ACTIVE_PROJECT_NAME and the project_parent_config.sh configuration files
+		# define the linear dependency relationship between projects from the $ACTIVE_PROJECT_NAME and the project_parent_config.sh configuration files
 		code_shared_define_project_linear_dependencies "${project_linear_dependencies_var}" "${ACTIVE_PROJECT_NAME}" "${projects_path}"
 
-#		echo "The value of project_linear_dependencies is: ${project_linear_dependencies[@]}"
-
-		local active_project_config_path="${projects_path}/${ACTIVE_PROJECT_NAME}/config"
+		# notify the user of the linear dependencies
+		echo ""
+		echo "*****************************************"
+		echo "Project Linear Dependencies:"
+		echo "(*Note: Projects are listed in parent->child order, where each project is a direct linear dependency of the one immediately to its left)"
+		echo "${project_linear_dependencies[@]}"
+		echo "*****************************************"
+		echo ""
 	fi
-
 
 	# check if this function is running on the client, if so load the runtime configuration
 	if [[ "${execution_type}" == "client" ]]; then
@@ -195,8 +194,8 @@ function code_shared_load_CODE_config()
 		code_shared_load_project_config_files "${project_linear_dependencies_var}" "${projects_path}" "project_runtime_config.sh"
 	fi
 
-	# load the project hierarchy configuration files for all of the projects in the project_linear_dependencies_var array
-	code_shared_load_project_config_files "${project_linear_dependencies_var}" "${projects_path}" "project_hierarchy_config.sh"
+	# load the project manifest files for all of the projects in the project_linear_dependencies_var array
+	code_shared_load_project_config_files "${project_linear_dependencies_var}" "${projects_path}" "project_manifest_config.sh"
 
 	# check if this function is running on the host or client, if so load the runtime configuration
 	if [[ "${execution_type}" != "container" ]]; then
