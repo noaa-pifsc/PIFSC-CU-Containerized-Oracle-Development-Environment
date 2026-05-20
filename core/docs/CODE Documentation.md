@@ -10,6 +10,8 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
 -   [CODE Demonstration Outline](./docs/demonstration_outline.md)
 -   [CODE Repository Fork Diagram](./diagrams/CODE_fork_diagram.drawio.png)
     -   [CODE Repository Fork Diagram source code](./diagrams/CODE_fork_diagram.drawio)
+-   [CODE Execution Diagram](./diagrams/CODE_execution_diagram.drawio.png)
+    -   [CODE Execution Diagram source code](./diagrams/CODE_execution_diagram.drawio)
 
 ## Appropriate Use
 -   The CODE project is NOT intended for production use, it was developed to provide a containerized development and testing environment. There has been no rigorous security hardening process that complies with federal security requirements. 
@@ -31,7 +33,7 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
     docker logout container-registry.oracle.com
     ```
 -   Windows/Linux machine serving as the local client
-    -   Git Bash
+    -   Bash (this was developed using Windows git bash)
     -   OpenSSH is setup to work with CAC authentication
     -   OpenSSH is configured to specify the username in the ~/.ssh/config file for each container host (e.g. docker_dev for the dev container host)
         -   The ForwardAgent feature is enabled to allow the git repositories to be cloned on the container host
