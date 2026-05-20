@@ -329,39 +329,83 @@ to do:
 	
 	document
 
-		_ document that apex dependencies can be implemented as well, they use the same ords server
+		X document that apex dependencies can be implemented as well, they use the same ords server
+		X non-apex app containers can be implemented as well
 
-		_ SOP for defining the project_parent_config for a new forked folder.  You can simply copy the value from the .active_project file and use that before that file is updated to the new fork's project folder
+		X SOP for defining the project_parent_config for a new forked folder.  You can simply copy the value from the .active_project file and use that before that file is updated to the new fork's project folder
 
-		_ diagram and document the overall execution process for the local and server deployments so we can also identify the hooks, where they are run, and the main action associated with each scope
+		X diagram and document the overall execution process for the local and server deployments so we can also identify the hooks, where they are run, and the main action associated with each scope
 		
-		_ document the new project_parent_config.sh
-			_ defines the project folder for the parent, this must be defined in order for the dependencies to be deployed properly
+			client -> local (docker desktop)
+			
+				pre-hook
+				deploy CODE stack
+				post-hook
+			
+				container -> 
+					install/upgrade apex
+					
+					pre hook
+					
+					deploy database scripts
+					post hook
+			
+			client -> server
+				host prep
+				
+					pre hook
+					
+					call host deploy with priv user
+					
+					post hook
+				
+				host deploy
+					pre hook
+					
+					deploy CODE stack
+		
+					
+					post hook
+			
+			
+			container -> 
+				install/upgrade apex
+				
+				pre hook
+				
+				deploy database scripts
+				post hook
+
+
+		
+		
+		X document the new project_parent_config.sh
+			X defines the project folder for the parent, this must be defined in order for the dependencies to be deployed properly
 	
-		_ document the different scenarios:
-			_ fork and customize for data system, forking to build on dependencies to leverage the existing forks
-			_ use as-is to provide a blank dev/test database instance that a developer could use for local offline development
+		X document the different scenarios:
+			X fork and customize for data system, forking to build on dependencies to leverage the existing forks
+			X use as-is to provide a blank dev/test database instance that a developer could use for local offline development
 			
 			
-			_ document the runtime arguments and how they affect the implementation (ORDS_ENABLED)
-			_ document the user-defined runtime arguments and how they affect the implementation
+			X document the runtime arguments and how they affect the implementation (ORDS_ENABLED)
+			X document the user-defined runtime arguments and how they affect the implementation
 			
 			
-			document the different containers implemented in the setup
+			X document the different containers implemented in the setup
 			
 			document the strategy for forking and how to choose a suitable fork
 				review the database dependencies and fork them in order starting with the base dependency and define subsequent forks for each 
 			
 	
-			document code management strategy
-				for the CODE project it can change anything in the core folder but it shouldn't change any other files/folders
-				for a given CODE fork, the only folder that can be modified is the corresponding /projects subfolder
-					-   If the files in another projects subfolder need to be updated the changes should be made directly in the corresponding repository and then the upstream changes can be pulled into the current CODE fork. 
+			X document code management strategy
+				X for the CODE project it can change anything in the core folder but it shouldn't change any other files/folders
+				X for a given CODE fork, the only folder that can be modified is the corresponding /projects subfolder
+					X -   If the files in another projects subfolder need to be updated the changes should be made directly in the corresponding repository and then the upstream changes can be pulled into the current CODE fork. 
 				
-			.active_project is set to ignore upstream changes because it is always intended to change when a new fork is created
+			X .active_project is set to ignore upstream changes because it is always intended to change when a new fork is created
 				
 				
-			should we define a "business rules" section? YES
+			X should we define a "business rules" section? YES
 				link to specific business rules in the documentation where they make sense
 				
 			
@@ -370,27 +414,28 @@ to do:
 	
 		Implementation:
 			New:
-				create fork
+				X create fork
 
 				create feature branch
 				
 				X change .active_project to set the ACTIVE_PROJECT_NAME value to folder name in projects/ folder
 				copy the code scripts template to the projects folder and rename it to the $ACTIVE_PROJECT_NAME
 				add git submodules in the projects/ACTIVE_PROJECT_NAME/modules folder and reference them in the project_hierarchy_config.sh configuration file accordingly (.yml files
-				Update projects/ACTIVE_PROJECT_NAME/build/X.yml to define the secrets and any overrides for docker containers that are being added
-				update projects/ACTIVE_PROJECT_NAME/config/project_hierarchy_config.sh with the basic information about the forked CODE implementation:
-					PROJECT_INHERITANCE should add an element with the ACTIVE_PROJECT_NAME 
+				X Update projects/ACTIVE_PROJECT_NAME/build/X.yml to define the secrets and any overrides for docker containers that are being added
+				X update projects/ACTIVE_PROJECT_NAME/config/project_manifest_config.sh with the basic information about the forked CODE implementation:
 					DB_SCRIPTS_MAP: add an array element for each automated database deployment script that will be run on deployments with the corresponding secret names
 						**Note: the path of the .sql scripts should be relative to the BUILD_PATH folder path value
 					COMPOSE_FILES to add any .yml files from the project's repository and/or any configuration overrides
 						**Note: the path of the .yml files should be relative to the BUILD_PATH folder path value
 					SECRET_MAPPING_ARR array elements/values that correspond to the secret name (element name) and the corresponding bash variable defined in the secrets.sh as the value
 					CUSTOM_ENV_VARS array values for any custom environment names that need to be transmitted to the container on startup
-				update projects/ACTIVE_PROJECT_NAME/config/project_runtime_config.sh with any global configuration variable values that are specific to this project (e.g. COMPOSE_PROJECT_NAME, APP_SCHEMA_NAME, GIT_URL, ORDS_ENABLED, TARGET_APEX_VERSION, etc.)
+				X update project_parent_config.sh
+				X update projects/ACTIVE_PROJECT_NAME/config/project_runtime_config.sh with any global configuration variable values that are specific to this project (e.g. COMPOSE_PROJECT_NAME, APP_SCHEMA_NAME, GIT_URL, ORDS_ENABLED, TARGET_APEX_VERSION, etc.)
 				
-				create any special hooks in the projects/ACTIVE_PROJECT_NAME/hooks folder with the following naming convention:
-					event_context_hook.sh where event is pre/post and context is client, host, container
-				secrets.sh -> define the required secret variable values for the given CODE fork
+				X create any special hooks in the projects/ACTIVE_PROJECT_NAME/hooks folder with the following naming convention:
+					X event_context_hook.sh where event is pre/post and context is client, host, container
+				
+				X secrets.template.sh -> define the required secret variable values for the given CODE fork
 				
 				** X do we define a variable that defines the parent folder so the script can dynamically include the configuration file of the parent folder instead of hard coding the reference? -> YES
 					
@@ -407,11 +452,11 @@ to do:
 			
 	
 	
+	I would also like to have a brief section on watching for updates
 	
 	
-	
-		**** _ clearly indicate this is only intended for development and testing purposes
-			* Not security hardened, encouraged not to work with sensitive data in a shared environment (anyone with docker privileges can connect to your containers and access the data within it)
+		**** X clearly indicate this is only intended for development and testing purposes
+			* X Not security hardened, encouraged not to work with sensitive data in a shared environment (anyone with docker privileges can connect to your containers and access the data within it)
 			
 		_ contribution guidelines for this project
 			how to fork and submit pull requests or attempt to push changes upstream (think through the scenarios)
@@ -428,43 +473,44 @@ to do:
 		X new installations can take up to 30 minutes depending on the resources allocated to the docker host
 		
 		
-		_ when rem_vol = yes it will remove all volumes associated with the stack
+		X when rem_vol = yes it will remove all volumes associated with the stack
 	
-		_ document the difference between dev and test scenarios
+		X document the difference between dev and test scenarios
 		
-		_ if there is a scenario where the volumes need to be cleared manually - document it and provide the script and parameters to use
-			_ for example - apex static files are a higher version than the target apex version and the installed database version (think about these more)
+		X if there is a scenario where the volumes need to be cleared manually - document it and provide the script and parameters to use
+			X for example - apex static files are a higher version than the target apex version and the installed database version (think about these more) -> NO, this was solved with the stateless implementation
 			
-		_ ** document that the only scenario where the volumes need to be removed is when the database needs to be reset
-			Either because the data needs to be replaced/re-seeded or a lower apex version than what is installed on the databse needs to be used:
+		X ** document that the only scenario where the volumes need to be removed is when the database needs to be reset
+			X Either because the data needs to be replaced/re-seeded or a lower apex version than what is installed on the database needs to be used:
 			
-				explicit shutdown/removal:
+				X explicit shutdown/removal:
 					bash ./client_execute_CODE_scripts.sh shutdown dev local yes
-				explicit shutdown/removal/deploy:
+				X explicit shutdown/removal/deploy:
 					bash ./client_execute_CODE_scripts.sh deploy dev local yes
 			
-		_ the apex admin account and ORDS_PUBLIC_USER accounts are reset on each deployment using the secrets.sh file
+		X the apex admin account, APEX_PUBLIC_USER and ORDS_PUBLIC_USER accounts are reset on each deployment using the secrets.sh file
+			X the database SYS, SYSTEM passwords are set when the database container is run without a database data volume or when the database data volume has been removed
 		
-		_ document the stateless APEX installation, can switch between dev and test deployments and the oracle apex admin password, ords service account, and apex service account are all set using the defined $oracle_admin_pwd secret value (secrets.sh)
+		X document the stateless APEX installation, can switch between dev and test deployments and the oracle apex admin password, ords service account, and apex service account are all set using the defined $oracle_admin_pwd secret value (secrets.sh)
 		
-		_ document why the apex configuration file is generated instead of using the CLI ords config commands
+		X document why the apex configuration file is generated instead of using the CLI ords config commands
 			it took several seconds for each command, and this added over a minute to the startup time
 		
-		target apex version (TARGET_APEX_VERSION)
-		current apex version (DB)
-		current apex version (static files)
+		X target apex version (TARGET_APEX_VERSION)
+		X current apex version (DB)
+		X current apex version (static files)
 		
-		_ merge protection: .active_project defines the name of the active project that corresponds to the folder name in the /projects folder
+		X merge protection: .active_project defines the name of the active project that corresponds to the folder name in the /projects folder
 			
 			
-		_ document that the secrets.sh is cumulative and so the single file needs to contain the secret definitions for all schemas involved 
-			_ should we have the secrets template change with the project? yes, would this be a case where we would want to auto reject changes?
+		X document that the secrets.sh is cumulative and so the single file needs to contain the secret definitions for all schemas involved 
+			X should we have the secrets template change with the project? yes, would this be a case where we would want to auto reject changes? NO
 				There is a chance that the schemas will change in an upstream update - for example if an application schema is implemented it could add another schema during the deployment that needs to be continued down the chain.  These should be very rare, maybe we just have this be a rare merge case?
 			
-			requires one-time setup (https://gemini.google.com/app/8a7f53fd936961a5): git config merge.ours.driver true
+			X requires one-time setup (https://gemini.google.com/app/8a7f53fd936961a5): git config merge.ours.driver true
 		
-		business rules:
-			when the apex installation has been completed 
+		X business rules:
+			X when the apex installation has been completed the custom database deployment script will run
 		
 	
 		_ review the sections defined for CDD/CAD and implement the ones that are appropriate

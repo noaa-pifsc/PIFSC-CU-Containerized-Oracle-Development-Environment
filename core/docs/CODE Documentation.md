@@ -11,7 +11,11 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
 -   [CODE Repository Fork Diagram](./diagrams/CODE_fork_diagram.drawio.png)
     -   [CODE Repository Fork Diagram source code](./diagrams/CODE_fork_diagram.drawio)
 
-# Prerequisites
+## Appropriate Use
+-   The CODE project is NOT intended for production use, it was developed to provide a containerized development and testing environment. There has been no rigorous security hardening process that complies with federal security requirements. 
+-   The CODE project can be used to develop and test features and applications without requiring System Administrator support. The user specifies the administrator passwords when the container is run so they can make system-level configuration changes directly in the database or ORDS containers and then provide the working configuration settings to the System Administrator for implementation in the enterprise test and production environments.
+
+## Prerequisites
 -   Create an account or login to the [Oracle Image Registry](https://container-registry.oracle.com)
     -   Generate an auth token
         -   Click on your username and choose "Auth Token"
@@ -33,6 +37,8 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
         -   The ForwardAgent feature is enabled to allow the git repositories to be cloned on the container host
 -   Automated Database Deployments:
     -   The individual project repositories that are implemented as git submodules for a given CODE fork must define automated database deployment scripts that can be executed via SQL*Plus
+-   The git merge strategy requires the merge.ours.drive to be enabled, the following command can be used to enable it:
+    -   `git config merge.ours.driver true`
 
 ## Container Host Instances
 -   For the development container and database instances the abbreviation used is "dev" 
@@ -90,6 +96,7 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
             -   \*Note: this folder was created so it can be copied into the /projects folder of the forked repository and renamed based on the project the CODE fork implements
     -   The [logs](../../logs) folder contains the log files from each CODE framework deployment process
     -   The [projects](../../projects) folder contains separate folders for each forked CODE repository to support the dependencies of the given CODE fork's project
+        -   \*Note the dependencies can be database schemas/objects, apex applications, or container applications 
         -   Each "project name" subfolder represents a fork of the CODE project or one of the CODE project's forks 
             -   The "build" subfolder contains the container build configuration files (.yml, Dockerfile, etc.) for the CODE framework
             -   The "config" subfolder contains the configuration files for the specific CODE framework implementation
@@ -128,11 +135,11 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
     -   The top-level parent is defined by the [.active_project](../../projects/.active_project) file, the $ACTIVE_PROJECT_NAME corresponds to the folder name of the corresponding top-level parent project folder in the [/projects/](../../projects) folder
     -   The parent/fork relationship is established by the [project_parent_config.sh](../templates/project_name/config/project_parent_config.sh) file in each project folder's configuration files. The $PROJECT_FOLDER_NAME variable defines the folder name of the corresponding parent project folder in the [/projects/](../../projects) folder
     -   #### Configuration Arrays:
-        -   Each time the CODE framework runs it will iterate through the defined hierarchy configuration arrays and perform the defined actions
+        -   Each time the CODE framework runs it will iterate through the defined configuration arrays and perform the defined actions
         -   The configuration arrays are defined in the corresponding project's config/project_manifest_config.sh file:
-            -   PROJECT_INHERITANCE defines the order of the cascading fork dependencies starting with the foundational dependencies and ending with the current forked CODE repository
-            -   CUSTOM_ENV_VARS defines custom environment variables that will be declared based on the corresponding bash variables so they are available to the containers and client/host scripts
-			-   DB_SCRIPTS_MAP defines specific database scripts and their corresponding credentials so they can be executed within the code-db-ords-deploy container 
+            -   PROJECT_LINEAR_DEPENDENCIES defines the order of the cascading linear dependencies starting with the foundational project-specific forked CODE repository and ending with the current forked CODE repository
+            -   CUSTOM_ENV_VARS defines custom environment variables that will be declared based on the corresponding bash variables so they are available to the containers and client/host scripts, these will be declared in the order they were added to the array variable
+			-   DB_SCRIPTS_MAP defines specific database scripts and their corresponding credentials so they can be executed within the code-db-ords-deploy container, the corresponding scripts will be executed in the order they were added to the array variable
                 -   This is a pipe (|) delimited string of 4 or more values in the following order:
                     -   #1: sql path: the absolute path the sqlplus script should execute from
                         -   **Note: the $BUILD_PATH folder path value (/core/build/) can be used when defining the path to simplify the process
@@ -144,8 +151,10 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
                 \*Note: when the automated deployment scripts in the CODE framework execute it will automatically define the corresponding container secrets (with a prefix of $COMPOSE_PROJECT_NAME to help ensure they are unique) so they are available in the corresponding containers 
                 -   Any new secret names that are implemented in code-db-ords-deploy by scripts that are defined in DB_SCRIPTS_MAP will require a new project-specific custom container .yml file to be created in the project's build folder and then added to the COMPOSE_FILES array                    
 	            -   The array element values must correspond to the secret variables specified in secrets.sh. The array element names must correspond to the actual secret names used in the given container.
-            -   COMPOSE_FILES defines the custom container .yml files that will be included when the CODE framework runs
+            -   COMPOSE_FILES defines the custom container .yml files that will be included when the CODE framework runs, these will be included in the order they were added to the array variable
             	-   \*Note: When specifying a new .yml file, the path must be relative to the /core/build folder  
+                -   \*Note: For project-specific container applications, additional .yml files can be added tio the COMPOSE_FILES array to reference the corresponding [modules](../templates/project_name/modules) directory to include the containers in the CODE container deployment
+                    -   \*Note: Additional .yml files that were added to the corresponding project-specific [build](../templates/project_name/build/) folder can be added to the COMPOSE_FILES array to override the associated container configuration for the CODE implementation  
 -   ### Script and Configuration Order
     -   For all of the project-specific functionality (hooks, compose files, database deployment scripts, configuration variables) the order of execution will start with the foundational linear dependency (highest parent repository) and down throughout the chain of forked repositories until the deepest fork to respect the order of dependencies.
     -   Example Scenario: Project A is forked from the CODE repository, Project B is forked from Project A, and Project C is forked from Project B
@@ -197,6 +206,19 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
             -   container: The main action is executing the database scripts to update the database and/or install apex application(s)
     -   The naming convention for these files is: [timing]_[scope]_hook.sh. For example, pre_container_hook.sh will run immediately before the database scripts are executed within the container
     -   These hook script files are saved in the corresponding project fork's /projects/project_name/hook folder
+-   ### Container Deployments
+    -   When the 
+
+## Container Architecture
+-   The code-db container is built from an official Oracle database image, this is defined by DB_IMAGE in the [file-based configuration](#file-based)
+-   The code-db-ords-deploy container is built from a custom dockerfile ([Dockerfile.deploy](../build/Dockerfile.deploy)) that uses an official Oracle InstantClient image with some custom libraries installed.  
+    -   This container waits until the code-db container is running and the service is healthy before running the [container_deploy_database.sh](../scripts/container_scripts/container_deploy_database.sh) bash script
+        -   If ORDS_ENABLED="yes" and TARGET_APEX_VERSION is a valid version of Apex the script will install/upgrade Apex in the code-db and code-ords containers
+        -   The script will then deploy all database schemas, database objects, and when applicable the Apex workspaces, and Apex apps
+    -   Once the code-db_ords_deploy container finishes deploying the database schemas/apps the container will shut down.  
+-   The code-ords container is built from an official Oracle ORDS image, this is defined by ORDS_IMAGE in the [file-based configuration](#file-based)  
+    -   This container runs [ords_startup.sh](../scripts/ords_scripts/ords_startup.sh) in the container before the ORDS container's official docker entrypoint executes. This script specifies the required Apex and ORDS configuration
+        -   \*Note: the apex configuration files are generated instead of using the CLI ORDS commands to specify the configuration because each CLI command took several seconds to execute.
 
 ## CODE Implementation Procedure
 -   \*Note: this process will fork a given CODE repository and repurpose it as a project-specific CODE
@@ -211,10 +233,13 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
         -   Update the [.active_project](../../projects/.active_project) file to set the value of $ACTIVE_PROJECT_NAME variable value to the name of the renamed project folder
             -   This indicates to the CODE framework which project is the active project which determines the order in which the dependencies (when applicable) are deployed  
         -   #### Forked Project Customization
+            -   Update the [projects/$ACTIVE_PROJECT_NAME/config/project_parent_config.sh](../templates/project_name/config/project_parent_config.sh) configuration file to set $PROJECT_FOLDER_NAME to the name of the folder in the [/projects](../../projects) folder that contains the current project's direct linear dependency
+                -   \*Note: The parent project's $ACTIVE_PROJECT_NAME value can be copied into the $PROJECT_FOLDER_NAME variable for the current project to define the direct dependency
             -   Rename and update the [projects/$ACTIVE_PROJECT_NAME/build/secrets.template.yml](../templates/project_name/build/secrets.template.yml) template file to define any additional secrets for the code-db-ords-deploy container and any configuration overrides for containers that are being added for the forked repository
-            -   Add any repository dependencies as git submodules in the [modules](../modules) subfolder
+                -   (When applicable) If there are container application(s) associated with the given project, additional .yml files can be added in the corresponding project-specific [build](../templates/project_name/build/) folder to override the associated container configuration values  
+            -   Add any project-specific repository dependencies as git submodules in the [modules](../templates/project_name/modules/) subfolder
             -   Update the [projects/$ACTIVE_PROJECT_NAME/config/project_manifest_config.sh](../templates/project_name/config/project_manifest_config.sh) configuration file with the basic information about the forked CODE implementation:
-                -   PROJECT_INHERITANCE should add an array element with the $ACTIVE_PROJECT_NAME 
+                -   PROJECT_LINEAR_DEPENDENCIES should add an array element with the $ACTIVE_PROJECT_NAME 
                 -   DB_SCRIPTS_MAP: add an array element for each automated database deployment script that will be run on deployments with the corresponding secret names
                 -   CUSTOM_ENV_VARS array values for any custom environment names that need to be transmitted to any of the containers on startup
                 -   COMPOSE_FILES to add any .yml files from the project's repository and/or any configuration overrides
@@ -232,19 +257,25 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
 -   ### Upstream Updates
     -   This project has been structured specifically to minimize the need to merge upstream changes as the CODE project continues to evolve and accommodates chains of forked projects that have complex dependencies. 
         -   Each forked repository has its own dedicated project folder so pulling upstream changes will not trigger any merge conflicts
-        -   The core folder contains all of the CODE framework's source code so when changes are made to the [CODE repository](#code-version-control-information) those upstream changes can be pulled by the individual forked repositories without triggering merge conflicts
+        -   The [core](../) folder contains all of the CODE framework's source code so when changes are made to the [CODE repository](#code-version-control-information) those upstream changes can be pulled by the individual forked repositories without triggering merge conflicts
+            -   \*Note: the core folder should only be modified in the CODE repository
+        -   The other project-specific folders for the current project's dependencies within the [/projects](../../projects) folder should never be modified since those are managed in upstream forked CODE repositories.  Instead, when upstream changes are made they should be pulled by the corresponding forked projects.
         -   Global bash array configuration variables are defined by the CODE framework and then the individual projects add elements to these arrays which determine the behavior of the CODE framework.
     -   The [projects/.active_project](../../projects/.active_project) file has been configured specifically to ignore upstream changes since it is expected to change every time a fork is created since it designates the active project folder.
     
 ## Setup
 -   Recursively clone the given CODE project to a directory on the local client computer
--   Within the project repository create the necessary bash file with the secret values for each database instance: secrets.sh in the [/secrets](../../secrets) folder
+-   Within the project repository create the necessary bash file with the secret values for each database schema and apex workspace: secrets.sh in the [/secrets](../../secrets) folder
     -   \*Note: There is a [secrets template](../../secrets/secrets.template.sh) file that can be used to create the secrets.sh file for each database instance 
     -   \*Note: the actual secret files should never be committed to the repository for security purposes, a [.gitignore](../../.gitignore) file has been added to the repository to prevent these sensitive files from being included in git.  
-    -   \*Note: the secrets.sh will only set the oracle database administrator password on the initial database container run, on subsequent runs it will set the APEX and ORDS administrator and system passwords and also be used to authenticate to the database
+    -   \*Note: The secrets.sh will only set the oracle database administrator password to $ORACLE_PWD on the initial database container run. On the initial run and subsequent runs it will set the APEX and ORDS administrator passwords to $ORACLE_PWD and use the defined $ORACLE_PWD to authenticate to the database
+        -   \*Note: this approach allows the Apex installation to be stateless, so even if the apex volume is dropped it will be rebuilt with the corresponding $TARGET_APEX_VERSION next time the container runs.  
 -   #### CODE Repository
+    -   \*Note: the CODE framework can be run directly from the CODE repository to provide a standard Oracle development environment with minimal setup. 
+    -   \*Note: the CODE repository can also be forked to customize the standard Oracle development environment   
     -   Update the [default_CODE_runtime_config.sh](../scripts/config/default_CODE_runtime_config.sh) configuration file to specify the appropriate runtime configuration
 -   #### Forked Repositories
+    -   \*Note: the CODE repository forks can customized for specific data systems and then those forks can be forked to build on those specific data system dependencies.
     -   Update the [/projects/$ACTIVE_PROJECT_NAME/config/project_runtime_config.sh](../templates/project_name/config/project_runtime_config.sh) configuration file to specify the appropriate runtime configuration 
 -   To allow multiple developers to use CODE concurrently on the same container host, update the three variables identified in the top section: COMPOSE_PROJECT_NAME, DB_HOST_PORT, and ORDS_HOST_PORT to have unique values
     -   \*Note: refer to the the [file-based configuration](#file-based) for more information
@@ -260,6 +291,7 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
     -   deploy_dest: deployment destination - "local" for docker desktop CODE deployments and "server" for linux host deployments
     -   rem_vol: remove volume flag - "yes" to remove the volumes associated with the CODE container stack name or "no" to retain the volumes
         -   \*Note: if a volume is removed the data contained within it is lost, caution is advised to ensure that work is not lost or it's saved before the volume(s) are removed.
+        -   \*Note: scenarios where a volume should be removed include: a lower version of Apex is required for a given Apex application, or the database data needs to be replaced or re-seeded.
     -   Examples:
         -   Executing a deployment for a development environment locally without removing the volumes first: 
             -   `bash client_execute_CODE_scripts.sh deploy dev local no`
@@ -279,19 +311,24 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
     -   #### Test:
         -   (env_name = "test") This scenario does not retain the database across container restarts, this is intended to test the deployment process of schemas and applications
         -   \*Note: the container run process can take up to approximately 30 minutes depending on the resources allocated to the container platform software since the database is initialized and when $ORDS_ENABLED is "yes" it also installs Apex on the ORDS container
--   <mark>A log file for each client script execution is saved in the [logs](../../logs) folder and is named client_deploy_application.sh.$(date +%Y%m%d_%H%M%S).log based on the date/time the script is executed.  This file will include the output from the remote host and container scripts
-
-## Container Architecture
--   The code-db container is built from an official Oracle database image, this is defined by DB_IMAGE in the [file-based configuration](#file-based)
--   The code-db-ords-deploy container is built from a custom dockerfile ([Dockerfile.deploy](../build/Dockerfile.deploy)) that uses an official Oracle InstantClient image with some custom libraries installed.  
-    -   This container waits until the code-db container is running and the service is healthy before installing/upgrading Apex in the database
-    -   This container runs the [container_deploy_database.sh](../scripts/container_scripts/container_deploy_database.sh) bash script to deploy all database schemas, database objects, and when applicable the Apex workspaces, and Apex apps
-    -   Once the code-db_ords_deploy container finishes deploying the database schemas/apps the container will shut down.  
--   The code-ords container is built from an official Oracle ORDS image, this is defined by ORDS_IMAGE in the [file-based configuration](#file-based)  
-    -   This container runs [ords_startup.sh](../scripts/ords_scripts/ords_startup.sh) in the container before the ORDS container's official docker entrypoint executes. This script specifies the required Apex and ORDS configuration
+-   A log file for each client script execution is saved in the [logs](../../logs) folder and is named client_deploy_application.sh.$(date +%Y%m%d_%H%M%S).log based on the date/time the script is executed.  This file will include the output from the remote host and container scripts
+-   ### CODE Execution Diagram
+    -   The [CODE execution diagram](../docs/diagrams/CODE_execution_diagram.drawio.png) provides an overview of the CODE execution for both server and local deployments.
+    -   Local Deployments:     
+        -   (Shown as 1a) The Client Deployment Script runs to build and deploy the CODE Containers locally using Docker Desktop
+    -   Server Deployments:
+        -   (Shown as 2a) The Client Deployment Script runs and uses SSH to clone the repository and execute the Host Preparation Script
+        -   (Shown as 2b) The Host Preparation Script runs and uses the "sudo -u" command to run the Host Deployment Script with a privileged server user that can run container commands
+        -   (Shown as 2c) The Host Deployment Script runs to build and deploy the CODE Containers on the Docker Host
+    -   CODE Container Deployments:
+        -   The Database Deployment Container automatically runs on startup 
+            -   (Shown as 3a) If $ORDS_ENABLED="yes" is enabled and $TARGET_APEX_VERSION is a valid version of Apex then the ORDS and DB containers will have the specified version of Apex installed
+            -   (Shown as 3b) The custom project-specific scripts will execute to deploy the corresponding database objects    
+    -   \*Note: Additional containers can be deployed using the COMPOSE_FILES variable from the custom [Configuration Arrays](#configuration-arrays)
+![CODE execution diagram](../docs/diagrams/CODE_execution_diagram.drawio.png)
 
 ## Connection Information
-For the following connections refer to the active [file-based configuration](#file-based) and the /secrets/secrets.sh for the corresponding values
+For the following connections refer to the active [file-based configuration](#file-based) and the /secrets/secrets.sh for the corresponding $ORACLE_PWD value
 -   \*Note: For server deployments the following command can create an SSH tunnel between the server and the developer workstation to allow the following URLs to connect to the corresponding server endpoints (where the variable references match the runtime values when the CODE containers were deployed):
     -   `ssh -N -L ${ORDS_HOST_PORT}:localhost:${ORDS_HOST_PORT} -L ${DB_HOST_PORT}:localhost:${DB_HOST_PORT} dev_docker`
 -   Database connections:
