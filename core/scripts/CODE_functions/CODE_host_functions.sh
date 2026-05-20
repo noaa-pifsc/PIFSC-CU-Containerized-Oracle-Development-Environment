@@ -38,6 +38,9 @@ function code_host_execute_container_scripts()
 		local process_secrets="no"
 	fi
 
+	# execute any pre-host prep hooks
+	code_shared_run_project_hooks "pre" "host_prep" "${arg_ref[project_linear_dependencies_var]}" "${arg_ref[projects_path]}"
+
 	# generate the formatted environment variable block
 	local env_block="${arg_ref[env_block]}"
 	
@@ -45,9 +48,6 @@ function code_host_execute_container_scripts()
 	env_block+="$(cds_shared_generate_export_env_vars_block ${CUSTOM_ENV_VARS[@]})"
 
 	# echo "DEBUG: The value of the env_block is: ${env_block}"
-
-	# execute any pre-host prep hooks
-	code_shared_run_project_hooks "pre" "host_prep" "${arg_ref[project_linear_dependencies_var]}" "${arg_ref[projects_path]}"
 
 	# declare the function arguments as a local variable
 	local -A func_args=(

@@ -215,14 +215,14 @@ function code_client_execute_container_scripts ()
 			return 1
 		fi
 
+		# execute any pre-client hooks
+		code_shared_run_project_hooks "pre" "client_local" "${arg_ref[project_linear_dependencies_var]}" "${arg_ref[projects_path]}"
+
 		# export the environment variables based on the list of fields
 		cds_shared_export_array_keys "${arg_array}" "compose_project_name" "db_host_port" "ords_host_port" "db_image" "ords_image" "target_apex_version" "app_schema_name" "dbport" "dbhost" "dbservicename" "stack_name" "network_name" "ords_enabled"
 		
 		# export additional custom environment variables
 		cds_shared_export_env_vars "${CUSTOM_ENV_VARS[@]}"
-
-		# execute any pre-client hooks
-		code_shared_run_project_hooks "pre" "client_local" "${arg_ref[project_linear_dependencies_var]}" "${arg_ref[projects_path]}"
 
 		# check the script_action value to determine if this is a deployment or shutdown script
 		if [[ "${script_action}" == "deploy" ]]; then

@@ -328,7 +328,7 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
     -   \*Note: Additional containers can be deployed using the COMPOSE_FILES variable from the custom [Configuration Arrays](#configuration-arrays)
 ![CODE execution diagram](../docs/diagrams/CODE_execution_diagram.drawio.png)
 
-## Contribution & Repository Management Guidelines
+## Contribution and Repository Management Guidelines
 -   To keep the CODE ecosystem clean, maintainable, and free of merge conflicts, contributions must adhere to a strict division of responsibility between the Upstream Engine and Downstream Project Forks.
 -   ### CODE Repository
     -   Only change files directly in the [CODE repository](#code-version-control-information) when updating the framework's universal core rules, fixing orchestration bugs, or updating base infrastructure templates.
@@ -340,7 +340,7 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
     -   In the [Script and Configuration Order](#script-and-configuration-order) example scenario, if the folder name for project B is "projectB", then the only folder project B should modify is projects/projectB
     -   \*Note: Do not change any of the file or folder names within the corresponding [projects](../../projects/) subfolder, the CODE framework uses specific filenames and folders to determine the behavior of the framework. 
 
-## Monitoring & Syncing Upstream Updates
+## Monitoring and Syncing Upstream Updates
 -   Because the upstream engine (CODE) and project forks are hosted on GitHub, maintaining clear synchronization lines is key to pulling upstream features, bug fixes, and security patches seamlessly.
 -   ### Watching Upstream Releases on GitHub
     -   To stay informed of important changes to the CODE framework:
