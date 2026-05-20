@@ -23,4 +23,4 @@
 ##### Project Configuration Variables: #####
 
 	# define the container git project URL
-	# Example: GIT_URL="--branch Branch_CODE_v1.4_install git@github.com:noaa-pifsc/PIFSC-DSC-Containerized-Oracle-Development-Environment.git"
+	# Example: GIT_URL="git@github.com:noaa-pifsc/PIFSC-DSC-Containerized-Oracle-Development-Environment.git"
