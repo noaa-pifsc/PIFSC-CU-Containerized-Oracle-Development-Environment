@@ -20,5 +20,8 @@ source "${CURR_DIR}/../../CODE_functions/CODE_client_functions.sh"
 # include the container configuration variables
 source "${CURR_DIR}/../../config/pre_CODE_config.sh"
 
+# create the log file for the current deployment
+cds_client_initialize_deployment_script "${LOGS_PATH}"
+
 # load the CODE and active project configurations
 code_shared_load_CODE_config "${CURR_DIR}" "client" "PROJECT_LINEAR_DEPENDENCIES"

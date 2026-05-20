@@ -38,7 +38,6 @@ function main()
 		["compose_file_array"]="COMPOSE_FILES"
 		["project_linear_dependencies_var"]="PROJECT_LINEAR_DEPENDENCIES"
 		["projects_path"]="${PROJECTS_PATH}"
-		["logs_path"]="${LOGS_PATH}"
 	)
 
 	# echo "DEBUG: the code_client_process_arguments_execute_container_scripts() function arguments are: $(cds_shared_dump_array_vals "client_deploy_container_args")"

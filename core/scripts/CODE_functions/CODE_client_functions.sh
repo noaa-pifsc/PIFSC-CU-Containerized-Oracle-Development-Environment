@@ -50,9 +50,6 @@ function code_client_process_arguments_execute_container_scripts ()
 	# create a pointer to the arg_array variable to make it easy to access the argument array values
 	local -n arg_ref="${arg_array}"
 
-	# create the log file for the current deployment
-	cds_client_initialize_deployment_script "${arg_ref[logs_path]}"
-
 	local script_action_name="script_action"
 	local env_var_name="env_name"
 	local dest_var_name="deploy_dest"
