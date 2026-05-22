@@ -235,6 +235,7 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
         -   #### Forked Project Customization
             -   Update the [projects/$ACTIVE_PROJECT_NAME/config/project_parent_config.sh](../templates/project_name/config/project_parent_config.sh) configuration file to set $PROJECT_FOLDER_NAME to the name of the folder in the [/projects](../../projects) folder that contains the current project's direct linear dependency
                 -   \*Note: The parent project's $ACTIVE_PROJECT_NAME value can be copied into the $PROJECT_FOLDER_NAME variable for the current project to define the direct dependency
+                -   \*Note: If there is no direct linear dependencies then $ACTIVE_PROJECT_NAME is blank
             -   Rename and update the [projects/$ACTIVE_PROJECT_NAME/build/secrets.template.yml](../templates/project_name/build/secrets.template.yml) template file to define any additional secrets for the code-db-ords-deploy container and any configuration overrides for containers that are being added for the forked repository
                 -   (When applicable) If there are container application(s) associated with the given project, additional .yml files can be added in the corresponding project-specific [build](../templates/project_name/build/) folder to override the associated container configuration values  
             -   Add any project-specific repository dependencies as git submodules in the [modules](../templates/project_name/modules/) subfolder

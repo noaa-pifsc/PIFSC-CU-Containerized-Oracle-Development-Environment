@@ -8,38 +8,40 @@ to do:
 	_ implement branch protection for all CODE forks
 	
 	
-	_ test if the passwords can have special characters in them that would normally require enclosing quotes
+	_ do we want to be able to run dev and test concurrently on a server?
+		YES, because we can diff them as they are being built to confirm the DDL that is in version control results in the identical data model (could be dependency/sequencing errors)
+		
+		Dev workflow: 
+			setup Dev with the foundational image (current version used as a starting point)
+				make changes to the database directly and save DDL in an upgrade file
+			periodically run the test deployment that also runs the DDL upgrade file 
+			run diff between the two instances to ensure the data models are equivalent
+
+	
+	X test if the passwords can have special characters in them that would normally require enclosing quotes
 		- @, $, %, *, etc.
 	
-	_ detect spaces and double quotes in the password values before they are used
-		_ do this in the code_container_deploy_custom_database_scripts() function before they are used, since it will cause an error
+	X detect spaces and double quotes in the password values before they are used
+		X do this in the code_container_deploy_custom_database_scripts() function before they are used, since it will cause an error
 		
-
-
 	X Update README.md for the forks to link to the project folder documentation
 
-		
-	_ ** re-examine restart policy for the code-db-ords-deploy container - it should probably retry on failure (5 times?)
-	
+	X ** re-examine restart policy for the code-db-ords-deploy container - it should probably retry on failure (5 times?)
+		this is the right policy for the container's role
 	
 	X created a new cds_shared_export_array_keys() function that exports environment variables from an array of values based on the list of fields
 		_ cds_shared_export_env_vars may be obsolete, but this needs to be determined after reviewing CDD and CAD functions
-	
-	
-	_ look to automate the deployment of the various database scripts in the CODE forks
-		_ we could specify the relative script path and then the db secrets (username, password) that are supplied with the database script.  If they can be specified in array arguments then a bash function might be able to loop through the database scripts and specify the credentials
 		
-
+	X look to automate the deployment of the various database scripts in the CODE forks
+		X we could specify the relative script path and then the db secrets (username, password) that are supplied with the database script.  If they can be specified in array arguments then a bash function might be able to loop through the database scripts and specify the credentials
+		
 	X place the .deploy_ready in a subfolder to not clutter up the apex static files folder
 	
 	_ create separate secret variables for the various apex and ords accounts 
 		apex admin, ords_public_user, apex_public_user, 
 
-
-
 	_ test concurrent CODE instances on docker host
-	
-		
+			
 	X Update CODE to use CDS directly again
 		_ Update CDS on all dependent projects:
 			_ CDD:

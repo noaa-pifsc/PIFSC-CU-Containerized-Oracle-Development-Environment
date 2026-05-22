@@ -13,8 +13,6 @@
 # 4: projects_path is the absolute path to the /projects folder in the root repository directory
 function code_shared_run_project_hooks ()
 {
-	echo "running code_shared_run_project_hooks($@)"
-	
 	local hook_timing="${1}"
 	local hook_scope="${2}"
 	local project_linear_dependencies_var="${3}"
@@ -82,14 +80,12 @@ function code_shared_define_project_linear_dependencies()
 			# unset the current value of the PROJECT_FOLDER_NAME global variable, so it doesn't interfere with the project-specific configuration file that is being loaded
 			unset PROJECT_FOLDER_NAME
 			
-			echo "the project_parent_config.sh file exists, load it"
-
 			# load the parent configuration 
 			source "${projects_path}/${project_name}/config/project_parent_config.sh"
 			
 			# check if the PROJECT_FOLDER_NAME is defined
 			if [[ -n "${PROJECT_FOLDER_NAME}" ]]; then
-				echo "the PROJECT_FOLDER_NAME is defined, call code_shared_define_project_linear_dependencies() recursively with the current ${PROJECT_FOLDER_NAME} as an argument" 
+				# there is a defined PROJECT_FOLDER_NAME, process it
 				
 				# recursively call code_shared_define_project_linear_dependencies()
 				code_shared_define_project_linear_dependencies "${project_linear_dependencies_var}" "${PROJECT_FOLDER_NAME}" "${projects_path}"
@@ -125,8 +121,6 @@ function code_shared_load_project_config_files ()
 	# Iterate over the project_linear_dependencies elements and attempt to execute the hooks for each project in order to respect their dependencies
 	for project_name in "${project_linear_dependencies[@]}"; do
 		
-		echo "processing the project linear dependency configuration (${configuration_file_name}) for ${project_name}"
-		
 		# check if the matching configuration file exists in the current project folder
 		if [[ -f "${projects_path}/${project_name}/config/${configuration_file_name}" ]]; then
 
@@ -137,7 +131,6 @@ function code_shared_load_project_config_files ()
 			source "${projects_path}/${project_name}/config/${configuration_file_name}"
 		fi
 	done
-
 }
 
 # this function loads the standard and default CODE configuration files and if the .active_project file is defined it will load the active project configuration
