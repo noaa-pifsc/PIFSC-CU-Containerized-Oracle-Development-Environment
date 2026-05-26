@@ -1,0 +1,7 @@
+# ignore all folders/files by default
+**/*
+
+# allow-list directories (allow the directory and its contents)
+!core/scripts/**
+!core/modules/**
+!projects/**

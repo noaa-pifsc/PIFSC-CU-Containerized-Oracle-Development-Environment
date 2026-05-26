@@ -1,0 +1,121 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="S-vW0Ktbb4xJjWk4SfTo">
+    <mxGraphModel dx="2054" dy="1137" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="zrM7UrMwQp6aMptab30U-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontSize=17;" value="CODE Containers" vertex="1">
+          <mxGeometry height="490" width="390" x="395" y="511" as="geometry" />
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-1" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" value="DB Container (code-db)" vertex="1">
+          <mxGeometry height="90" width="110" x="650" y="861" as="geometry" />
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="ORDS Container (code-ords)" vertex="1">
+          <mxGeometry height="80" width="100" x="655" y="581" as="geometry" />
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Database Deployment Container (code-db-ords-deploy)" vertex="1">
+          <mxGeometry height="80" width="100" x="435" y="716" as="geometry" />
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-5" edge="1" parent="1" source="zrM7UrMwQp6aMptab30U-4" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;" target="zrM7UrMwQp6aMptab30U-1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="355" y="876" as="sourcePoint" />
+            <mxPoint x="405" y="826" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-12" connectable="0" parent="zrM7UrMwQp6aMptab30U-5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="3a) (when enabled)&amp;nbsp;&lt;div&gt;Install/Upgrade Apex&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.1155" y="3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-6" edge="1" parent="1" source="zrM7UrMwQp6aMptab30U-4" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.75;exitY=0;exitDx=0;exitDy=0;" target="zrM7UrMwQp6aMptab30U-2" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="355" y="876" as="sourcePoint" />
+            <mxPoint x="405" y="826" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-9" connectable="0" parent="zrM7UrMwQp6aMptab30U-6" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="3a) (when enabled)&amp;nbsp;&lt;div&gt;Install/Upgrade Apex&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.1513" y="2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Client Deployment Script" vertex="1">
+          <mxGeometry height="80" width="120" x="65" y="216" as="geometry" />
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-15" edge="1" parent="1" source="zrM7UrMwQp6aMptab30U-4" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=60;entryPerimeter=0;curved=0;" target="zrM7UrMwQp6aMptab30U-1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="485" y="921" />
+            </Array>
+            <mxPoint x="85" y="501" as="sourcePoint" />
+            <mxPoint x="135" y="451" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-16" connectable="0" parent="zrM7UrMwQp6aMptab30U-15" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="3b) Deploy&amp;nbsp;&lt;div&gt;Database Objects&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.0345" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-17" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontSize=17;" value="Docker Host" vertex="1">
+          <mxGeometry height="290" width="200" x="490" y="161" as="geometry" />
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-18" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Host Preparation Script" vertex="1">
+          <mxGeometry height="80" width="120" x="530" y="216" as="geometry" />
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-19" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Host Deployment Script" vertex="1">
+          <mxGeometry height="80" width="120" x="530" y="316" as="geometry" />
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-22" edge="1" parent="1" source="zrM7UrMwQp6aMptab30U-18" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;" target="zrM7UrMwQp6aMptab30U-19" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="735" y="256" />
+              <mxPoint x="735" y="356" />
+            </Array>
+            <mxPoint x="85" y="501" as="sourcePoint" />
+            <mxPoint x="135" y="451" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-23" connectable="0" parent="zrM7UrMwQp6aMptab30U-22" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="2b) Execute&amp;nbsp;&lt;div&gt;Deployment Script&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.1407" y="-3" as="geometry">
+            <mxPoint x="3" y="24" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-24" edge="1" parent="1" source="zrM7UrMwQp6aMptab30U-19" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="zrM7UrMwQp6aMptab30U-14" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="85" y="501" as="sourcePoint" />
+            <mxPoint x="135" y="451" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-25" connectable="0" parent="zrM7UrMwQp6aMptab30U-24" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="2c) Build/Deploy&amp;nbsp;&lt;div&gt;Containers&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.3913" y="2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-26" edge="1" parent="1" source="zrM7UrMwQp6aMptab30U-8" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="zrM7UrMwQp6aMptab30U-18" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="85" y="501" as="sourcePoint" />
+            <mxPoint x="135" y="451" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-27" connectable="0" parent="zrM7UrMwQp6aMptab30U-26" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="2a) Execute&amp;nbsp;&lt;div&gt;Server Deployment&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.3391" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-28" edge="1" parent="1" source="zrM7UrMwQp6aMptab30U-8" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;" target="zrM7UrMwQp6aMptab30U-14" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="85" y="481" as="sourcePoint" />
+            <mxPoint x="135" y="431" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zrM7UrMwQp6aMptab30U-29" connectable="0" parent="zrM7UrMwQp6aMptab30U-28" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="1a) Build/Deploy&lt;div&gt;Containers&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.6329" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="dheHoSAXDEgvQ2hPrStr-3" parent="1" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;align=center;verticalAlign=middle;fontSize=14;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;font-weight: 400;&quot;&gt;CODE Execution Diagram&lt;/span&gt;&lt;/h1&gt;" vertex="1">
+          <mxGeometry height="70" width="850" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

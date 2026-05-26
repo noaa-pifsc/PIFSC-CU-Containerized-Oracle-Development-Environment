@@ -1,0 +1,1 @@
+This directory contains the log files from the client side script

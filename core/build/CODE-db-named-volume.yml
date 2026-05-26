@@ -1,0 +1,7 @@
+services:
+  code-db:
+    volumes:
+      - code-db-vol:/opt/oracle/oradata
+volumes:
+  code-db-vol:
+    external: false

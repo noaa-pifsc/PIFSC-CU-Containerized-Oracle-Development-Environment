@@ -1,0 +1,40 @@
+services:
+  code-ords:
+    networks:
+      - oracle-net
+    image: ${ORDS_IMAGE}
+    volumes:
+      # This points to the new shared Docker volume to allow the apex installation/upgrade to be handled by a separate container
+      - code-apex-static-vol:/opt/oracle/ords/static
+      # Mount the configuration script
+      - ../scripts/ords_scripts/ords_startup.sh:/usr/local/bin/ords_startup.sh
+    ports:
+      - target: 8080
+        published: ${ORDS_HOST_PORT}
+        protocol: tcp
+        mode: host
+    environment:
+      - DBHOST=${DBHOST}
+      - DBPORT=${DBPORT}
+      - DBSERVICENAME=${DBSERVICENAME}
+      - DEPLOY_ID=${DEPLOY_ID}
+    entrypoint: ["/bin/bash", "/usr/local/bin/ords_startup.sh"]
+    secrets:
+      - oracle_pwd
+    deploy:
+      replicas: 1 
+      restart_policy:
+        condition: on-failure 
+        delay: 15s             # Wait 15 seconds before trying again to avoid log spam
+        max_attempts: 30       # Allow up to 30 attempts
+        window: 600s           # Extend the failure window to 10 minutes
+volumes:
+  # Defines the new shared volume for the APEX static application files
+  code-apex-static-vol:
+    external: false
+networks: 
+  oracle-net:
+secrets:
+  oracle_pwd:
+    name: ${COMPOSE_PROJECT_NAME}_oracle_pwd
+    external: true
