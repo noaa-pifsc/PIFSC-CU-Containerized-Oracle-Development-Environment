@@ -1,16 +1,13 @@
 
 to do:
 
-	_ reordered documentation, propagate changes down the dependency chain
+	X reordered documentation, propagate changes down the dependency chain
 	
-	_ tagging strategy
-		_ yml file (use a template)
-		_ tag message
-		_ documentation for method
+	X tagging strategy
+		X document the version information in the CODE Fork documentation.md file
 		
-		
+	_ think about how to automate retrieving and parsing a manifest file (using PRI GIM) that will associate the upstream repositories with the given CODE fork
 	
-
 	_ is there a way to query gitlab or github for all the git submodules implemented for a given repository?
 		This could serve as a metric for utilization, and it would help to notify folks when there are updates available. This could be more directed than watching a github project
 
@@ -18,19 +15,10 @@ to do:
 		_ implement the ODS container using the same method as SIA or PLW
 		_ look to add the cron jobs later for the UVM and BDM
 		
-		
-	** (5/26/26) CODE is now at branch: Branch_CODE_v1.4
-		_ pull upstream changes into the different forked repos
-
-
-	X working on updating pri_secrets.yml 
-		X need to override the secrets for the PRI application because they have the ${COMPOSE_PROJECT} prefix
-
-	_ implement branch protection for all CODE forks
+	X implement branch protection for all CODE forks
 	
-	
-	_ do we want to be able to run dev and test concurrently on a server?
-		YES, because we can diff them as they are being built to confirm the DDL that is in version control results in the identical data model (could be dependency/sequencing errors)
+	X do we want to be able to run dev and test concurrently on a server?
+		X YES (documented), because we can diff them as they are being built to confirm the DDL that is in version control results in the identical data model (could be dependency/sequencing errors)
 		
 		Dev workflow: 
 			setup Dev with the foundational image (current version used as a starting point)

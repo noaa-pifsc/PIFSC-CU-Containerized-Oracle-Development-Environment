@@ -192,6 +192,7 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
             -   \*Note: if a volume is removed the data contained within it is lost, caution is advised to ensure that work is not lost or it's saved before the volume(s) are removed.
     -   #### File-Based    
         -   \*Note: the file-based runtime configuration is defined in [default_CODE_runtime_config.sh](../scripts/config/default_CODE_runtime_config.sh) and in each linear dependency defined in the [projects](../../projects) folders in the config/project_runtime_config.sh file (starting with the Top-Level Parent down through the linear dependency chain until the $ACTIVE_PROJECT_NAME)
+        -   \*Note: when deploying the CODE framework to a server, the file-based runtime configuration variables defined on the client computer will be used when deploying the CODE containers (otherwise the configuration variables would be overwritten by the configuration variables defined in the cloned repository on the server)
         -   $APP_SCHEMA_NAME is the database schema that will be used to check if the database schemas have been installed, this only applies to the [development runtime scenario](#development)
         -   $DB_IMAGE is the path to the database image used to build the database container (code-db container)
             -   This can be updated if a specific version of the database is required
