@@ -25,9 +25,11 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
         -   The ForwardAgent feature is enabled to allow the git repositories to be cloned on the container host
 -   Automated Database Deployments:
     -   The individual project repositories that are implemented as git submodules for a given CODE fork must define automated database deployment scripts that can be executed via SQL*Plus
--   The git merge strategy requires the merge.ours.drive to be enabled, the following command can be used to enable it:
-    -   `git config merge.ours.driver true`
-
+-   The git merge strategy requires the merge.ours.drive to be enabled
+    -   Global configuration: 
+        -   `git config --global merge.ours.driver true`
+    -   Working copy configuration (execute the following command in each working copy of the CODE or forked CODE repositories): 
+        -   `git config merge.ours.driver true`
 ## Container Host Instances
 -   For the development container and database instances the abbreviation used is "dev" 
 -   For the test container and database instances the abbreviation used is "test" 
