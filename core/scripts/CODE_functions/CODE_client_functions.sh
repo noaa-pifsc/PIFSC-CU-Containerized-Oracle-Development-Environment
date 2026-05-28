@@ -105,6 +105,9 @@ function code_client_process_arguments_execute_container_scripts ()
 }
 
 # the function returns the compose separator character based on the container deployment environment
+# the function accepts the following parameters:
+# 1: separator variable name: the name of the variable that defines the compose separator for multiple .yml files
+# 2: deploy_dest: local or server, which determines the separator character
 function code_client_get_compose_separator()
 {
 	local compose_sep_name="${1}"
