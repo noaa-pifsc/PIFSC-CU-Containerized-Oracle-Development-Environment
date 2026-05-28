@@ -6,7 +6,7 @@ This project was created to provide a containerized Oracle developer environment
 ## Outline
 -   [Documentation](https://github.com/noaa-pifsc/PIFSC-Containerized-Oracle-Development-Environment/blob/Branch_CODE_v1.4/core/docs/CODE%20Documentation.md) (show in GitHub)
     -   overview
-    -   Appropriate Use (only intended for dev/test scenarios, not production)
+    -   Intended Use (only intended for dev/test scenarios, not production)
     -   Prerequisites
         -   Bash and SSH configuration
         -   automated database deployment, this framework doesn't deploy the database for you, but it will execute the automated scripts to deploy/upgrade the database
@@ -142,12 +142,25 @@ This project was created to provide a containerized Oracle developer environment
         -   * README.md creates links to each CODE fork document
         -   * look at the modules/DSC folder to show that this orchestration project simply references files maintained in the project-specific repository 
         -   * look at hooks directory, it is empty because they aren't necessary in this CODE fork
+        -   show the 2 web applications:
+            -   CAS
+            -   CTP
+        -   shutdown the local CODE containers
+            -   _ show that the web app is no longer available and so is the database
+        -   _ create the tunnel to test (CTP was also deployed to dev docker): 
+            -   ssh -N -L 1521:localhost:1521 -L 8181:localhost:8181 test_docker
+            -   _ show that the web app and database on the server are available
+            -   _ shutdown the tunnel
+        -   startup the local CODE containers
+            -   _ show that it is much faster on restart when the volume already exists
     -   PRI (most complicated container app)
         -   * look at the hooks directory and how they were used to define an environment variable (CRON_SCHEDULE)
         -   * show the minimal code involved to define configuration array elements and the custom hooks for the cron schedule
-
-
-
+        -   _ shutdown the CTP containers
+        -   _ start the PRI and show the installation process (no Apex and minimal database deployment so it is quick)
+        -   _ load the web page (blank database, since the data currently comes from gitlab and we just need to update it)
+        -   _ remote into the container and set the cron job date/time
+        -   _ reload the web page
 -   Moving forward:
     -   Receiving notifications for available updates
         -   PRI could provide information about utilization based on matching version tags
