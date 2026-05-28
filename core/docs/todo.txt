@@ -1,6 +1,27 @@
 
 to do:
 
+	_ reordered documentation, propagate changes down the dependency chain
+	
+	_ tagging strategy
+		_ yml file (use a template)
+		_ tag message
+		_ documentation for method
+		
+		
+	
+
+	_ is there a way to query gitlab or github for all the git submodules implemented for a given repository?
+		This could serve as a metric for utilization, and it would help to notify folks when there are updates available. This could be more directed than watching a github project
+
+	PARR Tools
+		_ implement the ODS container using the same method as SIA or PLW
+		_ look to add the cron jobs later for the UVM and BDM
+		
+		
+	** (5/26/26) CODE is now at branch: Branch_CODE_v1.4
+		_ pull upstream changes into the different forked repos
+
 
 	X working on updating pri_secrets.yml 
 		X need to override the secrets for the PRI application because they have the ${COMPOSE_PROJECT} prefix
@@ -37,10 +58,10 @@ to do:
 		
 	X place the .deploy_ready in a subfolder to not clutter up the apex static files folder
 	
-	_ create separate secret variables for the various apex and ords accounts 
+	X create separate secret variables for the various apex and ords accounts (No Need)
 		apex admin, ords_public_user, apex_public_user, 
 
-	_ test concurrent CODE instances on docker host
+	X test concurrent CODE instances on docker host
 			
 	X Update CODE to use CDS directly again
 		_ Update CDS on all dependent projects:
@@ -52,6 +73,7 @@ to do:
 					_ update the cds_shared_get_array_val() function calls to use the arg_ref approach
 					_ cds_shared_remove_container_stack() was updated to accept a third argument: remove_volumes
 						_ could use this for the LCE to remove the verification volumes
+					_ cds_shared_get_secret_value() should be used to read secrets based on secret name, so we don't have to run cat() repeatedly and hardcode the path
 
 				_ LHP
 				_ PRI
@@ -64,6 +86,7 @@ to do:
 					X ** check cds_shared_deploy_container_stack -> added rem_vol argument
 					X cds_shared_shutdown_container_compose -> rem_vol argument
 					_ update the cds_shared_get_array_val() function calls to use the arg_ref approach
+					_ cds_shared_get_secret_value() should be used to read secrets based on secret name, so we don't have to run cat() repeatedly and hardcode the path
 					_ cds_shared_remove_container_stack() was updated to accept the following arguments:
 						rem_vol
 						build_path
@@ -76,12 +99,17 @@ to do:
 				_ PRI
 				_ SIA
 				_ PLW
+
+			
 		
 		
 document:
-	_ update the documentation to move appropriate business rules into the business rules section and reference the business rules in the appropriate sections of the documentation
-	_ remove repetitive information when possible
-	_ identify missing aspects
+	X update the documentation to move appropriate business rules into the business rules section and 
+		X reference the business rules in the appropriate sections of the documentation
+			X implementing CODE 
+			X container architecture (ORDS_ENABLED and TARGET_APEX_VERSION should reference the file-based business rules)
+	X remove repetitive information when possible
+	X identify missing aspects
 
 	_ review the sections defined for CDD/CAD and implement the ones that are appropriate
 		
