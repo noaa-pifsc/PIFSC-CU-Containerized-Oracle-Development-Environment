@@ -129,7 +129,7 @@ This project was created to provide a containerized Oracle developer environment
         -   * look at fork documentation (mostly references to the core CODE documentation)
         -   * README.md creates links to each CODE fork document
         -   * look at the modules/DSC folder to show that this orchestration project simply references files maintained in the project-specific repository 
-        -   * look at hooks directory, it is empty because they aren't necessary in this CODE fork
+        -   * look at hooks directory, it is empty because they aren't necessary in this CODE fork, only 1 CODE fork required this so far out of 9 total
     -   CTP (more complicated with dependency layers)
         -   * Look at the configuration files
             -   projects/.active_project

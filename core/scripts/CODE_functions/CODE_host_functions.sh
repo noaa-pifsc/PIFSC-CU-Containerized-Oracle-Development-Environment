@@ -43,9 +43,12 @@ function code_host_execute_container_scripts()
 
 	# generate the formatted environment variable block
 	local env_block="${arg_ref[env_block]}"
-	
-	# add any custom environment variables to the block
-	env_block+="$(cds_shared_generate_export_env_vars_block ${CUSTOM_ENV_VARS[@]})"
+		
+	# add the CUSTOM_ENV_VARS environment variables to the $env_block if there are any elements in the array
+	if (( ${#CUSTOM_ENV_VARS[@]} > 0 )); then
+		# add any custom environment variables to the block
+		env_block+=$'\n'"$(cds_shared_generate_export_env_vars_block ${CUSTOM_ENV_VARS[@]})"
+	fi
 
 	# echo "DEBUG: The value of the env_block is: ${env_block}"
 
