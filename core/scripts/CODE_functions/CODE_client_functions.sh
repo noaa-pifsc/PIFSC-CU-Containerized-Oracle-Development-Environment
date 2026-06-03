@@ -279,8 +279,8 @@ function code_client_execute_container_scripts ()
 
 		# add the CUSTOM_ENV_VARS environment variables to the $env_var_string if there are any elements in the array
 		if (( ${#CUSTOM_ENV_VARS[@]} > 0 )); then
-		# add the custom environment variables to the env_var_string variable
-			env_var_string+="$(cds_shared_generate_ssh_env_vars_string ${CUSTOM_ENV_VARS[@]})"
+			# add the custom environment variables to the env_var_string variable
+			env_var_string+=" $(cds_shared_generate_ssh_env_vars_string ${CUSTOM_ENV_VARS[@]})"
 		fi
 
 		# echo "DEBUG: The value of the env_var_string is: ${env_var_string}"
