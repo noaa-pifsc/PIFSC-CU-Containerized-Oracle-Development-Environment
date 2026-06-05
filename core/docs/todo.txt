@@ -1,14 +1,23 @@
-
 to do:
 
-	_ update PRI repo to specify a variable to define the port and then simply override that variable in the PRI CODE repository and move on.
-		_ we can define this in the custom configuration file so it can be changed to allow concurrent CODE containers to run
+	X update PRI repo to specify a variable to define the port and then simply override that variable in the PRI CODE repository and move on.
+		X we can define this in the custom configuration file so it can be changed to allow concurrent CODE containers to run
 		
+	_ propagate the CODE changes down through the tree one more time
+		_ test representative test cases when CAD and CDD have been tested
+
+		_ think about how to automate retrieving and parsing a manifest file (using PRI GIM) that will associate the upstream repositories with the given CODE fork
+		
+		_ is there a way to query gitlab or github for all the git submodules implemented for a given repository?
+			This could serve as a metric for utilization, and it would help to notify folks when there are updates available. This could be more directed than watching a github project
+
+	add as github issues:
+		_ pre-bake images? (this is usually a one-time setup except for test runs where it will be installed as part of the deployment process)
 
 
-	_ update the docker apps to allow the HTTPS ports to be defined by a configuration variable
+	X update the docker apps to allow the HTTPS ports to be defined by a configuration variable
 	
-	_ PRI: fix problem with CRON_SCHEDULE not being transferred properly -> it should work without modification with the configuration file loading hooks, check again
+	X PRI: fix problem with CRON_SCHEDULE not being transferred properly -> it should work without modification with the configuration file loading hooks, check again
 	
 
 	X reordered documentation, propagate changes down the dependency chain
@@ -16,10 +25,6 @@ to do:
 	X tagging strategy
 		X document the version information in the CODE Fork documentation.md file
 		
-	_ think about how to automate retrieving and parsing a manifest file (using PRI GIM) that will associate the upstream repositories with the given CODE fork
-	
-	_ is there a way to query gitlab or github for all the git submodules implemented for a given repository?
-		This could serve as a metric for utilization, and it would help to notify folks when there are updates available. This could be more directed than watching a github project
 
 	PARR Tools
 		_ implement the ODS container using the same method as SIA or PLW
@@ -30,7 +35,7 @@ to do:
 	X do we want to be able to run dev and test concurrently on a server?
 		X YES (documented), because we can diff them as they are being built to confirm the DDL that is in version control results in the identical data model (could be dependency/sequencing errors)
 		
-		Dev workflow: 
+		X (documented) Dev workflow: 
 			setup Dev with the foundational image (current version used as a starting point)
 				make changes to the database directly and save DDL in an upgrade file
 			periodically run the test deployment that also runs the DDL upgrade file 
@@ -65,19 +70,19 @@ to do:
 		_ Update CDS on all dependent projects:
 			_ CDD:
 				_ general improvements:
-					_ use ${FUNCNAME[0]} instead of hardcoding the function names in error messages
-					_ update cds_host_deploy_container function calls to set persistent_container flag
-					_ cds_host_cleanup_container_source_folder() accepts two parameters now (source_dir, target_user)
-					_ update the cds_shared_get_array_val() function calls to use the arg_ref approach
-					_ cds_shared_remove_container_stack() was updated to accept a third argument: remove_volumes
-						_ could use this for the LCE to remove the verification volumes
-					_ cds_shared_get_secret_value() should be used to read secrets based on secret name, so we don't have to run cat() repeatedly and hardcode the path
+					X use ${FUNCNAME[0]} instead of hardcoding the function names in error messages
+					X update cds_host_deploy_container function calls to set persistent_container flag
+					X cds_host_cleanup_container_source_folder() accepts two parameters now (source_dir, target_user)
+					X update the cds_shared_get_array_val() function calls to use the arg_ref approach
+					X cds_shared_remove_container_stack() was updated to accept a third argument: remove_volumes
+						X could use this for the LCE to remove the verification volumes (CDD does not run in stack mode)
+					X cds_shared_get_secret_value() should be used to read secrets based on secret name, so we don't have to run cat() repeatedly and hardcode the path
 
 				_ LHP
 				_ PRI
 				_ LCE
-			_ CAD:
-				_ general improvements:
+			X CAD:
+				X general improvements:
 					X use ${FUNCNAME[0]} instead of hardcoding the function names in error messages
 					X update cds_host_deploy_container function calls to set persistent_container flag
 					X cds_host_cleanup_container_source_folder() accepts two parameters now (source_dir, target_user)
@@ -90,18 +95,23 @@ to do:
 						build_path
 						compose_path
 						
-						_ change to use array arguments (since there are 5 args now)
+						X change to use array arguments (since there are 5 args now)
 						
-						_ this should be implemented as an option to allow volumes to be easily removed
-					_ update 
-				_ PRI
-				_ SIA
-				_ PLW
+						X this should be implemented as an option to allow volumes to be easily removed
+					X update 
+				X PRI
+				X SIA
+				X PLW
 
-			
-		
-		
 document:
+
+	X document the software development strategy
+		How to update the upstream top-level parent CODE project and feasibly test it without creating a maintenance headache
+			example: Make the changes in the forked repo even if it's to the upstream repo, once it's working use a diff tool to pull the changes into the respective projects (CODE repo for /core/ folder or specific /projects/ folder) and commit them, then revert changes in the forked repo and pull the upstream changes. Test again to ensure the changes were successful.
+			If so, then pull the upstream changes into the other downstream forked repositories 
+			If not, then continue to make changes to the forked repository
+
+
 	X update the documentation to move appropriate business rules into the business rules section and 
 		X reference the business rules in the appropriate sections of the documentation
 			X implementing CODE 
@@ -109,7 +119,10 @@ document:
 	X remove repetitive information when possible
 	X identify missing aspects
 
-	_ review the sections defined for CDD/CAD and implement the ones that are appropriate
+
+	_ look at the pitfalls for development/testing: if the GIT_URL does not match the desired branch it will deploy code from a different branch to the server and execute it (for example, create a dev branch and if the branch is not specified by the GIT_URL the code will be pull from the default branch)
+
+	X review the sections defined for CDD/CAD and implement the ones that are appropriate
 		
 
 git bash commands:

@@ -8,6 +8,16 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/includes/include_clien
 
 function main()
 {
+
+	# notify the user which script is being run
+	echo ""
+	echo "********************************************************"
+	echo "*********** Executing CODE deployment script ***********"
+	echo "********************************************************"
+	echo ""
+	echo "*Note: This script will deploy the specified CODE containers to the specified destination"
+	echo ""
+
 	local -A client_deploy_container_args=(
 		["script_action"]="${1}"
 		["env_name"]="${2}"

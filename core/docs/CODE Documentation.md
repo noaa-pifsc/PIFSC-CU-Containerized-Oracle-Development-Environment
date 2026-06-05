@@ -12,24 +12,35 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
     -   [CODE Repository Fork Diagram source code](./diagrams/CODE_fork_diagram.drawio)
 -   [CODE Execution Diagram](./diagrams/CODE_execution_diagram.drawio.png)
     -   [CODE Execution Diagram source code](./diagrams/CODE_execution_diagram.drawio)
+-   CODE Development Workflow Diagrams:
+    -   [Scenario 1 Diagram](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%201.drawio.png)
+        -   [Scenario 1 Diagram source code](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%201.drawio)
+    -   [Scenario 2 Diagram](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%202.drawio.png)
+        -   [Scenario 2 Diagram source code](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%202.drawio)
 
 ## Intended Use
 -   The CODE project is NOT intended for production use, it was developed to provide a containerized development and testing environment. There has been no rigorous security hardening process that complies with federal security requirements. 
 -   The CODE project can be used to develop and test features and applications without requiring System Administrator support. The user specifies the administrator passwords when the container is run so they can make system-level configuration changes directly in the database or ORDS containers and then provide the working configuration settings to the System Administrator for implementation in the enterprise test and production environments.
 
-## Prerequisites
--   Windows/Linux machine serving as the local client
-    -   Bash (this was developed using Windows git bash)
-    -   SSH is setup to work with CAC authentication
-    -   SSH is configured to specify the username in the ~/.ssh/config file for each container host (e.g. docker_dev for the dev container host)
-        -   The ForwardAgent feature is enabled to allow the git repositories to be cloned on the container host
--   Automated Database Deployments:
-    -   The individual project repositories that are implemented as git submodules for a given CODE fork must define automated database deployment scripts that can be executed via SQL*Plus
--   The git merge strategy requires the merge.ours.drive to be enabled
-    -   Global configuration: 
-        -   `git config --global merge.ours.driver true`
-    -   Working copy configuration (execute the following command in each working copy of the CODE or forked CODE repositories): 
-        -   `git config merge.ours.driver true`
+## Requirements
+-   Client machine:
+    -   Bash (Linux) or Git Bash (Windows)
+    -   The git merge strategy requires the merge.ours.drive to be enabled:
+        -   Global configuration: 
+            -   `git config --global merge.ours.driver true`
+        -   Working copy configuration (execute the following command in each working copy of the CODE or forked CODE repositories): 
+            -   `git config merge.ours.driver true`
+    -   For remote container deployments only:
+        -   SSH is setup to work with CAC authentication
+        -   SSH is configured to specify the username in the ~/.ssh/config file for each container host (e.g. docker_dev for the dev container host)
+            -   The ForwardAgent feature is enabled to allow the git repositories to be cloned on the container host
+-   Container host:
+    -   Docker
+    -   dos2unix
+    -   git
+-   Data System Prerequisites:
+    -   Automated database deployment scripts that can be executed via SQL*Plus are required for individual project repositories that are implemented as git submodules for a given CODE fork 
+
 ## Container Host Instances
 -   For the development container and database instances the abbreviation used is "dev" 
 -   For the test container and database instances the abbreviation used is "test" 
@@ -40,6 +51,7 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
     -   folder path: [/core/modules/CDS](../modules/CDS)
     -   Version Control Information:
         -   URL: <git@github.com:noaa-pifsc/PIFSC-Container-Deployment-System.git>
+        -   Version: 1.3 (Git tag: pifsc_container_deployment_system_v1.3)
 
 ## Container Architecture
 -   The code-db container is built from an official Oracle database image, this is defined by $DB_IMAGE in the [file-based configuration](#file-based)
@@ -58,8 +70,9 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
     -   Namespace: code_
     -   Execution Scopes: 
         -   client_: Executes on the developer workstation.
-        -   host_: Executes on the remote container host server.
         -   container_: Executes within the container.
+        -   host_: Executes on the remote container host server.
+        -   shared_: Utilities utilized across multiple execution scopes.
     -   Resources: 
         -   [CDS function naming conventions](../modules/CDS/README.md#functions)
 -   ### Variables
@@ -104,7 +117,7 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
             -   The "docs" subfolder contains the documentation for the specific CODE framework implementation
             -   The "hooks" folder contains any pre- or post-processing scripts that follow the standard naming convention that can automatically run in the specified scope (client, host, container) 
             -   The "modules" subfolder contains the git submodules implemented for the specific CODE framework implementation
-    -   The [secrets](../../secrets) folder must be populated with a secrets.sh file that contains the definition for all secret variables used in the given CODE framework implementation 
+    -   The [secrets](../../secrets) folder must be populated with a secrets.sh file that contains the definition for all secret variables used in the given CODE framework implementation (these files are not committed to version control)
     -   The [README.md](../../README.md) file documents the CODE module
 -   ### CODE Folder Diagram:
     ```
@@ -231,10 +244,10 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
     -   These hook script files are saved in the corresponding project fork's /projects/project_name/hook folder
 
 ## CODE Implementation Procedure
--   \*Note: this process will fork a given CODE repository and repurpose it as a project-specific CODE
+-   \*Note: this process will fork a given CODE or CODE fork repository and configure it as a project-specific CODE repository
 -   ### Forking the Repository
     -   Fork the desired CODE repository (e.g. [CODE](#code-version-control-information))
-        -   In the git web interface update the name/description of the forked project to specify the data system that is implemented in CODE
+        -   In the git web interface update the name/description of the forked project to specify the data system that is implemented
     -   Clone the forked project recursively to a working directory
         -   In the working copy of the given CODE fork repository, add the "upstream" repository using the git remote:
             ```
@@ -257,8 +270,9 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
                 -   Refer to the [project linear dependency configuration](#linear-dependencies) for relevant business rule information
                 -   \*Note: The parent project's $ACTIVE_PROJECT_NAME value can be copied into the $PROJECT_FOLDER_NAME variable for the current project to define the direct dependency
             -   Rename and update the [projects/$ACTIVE_PROJECT_NAME/build/secrets.template.yml](../templates/project_name/build/secrets.template.yml) template file to define any additional secrets for the code-db-ords-deploy container and any configuration overrides for containers that are being added for the forked repository
-                -   (When applicable) If there are container application(s) associated with the given project, additional .yml files can be added in the corresponding project-specific [build](../templates/project_name/build/) folder to override the associated container configuration values  
-                -   \*Note: Refer to [Secret Definitions](#secret-definitions) for details about the project-specific .yml files
+                -   (When applicable) If there are container application(s) associated with the given project, additional .yml files can be added in the corresponding project-specific [build](../templates/project_name/build/) folder to override the associated container configuration values
+                    -   \*Note: Refer to the [PRI CODE](https://github.com/noaa-pifsc/PIFSC-PRI-Containerized-Oracle-Development-Environment) for an example of a configured CODE container application ([custom_pri.yml](https://github.com/noaa-pifsc/PIFSC-PRI-Containerized-Oracle-Development-Environment/blob/main/projects/PRI/build/custom_pri.yml)) 
+1                -   \*Note: Refer to [Secret Definitions](#secret-definitions) for details about the project-specific .yml files
             -   Add any project-specific repository dependencies as git submodules in the [modules](../templates/project_name/modules/) subfolder
             -   Update the [projects/$ACTIVE_PROJECT_NAME/config/project_manifest_config.sh](../templates/project_name/config/project_manifest_config.sh) configuration file with the basic information about the forked CODE implementation:
                 -   \*Note: Refer to the [Configuration Arrays](#configuration-arrays) section for relevant business rules for the following arrays:
@@ -274,7 +288,7 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
             -   Rename and update the [projects/$ACTIVE_PROJECT_NAME/docs/CODE Fork Documentation.template.md](../templates/project_name/docs/CODE%20Fork%20Documentation.template.md) documentation template
                 -   Update the documentation to specify any relevant information about the forked repository   
                     -   The "Upstream Repositories" section should list all of the forked repository's parent repositories
-                    -   The "Dependencies" section should list all dependencies of the current forked repository as well as all the forked repository's parent repositories
+                    -   The "Custom Dependencies" section should list all dependencies of the current forked repository as well as all the forked repository's parent repositories
                 -   Refer to the [CTP Fork Documentation](https://github.com/noaa-pifsc/PIFSC-CTP-Containerized-Oracle-Development-Environment/blob/main/projects/CTP/docs/CTP%20CODE%20Fork%20Documentation.md) for an example of a forked CODE project with two levels of direct linear project dependencies
             -   Update the [secrets.template.sh](../../secrets/secrets.template.sh) template file to include placeholder variables for any secret values used inside of the forked repository.
                 -   \*Note: Refer to [Secret Definitions](#secret-definitions) for details about the secrets.sh variables for a given CODE fork
@@ -358,6 +372,48 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
     -   When customizing a specific CODE fork, developers must confine all modifications to project-specific configurations and corresponding submodules with the corresponding [projects](../../projects/) folder for the CODE fork
     -   In the [Script and Configuration Order](#script-and-configuration-order) example scenario, if the folder name for project B is "projectB", then the only folder project B should modify is projects/projectB
     -   \*Note: Do not change any of the file or folder names within the corresponding [projects](../../projects/) subfolder, the CODE framework uses specific filenames and folders to determine the behavior of the framework. 
+-   ### CODE Development Workflow Recommendations
+    -   \*Note: For this section the example forked repositories are listed below:
+        -   Project A forks the CODE repository
+        -   Project B forks Project A
+        -   Project C forks Project B 
+        -   Project D forks Project A
+    -   There are two main scenarios for developing upgrades to the CODE framework:
+        -   #### Improvements (Scenario 1)
+            -   When existing CODE features are improved (e.g. refactor code, security updates) it is feasible to make and test the changes in the CODE repository directly
+            -   The [Diagram](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%201.drawio.png) shown below illustrates how the changes are propagated through the forked repository network:
+                -   \*Note: The CODE forks are shown in blue
+                -   Changes are developed and tested directly in the CODE repository
+                -   The downstream forked CODE repositories pull the upstream changes through their direct linear dependencies (CODE -> Project A -> Project B -> Project C and CODE -> Project A -> Project D) 
+                -   When each of the forked CODE repositories have been successfully tested:
+                    -   The CODE project changes are merged and tagged as a release
+                    -   The downstream forked CODE repositories' changes are merged and tagged as a release
+            ![Diagram](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%201.drawio.png)
+        -   #### New Functionality (Scenario 2)
+            -   When new CODE features are needed by a specific CODE fork, it can streamline the development workflow by making and testing the changes directly in the specific CODE fork. This approach is more direct than making updates to the CODE repository and other upstream CODE fork repositories and propagating them to the specific CODE fork before they can be tested which can add significant overhead to the development workflow. 
+            -   The [Diagram](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%202.drawio.png) shown below illustrates how the changes are propagated through the forked repository network:
+                -   \*Note: The CODE forks are shown in blue
+                -   To make chages to Project C, the following process can be used:
+                    -   The [core](../) folder is modified to update the CODE core files
+                    -   If required, Project A's and/or Project B's files within the corresponding [projects](../../projects/) subfolder is modified
+                    -   Successfully test the changes within Project C
+                    -   Apply the changes to the corresonding upstream repositories:
+                        -   \*Note: the changes made via the diff tool are shown with orange connectors in the diagram 
+                        -   A diff tool is used to compare the files in the [core](../) folder of the working copies of the CODE and Project C repositories to update the working copy of CODE
+                        -   A diff tool is used to compare the files within each of the corresponding [projects](../../projects/) subfolders between the working copies of Project A and C as well as Project B and C to update the working copies of the corresponding upstream repositories
+                        -   Project C commits the changes to the corresponding [projects](../../projects/) subfolder that belongs to Project C
+                            -   Project C stashes all changes to the files/folders that are not within the corresponding [projects](../../projects/) subfolder that belongs to Project C
+                -   CODE commits and pushes its changes
+                -   Project A commits its changes and pulls the upstream changes from CODE, verifies Project A is working, and then pushes its changes 
+                -   Project B commits its changes and pulls the upstream changes from Project A, verifies Project B is working, and then pushes its changes 
+                -   Project C commits its changes and pulls the upstream changes from Project B, verifies Project C is working, and then pushes its changes 
+                -   Project D pulls the upstream changes from Project A, verify Project D is working, and then pushes its changes
+        ![Diagram](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%202.drawio.png)
+-   ### Database Development Workflow Recommendations
+    -   Deploy a development CODE instance with the foundational database model (current version used as a starting point)
+    -   Make the data model changes to the development database and save the corresponding DDL in an upgrade file
+    -   Periodically deploy the test CODE instance deployment that runs the DDL upgrade file 
+    -   Use a database diff tool (e.g. SQL Developer) between the development and test instances to ensure the data models are equivalent
 
 ## Monitoring and Syncing Upstream Updates
 -   Because the upstream engine (CODE) and project forks are hosted on GitHub, maintaining clear synchronization lines is key to pulling upstream features, bug fixes, and security patches seamlessly.

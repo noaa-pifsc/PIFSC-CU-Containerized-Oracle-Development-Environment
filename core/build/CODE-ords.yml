@@ -28,6 +28,11 @@ services:
         delay: 15s             # Wait 15 seconds before trying again to avoid log spam
         max_attempts: 30       # Allow up to 30 attempts
         window: 600s           # Extend the failure window to 10 minutes
+  code-db-ords-deploy:
+    volumes:
+      # Mounts the shared volume as a folder inside this container
+      # so the script can write the static files to it.
+      - code-apex-static-vol:/apex-static
 volumes:
   # Defines the new shared volume for the APEX static application files
   code-apex-static-vol:

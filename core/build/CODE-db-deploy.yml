@@ -25,10 +25,6 @@ services:
       dockerfile: core/build/Dockerfile.deploy
     networks:
       - oracle-net
-    volumes:
-      # Mounts the shared volume as a folder inside this container
-      # so the script can write the static files to it.
-      - code-apex-static-vol:/apex-static
     environment:
       - TARGET_APEX_VERSION=${TARGET_APEX_VERSION}
       - ORACLE_PWD_FILE=/run/secrets/oracle_pwd
@@ -45,10 +41,6 @@ services:
       replicas: 1 
       restart_policy:
         condition: none 
-volumes:
-  # Defines the new shared volume for the APEX static application files
-  code-apex-static-vol:
-    external: false
 networks: 
   oracle-net:
 secrets:
