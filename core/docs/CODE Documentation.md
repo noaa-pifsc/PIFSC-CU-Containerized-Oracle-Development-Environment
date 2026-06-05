@@ -375,34 +375,34 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
         -   Project D forks Project A
     -   There are two main scenarios for developing upgrades to the CODE framework:
         -   #### Improvements (Scenario 1)
-            -   When existing CODE features are improved (e.g. refactor code, security updates) it is feasible to make the changes in the CODE repository directly using a feature branch
-            -   The downstream forked repositories can pull the upstream changes through the direct linear dependencies using a feature branch. 
-            -   When all of the forked repositories have been successfully tested:
-                -   The CODE project changes can be merged to the main branch and tagged as a release
-                -   The downstream forked repositories' changes can be merged to the main branch and tagged as a release
+            -   When existing CODE features are improved (e.g. refactor code, security updates) it is feasible to make and test the changes in the CODE repository directly
             -   The [Diagram](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%201.drawio.png) shown below illustrates how the changes are propagated through the forked repository network:
-                -   The CODE forks are shown in blue
-                -   Changes are made to the CODE repository
-                -   The CODE changes are propagated by each downstream CODE fork pulling the upstream changes from its parent repository
+                -   \*Note: The CODE forks are shown in blue
+                -   Changes are developed and tested directly in the CODE repository
+                -   The downstream forked CODE repositories pull the upstream changes through their direct linear dependencies (CODE -> Project A -> Project B -> Project C and CODE -> Project A -> Project D) 
+                -   When each of the forked CODE repositories have been successfully tested:
+                    -   The CODE project changes are merged and tagged as a release
+                    -   The downstream forked CODE repositories' changes are merged and tagged as a release
             ![Diagram](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%201.drawio.png)
         -   #### New Functionality (Scenario 2)
-            -   When new CODE features are needed by a specific CODE fork, it can streamline the development workflow by making the changes directly in the specific CODE fork so the changes can be tested directly before initiating the updates to the CODE repository and integrating the changes to the downstream CODE forks. 
+            -   When new CODE features are needed by a specific CODE fork, it can streamline the development workflow by making and testing the changes directly in the specific CODE fork. This approach is more direct than making updates to the CODE repository and other upstream CODE fork repositories and propagating them to the specific CODE fork before they can be tested which can add significant overhead to the development workflow. 
             -   The [Diagram](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%202.drawio.png) shown below illustrates how the changes are propagated through the forked repository network:
-                -   The CODE forks are shown in blue
-                -   Within the working copy of Project C:
-                    -   The [core](../) folder can be modified to update the CODE core files
-                    -   If required, Project A's and/or Project B's files within the corresponding [projects](../../projects/) subfolder can be modified
-                    -   Successfully test the changes within Project C:
+                -   \*Note: The CODE forks are shown in blue
+                -   To make chages to Project C, the following process can be used:
+                    -   The [core](../) folder is modified to update the CODE core files
+                    -   If required, Project A's and/or Project B's files within the corresponding [projects](../../projects/) subfolder is modified
+                    -   Successfully test the changes within Project C
+                    -   Apply the changes to the corresonding upstream repositories:
                         -   \*Note: the changes made via the diff tool are shown with orange connectors in the diagram 
-                        -   A diff tool can be used to compare the files in the [core](../) folder of the working copies of the CODE and Project C repositories to update the working copy of CODE
-                        -   A diff tool can be used to compare the files within each of the corresponding [projects](../../projects/) subfolders between the working copies of Project A and C as well as Project B and C to update the working copies of the corresponding upstream repositories
-                        -   Project C can commit the changes to the corresponding [projects](../../projects/) subfolder that belongs to Project C
-                            -   Project C can stash all changes to the files/folders that are not within the corresponding [projects](../../projects/) subfolder that belongs to Project C
-                -   CODE can commit and push its changes
-                -   Project A can commit its changes and pull the upstream changes from CODE, verify Project A is working, and then push its changes 
-                -   Project B can commit its changes and pull the upstream changes from Project A, verify Project B is working, and then push its changes 
-                -   Project C can commit its changes and pull the upstream changes from Project B, verify Project C is working, and then push its changes 
-                -   Project D can pull the upstream changes from Project A, verify Project D is working, and then push its changes
+                        -   A diff tool is used to compare the files in the [core](../) folder of the working copies of the CODE and Project C repositories to update the working copy of CODE
+                        -   A diff tool is used to compare the files within each of the corresponding [projects](../../projects/) subfolders between the working copies of Project A and C as well as Project B and C to update the working copies of the corresponding upstream repositories
+                        -   Project C commits the changes to the corresponding [projects](../../projects/) subfolder that belongs to Project C
+                            -   Project C stashes all changes to the files/folders that are not within the corresponding [projects](../../projects/) subfolder that belongs to Project C
+                -   CODE commits and pushes its changes
+                -   Project A commits its changes and pulls the upstream changes from CODE, verifies Project A is working, and then pushes its changes 
+                -   Project B commits its changes and pulls the upstream changes from Project A, verifies Project B is working, and then pushes its changes 
+                -   Project C commits its changes and pulls the upstream changes from Project B, verifies Project C is working, and then pushes its changes 
+                -   Project D pulls the upstream changes from Project A, verify Project D is working, and then pushes its changes
         ![Diagram](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%202.drawio.png)
 -   ### Database Development Workflow Recommendations
     -   Deploy a development CODE instance with the foundational database model (current version used as a starting point)
