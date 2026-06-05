@@ -12,6 +12,12 @@ The PIFSC Containerized Oracle Developer Environment (CODE) framework was develo
     -   [CODE Repository Fork Diagram source code](./diagrams/CODE_fork_diagram.drawio)
 -   [CODE Execution Diagram](./diagrams/CODE_execution_diagram.drawio.png)
     -   [CODE Execution Diagram source code](./diagrams/CODE_execution_diagram.drawio)
+-   CODE Development Workflow Diagrams:
+    -   [Scenario 1 Diagram](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%201.drawio.png)
+        -   [Scenario 1 Diagram source code](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%201.drawio)
+    -   [Scenario 2 Diagram](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%202.drawio.png)
+        -   [Scenario 2 Diagram source code](./diagrams/CODE%20dev%20workflow%20diagram%20scenario%202.drawio)
+
 
 ## Intended Use
 -   The CODE project is NOT intended for production use, it was developed to provide a containerized development and testing environment. There has been no rigorous security hardening process that complies with federal security requirements. 
