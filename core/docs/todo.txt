@@ -126,6 +126,22 @@ document:
 	X review the sections defined for CDD/CAD and implement the ones that are appropriate
 		
 
+
+	X design strategy:
+		X leverage modularity to promote code reuse
+		X leverage inheritance to allow fully working real-world data systems to be built upon easily or to run them as individual copies for various purposes (review, evaluation, development, etc.)
+		Developers are free to implement any of these as submodules
+		
+	Benefits:
+		X Fully portable applications. Now if some Center likes a certain application or database utility they can run it themselves
+			X Before with database dependencies it would've been very challenging to 
+			X Can be used for evaluation purposes
+
+		GitHub public repos:
+			Anyone in NMFS can clone, run, and evaluate the databases/apps
+			
+
+
 git bash commands:
 
 

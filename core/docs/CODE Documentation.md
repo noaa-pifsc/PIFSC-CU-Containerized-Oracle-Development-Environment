@@ -468,3 +468,12 @@ For the following connections refer to the active [file-based configuration](#fi
 -   The CODE project inherits security features from the [CDS module](../modules/CDS/README.md#security-features).
 -   Decoupled Configuration Adapter Pattern: The core CODE engine enforces a strict Separation of Concerns. It remains completely independent of project-specific global variables. It only operates on strictly validated associative arrays and arguments, ensuring that the engine itself cannot inadvertently expose or mishandle project-specific configurations.
 -   Docker Secrets: Database credentials are defined as secrets and retrieved dynamically within the container to protect them from unauthorized access
+
+## Design Strategy
+-   Leverage the [CDS module](./modules/CDS/README.md#design-strategy) for its collection of flexible and reusable container functions
+    -   Benefits:
+        -   Reduce the amount of custom code needed for CODE
+-   Leverage inheritance to allow real-world data systems to be run on any docker host
+    -   Benefits:
+        -   Facilitates deploying fully-functional data systems in a containerized environment so they can be reviewed and evaluated 
+        -   Facilitates the implementation of a dependent data systems using the forking feature

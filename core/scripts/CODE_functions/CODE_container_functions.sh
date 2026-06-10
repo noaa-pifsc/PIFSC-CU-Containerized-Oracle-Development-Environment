@@ -346,7 +346,7 @@ function code_container_deploy_database_scripts ()
 		echo "Database is not initialized, run the custom database and/or application deployment scripts"
 
 		# execute any pre-container hooks
-		code_shared_run_project_hooks "post" "container" "${arg_ref[project_linear_dependencies_var]}" "${arg_ref[projects_path]}"
+		code_shared_run_project_hooks "pre" "container" "${arg_ref[project_linear_dependencies_var]}" "${arg_ref[projects_path]}"
 
 		# run the custom database deployment scripts:
 		code_container_deploy_custom_database_scripts "${arg_array}" "${arg_ref[db_scripts_map]}"

@@ -12,6 +12,9 @@ The PIFSC Containerized Oracle Developer Environment (CODE) project was develope
             -   URL: <[UPSTREAM PROJECT URL]>
             -   Version: [UPSTREAM VERSION] (git tag: [UPSTREAM VERSION TAG])
 
+## Intended Use
+-   Refer to the CODE [Intended Use](../../../../core/docs/CODE%20Documentation.md#intended-use) for details
+
 ## Requirements
 -   Refer to the CODE [Requirements](../../../../core/docs/CODE%20Documentation.md#requirements) for details
 
@@ -59,3 +62,8 @@ The PIFSC Containerized Oracle Developer Environment (CODE) project was develope
 
 ## Security Features
 -   Refer to the CODE [Security Features](../../../../core/docs/CODE%20Documentation.md#security-features) for details
+
+## Design Strategy
+-   Refer to the [CODE Design Strategy](../../../../core/docs/CODE%20Documentation.md#design-strategy) documentation
+    -   Benefits:
+        -   Reduce the amount of custom code needed to deploy this CODE fork
