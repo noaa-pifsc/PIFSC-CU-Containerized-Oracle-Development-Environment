@@ -470,7 +470,7 @@ For the following connections refer to the active [file-based configuration](#fi
 -   Docker Secrets: Database credentials are defined as secrets and retrieved dynamically within the container to protect them from unauthorized access
 
 ## Design Strategy
--   Leverage the [CDS module](./modules/CDS/README.md#design-strategy) for its collection of flexible and reusable container functions
+-   Leverage the [CDS module](../modules/CDS/README.md#design-strategy) for its collection of flexible and reusable container functions
     -   Benefits:
         -   Reduce the amount of custom code needed for CODE
 -   Leverage inheritance to allow real-world data systems to be run on any docker host
