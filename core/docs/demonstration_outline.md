@@ -4,7 +4,10 @@
 This project was created to provide a containerized Oracle developer environment (ODE) for PIFSC software developers so they can develop databases and APEX applications locally and deploy them to the enterprise test and production server instances.  This flexible collection of containers can be customized to include database and APEX application dependencies for systems that are deployed to the test and production instances to help ensure that the software will work as intended when it is deployed to the enterprise server instances.  
 
 ## Outline
--   [Documentation](https://github.com/noaa-pifsc/PIFSC-Containerized-Oracle-Development-Environment/blob/Branch_CODE_v1.4/core/docs/CODE%20Documentation.md) (show in GitHub)
+-   (startup the CTP CODE containers before the demo starts)
+-   Design principles
+    -   strict separation of concerns, the implemented core bash container module (CDS) and CODE framework doesn't know anything about the specific projects it's implemented in -> functions, variables, etc.)
+-   [Documentation](https://github.com/noaa-pifsc/PIFSC-Containerized-Oracle-Development-Environment/blob/main/core/docs/CODE%20Documentation.md) (show in GitHub)
     -   overview
     -   Intended Use (only intended for dev/test scenarios, not production)
     -   Prerequisites
@@ -18,6 +21,8 @@ This project was created to provide a containerized Oracle developer environment
         -   code-ords is the official ORDS image (does not come with Apex pre-installed out of the box), this is included based on the runtime configuration variables
     -   naming conventions (pause if there are questions, should be self-explanatory)
     -   fork network diagram
+        -   entities are data systems (db only, db + ords/apex, db + container app)
+            -   yellow entities are potential implementations and blue entities are actual implementations
         -   each directed arrow represents a parent-fork relationship where the source connector is the parent and the arrow connector is the forked repository of child repository
         -   You can see how they build on each other based on the dependencies the given forked repository has
         -   (pause for any questions)
@@ -27,14 +32,14 @@ This project was created to provide a containerized Oracle developer environment
             -   The core folder can function on its own as a standalone dev environment
             -   build contains the .yml files and custom Dockerfile 
                 -   separate files for different use cases (based on runtime configuration) that are added to an array so the .yml files can be specified at runtime
-                -   * show the .yml files in the github web interface
-                -   * show the Dockerfile.deploy in the github web interface
+                -   ** show the .yml files in the github web interface
+                -   ** show the Dockerfile.deploy in the github web interface
             -   scripts contains the core CODE scripts that are used for every CODE framework deployment
                 -   we'll take a quick look at some of the bash functions that were developed for the CODE framework:
-                    -   * CODE_client_functions.sh -> code_client_construct_compose_file_string() determines which .yml files are used when deploying the containers based on the user-defined and file-based runtime configuration
-                    -   * CODE_container_functions.sh -> code_container_deploy_custom_database_scripts() executes the database scripts using the referenced secret values
-                    -   * CODE_shared_functions.sh -> code_shared_run_project_hooks() executes the corresponding hook scripts for a given timing and scope, for each project based on the dependencies
-                    -   * CODE_host_functions.sh -> code_host_execute_container_scripts_elev_privs() will deploy or shutdown the CODE containers based on the parameters and configuration variables. It runs the appropriate hooks before and after the host deployment action.
+                    -   ** CODE_client_functions.sh -> code_client_construct_compose_file_string() determines which .yml files are used when deploying the containers based on the user-defined and file-based runtime configuration
+                    -   ** CODE_container_functions.sh -> code_container_deploy_custom_database_scripts() executes the database scripts using the referenced secret values
+                    -   ** CODE_shared_functions.sh -> code_shared_run_project_hooks() executes the corresponding hook scripts for a given timing and scope, for each project based on the dependencies
+                    -   ** CODE_host_functions.sh -> code_host_execute_container_scripts_elev_privs() will deploy or shutdown the CODE containers based on the parameters and configuration variables. It runs the appropriate hooks before and after the host deployment action.
             -   templates folder can be copied into the projects folder and renamed to customize a given forked project
         -   logs folder contains logs of the deployment scripts
         -   projects folder contains separate folders for each forked repository
@@ -43,7 +48,7 @@ This project was created to provide a containerized Oracle developer environment
         -   secrets/secrets.sh defines the credentials for the database schemas and any other endpoints (e.g. API keys)
             -   This is a cumulative file for all dependencies that is not managed in version control
             -   Used to define the credentials for the database objects and also to connect to deploy the appropriate database objects
-            -   * show the secrets.template.sh
+            -   ** show the secrets.template.sh
         -   (pause for any questions)
     -   CODE Business Rules
         -   This defines how the behavior of the application is driven by configuration files and allows custom code to be injected for a given forked project using hooks for specific scopes and timing
@@ -53,7 +58,7 @@ This project was created to provide a containerized Oracle developer environment
             -   linear dependency (defined by configuration file pointing towards parent project's folder)
             -   Top-level parent (highest parent project, excluding CODE repo)
         -   Configuration arrays
-            -   * show the core/scripts/config/pre_CODE_config.sh file, linear dependency information
+            -   ** show the core/scripts/config/pre_CODE_config.sh file, linear dependency information
             -   These drive the behavior of the framework, they are implemented in order from the top-level parent through the dependency chain, to the active project
             -   CUSTOM_ENV_VARS - defines custom environment variables needed by the CODE containers
             -   DB_SCRIPTS_MAP - defines the automated database deployment scripts that run when the CODE containers start
@@ -68,7 +73,7 @@ This project was created to provide a containerized Oracle developer environment
                 -   deployment destination (local, server)
                 -   remove volume (yes, no) to remove the persistent docker volumes
             -   file-based configuration 
-                -   * show the core/scripts/config/default_CODE_runtime_config.sh file showing the default parameters, these are overridden by the individual project-specific configuration files
+                -   ** show the core/scripts/config/default_CODE_runtime_config.sh file showing the default parameters, these are overridden by the individual project-specific configuration files
                 -   options for port numbers, ORDS/Apex enabled, application schema name (to determine if the database has already been deployed -> to prevent redeployments on subsequent "dev" deployments)
         -   Automated hooks
             -   multiple scopes (client local, host deploy, container, etc.) and timing (pre and post event)
@@ -76,8 +81,8 @@ This project was created to provide a containerized Oracle developer environment
     -   CODE implementation procedure
         -   uses the CODE project template and an SOP to fork the appropriate repository and customize it for a specific data system
         -   (We don't need to review this in detail unless you would like to)
-            -   * Look at DSC as a simple example
-            -   * Look at CTP as a complex example
+            -   ** Look at DSC as a simple example
+            -   ** Look at CTP as a complex example
         -   Implementation examples developers can review to see how they were configured
         -   Minimal configuration required to customize a forked CODE repo
     -   Setup process
@@ -107,10 +112,26 @@ This project was created to provide a containerized Oracle developer environment
         -   to prevent merge conflicts some contribution guidelines have been established    
         -   as mentioned earlier the CODE repository is the only repository that can make changes to files/folders in the core folder
         -   for downstream code forks the given repository should only make changes to files/folders in the project-specific projects folder
+        -   CODE Development Workflow Recommendations
+            -   There are two scenarios defined for updating the project with corresponding workflows:
+                -   Improvements
+                    -   Look at the diagram, make the changes to the CODE repository's core folder directly and pull upstream changes from all downstream forks in a sequence that respects the dependencies 
+                -   New Functionality
+                    -   Make the changes directly in the project that needs it
+                    -   Create a feature branch for the specific project and develop and test the changes within the Project's (in the diagram this is Project C) including other projects folders and the core folder
+                    -   ** For server deployments the changes must be pushed so they can be cloned and executed on the server, but local deployments can be tested without committing and pushing the changes
+                    -   (orange arrows) When the changes have been tested, a diff tool can be used to copy the changes to the respective folders in the corresponding repositories where they are committed and pushed. 
+                    -   The changes to the Project C folder can be committed and the rest of the changes to other project folders and core folder can be stashed.
+                    -   Then the changes can be pulled upstream following the direct linear dependencies
+        -   Database Development Workflow Recommendation
+            -   deploy dev version of the containers
+                -   make incremental changes to the data model and save the generated DDL
+            -   deploy test version periodically that includes the saved DDL to compare using a diff tool if the dev and test are in sync. 
     -   Monitoring and Syncing Upstream Updates
         -   Watch upstream releases on GitHub
             -   Watch the direct parent for the repository for releases and security alerts, upstream changes can be pulled and merged to take advantage of updates    
             -   (Optionally) watch the direct parent for the repository for releases and security alerts, the changes can't be pulled until they are merged by the parent repository
+        -   In the future, if the GitHub API is integrated into the PRI project then we can use the app to identify all the instances of the CODE framework (or CODE forks) and list the ones that have a tagged version upgrade available 
         -   syncing procedure
             -   Basically just pull and merge the upstream changes, the vast majority of the git pulls should merge automatically because the project-specific files should be kept separate from upstream updates
             -   .active_project is configured to automatically ignore upstream changes because it is intended to change for every fork
@@ -118,30 +139,35 @@ This project was created to provide a containerized Oracle developer environment
     -   Connection information
         -   Can create an SSH tunnel for server deployments so the application and database endpoints can be accessed
         -   connection information is listed for each type of resource
+    -   Security features, many are inherited from CDS module
 -   Look at forked repository examples (review code)
-    -   DSC (simplest of all, contains the current login function so it is used by many different data systems)
-        -   * Look at the configuration files
+    -   CODE (top-level parent for forked CODE repositories)
+        -   This can function as a clean development environment. If you use the "dev" version it will retain the data volume across container restarts. It is still recommended to export changes as DDL so they can be replayed even if there is a container or volume failure
+        -   This could be used for the ORDS application development project that we are currently working on 
+    -   DSC (simplest fork of all, contains the current login function so it is used by many different data systems)
+        -   ** Look at the configuration files
             -   projects/.active_project
             -   project_parent_config.sh
             -   project_runtime_config.sh
             -   project_manifest_config.sh
-        -   * look at the build/dsc_secrets.yml file
-        -   * look at fork documentation (mostly references to the core CODE documentation)
-        -   * README.md creates links to each CODE fork document
-        -   * look at the modules/DSC folder to show that this orchestration project simply references files maintained in the project-specific repository 
-        -   * look at hooks directory, it is empty because they aren't necessary in this CODE fork, only 1 CODE fork required this so far out of 9 total
+        -   ** look at the build/dsc_secrets.yml file
+        -   ** look at fork documentation (mostly references to the core CODE documentation)
+        -   ** README.md creates links to each CODE fork document
+        -   ** look at the modules/DSC folder to show that this orchestration project simply references files maintained in the project-specific repository 
+        -   ** look at hooks directory, it is empty because they aren't necessary in this CODE fork, only 1 CODE fork required this so far out of 9 total
     -   CTP (more complicated with dependency layers)
-        -   * Look at the configuration files
+        -   look at the docker logs for the code-db-ords-deploy container
+        -   ** Look at the configuration files
             -   projects/.active_project
             -   project_parent_config.sh
             -   project_runtime_config.sh
             -   project_manifest_config.sh
-        -   * look at the build/ctp_secrets.yml file
-        -   * look at the other folders in /projects, these are provided when the fork is created and updated when upstream changes are merged
-        -   * look at fork documentation (mostly references to the core CODE documentation)
-        -   * README.md creates links to each CODE fork document
-        -   * look at the modules/DSC folder to show that this orchestration project simply references files maintained in the project-specific repository 
-        -   * look at hooks directory, it is empty because they aren't necessary in this CODE fork
+        -   ** look at the build/ctp_secrets.yml file
+        -   ** look at the other folders in /projects, these are provided when the fork is created and updated when upstream changes are merged
+        -   ** look at fork documentation (mostly references to the core CODE documentation)
+        -   ** README.md creates links to each CODE fork document
+        -   ** look at the modules/DSC folder to show that this orchestration project simply references files maintained in the project-specific repository 
+        -   ** look at hooks directory, it is empty because they aren't necessary in this CODE fork
         -   show the 2 web applications:
             -   CAS
             -   CTP
@@ -154,13 +180,14 @@ This project was created to provide a containerized Oracle developer environment
         -   startup the local CODE containers
             -   _ show that it is much faster on restart when the volume already exists
     -   PRI (most complicated container app)
-        -   * look at the hooks directory and how they were used to define an environment variable (CRON_SCHEDULE)
-        -   * show the minimal code involved to define configuration array elements and the custom hooks for the cron schedule
+        -   ** look at the hooks directory and how they were used to define an environment variable (CRON_SCHEDULE)
+        -   ** show the minimal code involved to define configuration array elements and the custom hooks for the cron schedule
         -   _ shutdown the CTP containers
         -   _ start the PRI and show the installation process (no Apex and minimal database deployment so it is quick)
         -   _ load the web page (blank database, since the data currently comes from gitlab and we just need to update it)
         -   _ remote into the container and set the cron job date/time
         -   _ reload the web page
+        -   Show I can change the code live without reloading because mounted volumes are used
 -   Moving forward:
     -   Receiving notifications for available updates
         -   PRI could provide information about utilization based on matching version tags
