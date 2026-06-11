@@ -13,13 +13,13 @@ The PIFSC Containerized Oracle Developer Environment (CODE) project was develope
             -   Version: [UPSTREAM VERSION] (git tag: [UPSTREAM VERSION TAG])
 
 ## Intended Use
--   Refer to the CODE [Intended Use](../../../../core/docs/CODE%20Documentation.md#intended-use) for details
+-   Refer to the CODE [Intended Use](../../../../core/docs/CODE%20Documentation.md#intended-use) documentation for details
 
 ## Requirements
--   Refer to the CODE [Requirements](../../../../core/docs/CODE%20Documentation.md#requirements) for details
+-   Refer to the CODE [Requirements](../../../../core/docs/CODE%20Documentation.md#requirements) documentation for details
 
 ## Container Host Instances
--   Refer to the CODE [Container Host Instances](../../../../core/docs/CODE%20Documentation.md#container-host-instances) for details
+-   Refer to the CODE [Container Host Instances](../../../../core/docs/CODE%20Documentation.md#container-host-instances) documentation for details
 
 ## Dependencies
 -   Refer to the CODE [Dependencies](../../../../core/docs/CODE%20Documentation.md#dependencies) for details
@@ -27,43 +27,43 @@ The PIFSC Containerized Oracle Developer Environment (CODE) project was develope
     -   [LIST ALL PROJECT DEPENDENCIES]
 
 ## Container Architecture
--   Refer to the CODE [Container Architecture](../../../../core/docs/CODE%20Documentation.md#container-architecture) for details
+-   Refer to the CODE [Container Architecture](../../../../core/docs/CODE%20Documentation.md#container-architecture) documentation for details
 
 ## Naming Conventions
--   Refer to the CODE [Repository Fork Diagram](../../../../core/docs/CODE%20Documentation.md#naming-conventions) for details
+-   Refer to the CODE [Repository Fork Diagram](../../../../core/docs/CODE%20Documentation.md#naming-conventions) documentation for details
 
 ## Repository Fork Diagram
--   Refer to the CODE [Repository Fork Diagram](../../../../core/docs/CODE%20Documentation.md#repository-fork-diagram) for details
+-   Refer to the CODE [Repository Fork Diagram](../../../../core/docs/CODE%20Documentation.md#repository-fork-diagram) documentation for details
 
 # CODE Folder Structure
--   Refer to the CODE [Folder Structure](../../../../core/docs/CODE%20Documentation.md#code-folder-structure) for details
+-   Refer to the CODE [Folder Structure](../../../../core/docs/CODE%20Documentation.md#code-folder-structure) documentation for details
 
 ## CODE Business Rules
--   Refer to the CODE [Business Rules](../../../../core/docs/CODE%20Documentation.md#code-business-rules) for details
+-   Refer to the CODE [Business Rules](../../../../core/docs/CODE%20Documentation.md#code-business-rules) documentation for details
 
 ## CODE Implementation Procedure
--   Refer to the CODE [Implementation Procedure](../../../../core/docs/CODE%20Documentation.md#code-implementation-procedure) for details
+-   Refer to the CODE [Implementation Procedure](../../../../core/docs/CODE%20Documentation.md#code-implementation-procedure) documentation for details
 
 ## Setup
--   Refer to the CODE [Setup](../../../../core/docs/CODE%20Documentation.md#setup) for details
+-   Refer to the CODE [Setup](../../../../core/docs/CODE%20Documentation.md#setup) documentation for details
 
 ## Executing the CODE Project
--   Refer to the [Executing the CODE Project](../../../../core/docs/CODE%20Documentation.md#executing-the-code-project) for details
+-   Refer to the [Executing the CODE Project](../../../../core/docs/CODE%20Documentation.md#executing-the-code-project) documentation for details
 
 ## Contribution and Repository Management Guidelines
--   Refer to the [Contribution and Repository Management Guidelines](../../../../core/docs/CODE%20Documentation.md#contribution-and-repository-management-guidelines) for details
+-   Refer to the [Contribution and Repository Management Guidelines](../../../../core/docs/CODE%20Documentation.md#contribution-and-repository-management-guidelines) documentation for details
 
 ## Monitoring and Syncing Upstream Updates
--   Refer to the [Monitoring and Syncing Upstream Updates](../../../../core/docs/CODE%20Documentation.md#monitoring-and-syncing-upstream-updates) for details
+-   Refer to the [Monitoring and Syncing Upstream Updates](../../../../core/docs/CODE%20Documentation.md#monitoring-and-syncing-upstream-updates) documentation for details
 
 ## Connection Information
--   Refer to the CODE [Connection Information](../../../../core/docs/CODE%20Documentation.md#connection-information) for details
+-   Refer to the CODE [Connection Information](../../../../core/docs/CODE%20Documentation.md#connection-information) documentation for details
     -   The individual account passwords can be found in the /secrets/secrets.sh file 
 
 ## Security Features
--   Refer to the CODE [Security Features](../../../../core/docs/CODE%20Documentation.md#security-features) for details
+-   Refer to the CODE [Security Features](../../../../core/docs/CODE%20Documentation.md#security-features) documentation for details
 
 ## Design Strategy
--   Refer to the [CODE Design Strategy](../../../../core/docs/CODE%20Documentation.md#design-strategy) documentation
+-   Refer to the [CODE Design Strategy](../../../../core/docs/CODE%20Documentation.md#design-strategy) documentation for details
     -   Benefits:
         -   Reduce the amount of custom code needed to deploy this CODE fork
