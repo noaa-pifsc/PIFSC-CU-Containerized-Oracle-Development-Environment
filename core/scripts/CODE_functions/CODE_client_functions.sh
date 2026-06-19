@@ -42,7 +42,7 @@ function code_client_process_arguments_execute_container_scripts ()
     fi
 
 	# input validation:
-	if ! cds_shared_validate_required_array_vals "${arg_array}" "ords_enabled" "build_path" "secret_mapping_var_name" "compose_project_name" "db_host_port" "ords_host_port" "db_image" "ords_image" "target_apex_version" "app_schema_name" "dbport" "dbhost" "dbservicename" "stack_name" "network_name" "config_dir" "hostname" "host_source_path" "git_url" "host_scripts_path" "secret_data_var_name" "compose_file_array" "project_linear_dependencies_var" "projects_path"; then
+	if ! cds_shared_validate_required_array_vals "${arg_array}" "ords_enabled" "build_path" "secret_mapping_var_name" "compose_project_name" "db_host_port" "ords_host_port" "db_image" "ords_image" "app_schema_name" "dbport" "dbhost" "dbservicename" "stack_name" "network_name" "config_dir" "hostname" "host_source_path" "git_url" "host_scripts_path" "secret_data_var_name" "compose_file_array" "project_linear_dependencies_var" "projects_path"; then
         echo "Error: ${FUNCNAME[0]}() function argument validation failed" >&2
         return 1
     fi
@@ -213,7 +213,7 @@ function code_client_execute_container_scripts ()
 		# this is a local deployment
 
 		# input validation:
-		if ! cds_shared_validate_required_array_vals "${arg_array}" "compose_project_name" "db_host_port" "ords_host_port" "db_image" "ords_image" "target_apex_version" "app_schema_name" "dbport" "dbhost" "dbservicename" "stack_name" "network_name"; then
+		if ! cds_shared_validate_required_array_vals "${arg_array}" "compose_project_name" "db_host_port" "ords_host_port" "db_image" "ords_image" "app_schema_name" "dbport" "dbhost" "dbservicename" "stack_name" "network_name"; then
 			echo "Error: ${FUNCNAME[0]}() function argument validation failed" >&2
 			return 1
 		fi

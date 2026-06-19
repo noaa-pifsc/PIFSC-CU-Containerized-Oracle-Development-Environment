@@ -334,8 +334,19 @@ function code_container_deploy_database_scripts ()
 	
 	# install or upgrade the apex container installation (if target_apex_version is defined and ords_enabled = yes):
 	if [[ "${arg_ref[ords_enabled]}" == "yes" && -n "${arg_ref[target_apex_version]}" ]]; then
+		# target_apex_version is defined and ORDS is enabled, install/upgrade apex
 		echo "target_apex_version is defined and ORDS is enabled, install/upgrade apex"
 		code_container_install_or_upgrade_apex "${sys_credentials}" "${sys_password}" "${arg_ref[target_apex_version]}" "${arg_ref[dbservicename]}" "${arg_ref[deploy_id]}"
+	elif [[ "${arg_ref[ords_enabled]}" == "yes" ]]; then
+		# target_apex_version is not defined and ORDS is enabled
+
+		echo "target_apex_version is not defined, but ORDS is enabled, set the ORDS service schema password"
+
+		# set the ORDS_PUBLIC_USER to the specified system password
+		code_container_reset_schema_password "${sys_credentials}" "ORDS_PUBLIC_USER" "${sys_password}"
+
+		# create the deployment metadata file to indicate the ords container can begin executing its startup scripts				
+		code_container_create_deploy_metadata_file "${arg_ref[deploy_id]}"	
 	else
 		echo "target_apex_version is not defined or ORDS is not enabled, skip apex install/upgrade process"
 	fi
@@ -532,11 +543,8 @@ EOF
 		code_container_configure_apex_admin "${arg_ref[target_apex_version]}" "${arg_ref[sys_password]}" "${arg_ref[sys_credentials]}" "${arg_ref[dbservicename]}"
 	fi
 
-	# apex has finished installing, create the /apex-static/.deploy_read_${arg_ref[deploy_id]} file to indicate that the ords container can start now:
-#	echo "Create the new deployment metadata file to indicate that the apex installation has completed: /apex-static/deployments/.deploy_ready_${arg_ref[deploy_id]}"
-
-	mkdir -p "/apex-static/deployments/"	# create the deployments subfolder to not clutter up the apex static folder
-	touch "/apex-static/deployments/.deploy_ready_${arg_ref[deploy_id]}"	
+	# apex has finished installing, create the new deployment metadata file to indicate the ORDS container can execute its startup scripts
+	code_container_create_deploy_metadata_file "${arg_ref[deploy_id]}"
 }
 
 # function that moves the static application files to the designated folder
@@ -633,7 +641,6 @@ function code_container_configure_apex_admin()
 	
 	# check if the target apex version is less than 23.2
 	code_container_version_compare "${target_apex_version}" "23.2" "version_status"
-	
 	if [ "${version_status}" -eq 2 ]; then 
 		# apex version is 23.1 or less
 
@@ -673,23 +680,21 @@ function code_container_configure_apex_admin()
 	
 	fi
 	
-	# The Apex upgrade completed, unlock the APEX_PUBLIC_USER account and attempt to create the Apex instance admin account or if it already exists then reset the password to sys_password
+	# The Apex upgrade completed, unlock the apex and ords service accounts, and attempt to create the Apex instance admin account or if it already exists then reset the password to sys_password
 
 	# run the sqlplus script using the SYS schema
 	echo "Unlocking/Initializing/Configuring Apex accounts..."
 	
+	# set the APEX_PUBLIC_USER to the specified system password
+	code_container_reset_schema_password "${sys_credentials}" "APEX_PUBLIC_USER" "${sys_password}"
+	
+	# set the ORDS_PUBLIC_USER to the specified system password
+	code_container_reset_schema_password "${sys_credentials}" "ORDS_PUBLIC_USER" "${sys_password}"
+	
+	# create the apex admin user and set the password if the admin user already exists
 	sqlplus -s -l "${sys_credentials}" <<EOF
 	WHENEVER SQLERROR EXIT SQL.SQLCODE
 	ALTER SESSION SET CONTAINER = ${dbservicename};
-	-- Update the APEX_PUBLIC_USER and ORDS_PUBLIC_USER schema passwords to the system password, query the database to confirm the schema exists before attempting to set the password 
-	BEGIN
-		-- query for the APEX_PUBLIC_USER and ORDS_PUBLIC_USER users in the database, if they exist update the password to the user-specified admin password
-		for rec in (SELECT USERNAME from DBA_USERS where USERNAME IN ('APEX_PUBLIC_USER', 'ORDS_PUBLIC_USER')) LOOP
-			--set the current schema password
-			EXECUTE IMMEDIATE 'ALTER USER '||rec.USERNAME||' IDENTIFIED BY "${sys_password}" ACCOUNT UNLOCK';
-		END LOOP;
-	END;
-	/
 	SET SERVEROUTPUT ON
 	
 	-- Switch to the Apex schema to perform admin tasks
@@ -725,7 +730,7 @@ function code_container_configure_apex_admin()
 
 		COMMIT;
 	EXCEPTION WHEN OTHERS THEN
-		-- If apex admin user already exists, just reset the password (based on ORACLE_PWD variable defined in .env file)
+		-- If apex admin user already exists, just reset the password (based on ORACLE_PWD variable)
 
 		-- Run the appropriate unlock/reset block
 		${UNLOCK_BLOCK}
@@ -924,4 +929,58 @@ function code_container_validate_secret()
 
 	fi
 	
+}
+
+# function to create the database deployment metadata file to indicate when the ORDS container can execute its startup scripts
+# this function accepts the following arguments:
+# 1: deploy_id that contains the 
+function code_container_create_deploy_metadata_file ()
+{
+	deploy_id="${1}"
+	
+	# validate the bash variable values
+	if ! cds_shared_validate_required_vars	"deploy_id"; then
+        echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
+        return 1
+	fi
+	
+	# create the deployment metadata folder 
+	mkdir -p "/apex-static/deployments/"	
+	
+	# create the deployment metadata file
+	touch "/apex-static/deployments/.deploy_ready_${deploy_id}"	
+}
+
+# this function resets the ords system schema password so the ORDS service can connect to the database
+# this function accepts the following parameters:
+# 1: SYS schema database connection string, this is used to execute the SQL command
+# 2: schema name
+# 3: schema password
+function code_container_reset_schema_password ()
+{
+	sys_credentials="${1}"
+	schema_name="${2}"
+	schema_password="${3}"
+#	dbservicename="${4}"
+
+	# validate the bash variable values
+	if ! cds_shared_validate_required_vars	"sys_credentials" "schema_name" "schema_password"; then
+        echo "Error: ${FUNCNAME[0]}() function required bash variable validation failed" >&2
+        return 1
+	fi
+	
+	sqlplus -s -l "${sys_credentials}" <<EOF
+	WHENEVER SQLERROR EXIT SQL.SQLCODE
+	-- Update the schema name to the specified password, query the database to confirm the schema exists before attempting to set the password 
+	BEGIN
+		-- query for the schema name in the database, if it exists update the password to the user-specified password
+		for rec in (SELECT USERNAME from DBA_USERS where USERNAME IN ('${schema_name}')) LOOP
+			--set the current schema password
+			EXECUTE IMMEDIATE 'ALTER USER '||rec.USERNAME||' IDENTIFIED BY "${schema_password}" ACCOUNT UNLOCK';
+		END LOOP;
+	END;
+	/
+	exit;
+EOF
+
 }
