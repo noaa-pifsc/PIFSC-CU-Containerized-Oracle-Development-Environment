@@ -55,47 +55,78 @@ X testing (6/10/26):
 			X test
 				X ORDS_ENABLED:
 					X yes
-						X installs db, ords, apex from scratch
-							X verify ORDS/Apex login
-							X verify DB connectivity
-								X Create temp table and insert data
-						X validation:
-							X invalid TARGET_APEX_VERSION (format fails - 24.3.1)
-							X incorrect TARGET_APEX_VERSION (does not exist - 24.6)
-						X REM_VOL
-							X yes - remove apex static volume
-							X no - retain all volumes
+						X APEX version defined:
+							X installs db, ords, apex from scratch
+								X verify ORDS/Apex login
+								X verify DB connectivity
+									X Create temp table and insert data
+							X validation:
+								X invalid TARGET_APEX_VERSION (format fails - 24.3.1)
+								X incorrect TARGET_APEX_VERSION (does not exist - 24.6)
+							X REM_VOL
+								X yes - remove apex static volume
+								X no - retain all volumes
+						X APEX version not defined:
+							X installs db, ords from scratch
+								X setup ORDS login
+									X verify ORDS login
+								X verify DB connectivity
+									X Create temp table and insert data
+							X REM_VOL
+								X yes - remove apex static volume
+								X no - retain all volumes
+							
 					X no
 						X REM_VOL
 							X yes - remove apex static volume
 								X verify DB connectivity
 							X no
 								X verify DB connectivity
+
 			X dev
 				X ORDS_ENABLED:
 					X yes
-						X installs db, ords, apex from scratch
-							X verify ORDS/Apex login
-							X verify DB connectivity
-								X Create temp table and insert data
-						X (same TARGET_APEX_VERSION) resume db, ords, apex
-							X verify ORDS/Apex login
-							X verify DB connectivity
-								X verify temp table
-						X (increase TARGET_APEX_VERSION) resume db, ords, apex
-							X verify ORDS/Apex login
-							X verify DB connectivity
-								X verify temp table
-						X REM_VOL
-							X yes - remove all volumes
+						X APEX version defined:
+							X installs db, ords, apex from scratch
 								X verify ORDS/Apex login
 								X verify DB connectivity
 									X Create temp table and insert data
-							X no - retain all volumes
-						X validation:
-							X decrease TARGET_APEX_VERSION (downgrade error)
-							X invalid TARGET_APEX_VERSION (format fails - 24.3.1)
-							X incorrect TARGET_APEX_VERSION (does not exist - 24.6)
+							X (same TARGET_APEX_VERSION) resume db, ords, apex
+								X verify ORDS/Apex login
+								X verify DB connectivity
+									X verify temp table
+							X (increase TARGET_APEX_VERSION) resume db, ords, apex
+								X verify ORDS/Apex login
+								X verify DB connectivity
+									X verify temp table
+							X REM_VOL
+								X yes - remove all volumes
+									X verify ORDS/Apex login
+									X verify DB connectivity
+										X Create temp table and insert data
+								X no - retain all volumes
+							X validation:
+								X decrease TARGET_APEX_VERSION (downgrade error)
+								X invalid TARGET_APEX_VERSION (format fails - 24.3.1)
+								X incorrect TARGET_APEX_VERSION (does not exist - 24.6)
+						X APEX version not defined:
+							X installs db, ords from scratch
+								X setup ORDS login
+									X verify ORDS login
+								X verify DB connectivity
+									X Create temp table and insert data
+							X REM_VOL
+								X yes - remove all volumes
+									X setup ORDS login
+										X verify ORDS login
+									X verify DB connectivity
+										X Create temp table and insert data
+								X no - retain all volumes
+									X verify ORDS login
+									X verify DB connectivity
+										X verify temp table
+							
+
 					X no - ORDS container does not run
 						X initial
 							X verify DB connectivity
@@ -112,10 +143,14 @@ X testing (6/10/26):
 			X test
 				X ORDS_ENABLED:
 					X yes
-						REM_VOL
-							X yes: remove apex static volume
-							X no: retain volumes
-					
+						X APEX version defined:
+							X REM_VOL
+								X yes: remove apex static volume
+								X no: retain volumes
+						X APEX version not defined:
+							X REM_VOL
+								X yes: remove apex static volume
+								X no: retain volumes					
 					X no
 						REM_VOL
 							X yes: remove volumes
@@ -123,10 +158,14 @@ X testing (6/10/26):
 			X dev
 				X ORDS_ENABLED:
 					X yes
-						REM_VOL
-							X yes: remove apex static and db volumes
-							X no: retain volumes
-					
+						X APEX version defined:
+							X REM_VOL
+								X yes: remove apex static and db volumes
+								X no: retain volumes
+						X APEX version not defined:
+							X REM_VOL
+								X yes: remove apex static volume
+								X no: retain volumes					
 					X no
 						REM_VOL
 							X yes: remove db volumes
@@ -186,16 +225,27 @@ X testing (6/10/26):
 			X test
 				X ORDS_ENABLED:
 					X yes
-						X installs db, ords, apex from scratch
-							X verify ORDS/Apex login
-							X verify DB connectivity
-								X Create temp table and insert data
-						X validation:
-							X invalid TARGET_APEX_VERSION (format fails - 24.3.1)
-							X incorrect TARGET_APEX_VERSION (does not exist - 24.6)
-						X REM_VOL
-							X yes - remove apex static volume
-							X no - retain all volumes
+						APEX version defined:
+							X installs db, ords, apex from scratch
+								X verify ORDS/Apex login
+								X verify DB connectivity
+									X Create temp table and insert data
+							X validation:
+								X invalid TARGET_APEX_VERSION (format fails - 24.3.1)
+								X incorrect TARGET_APEX_VERSION (does not exist - 24.6)
+							X REM_VOL
+								X yes - remove apex static volume
+								X no - retain all volumes
+						X APEX version not defined:
+							X installs db, ords from scratch
+								X setup ORDS login
+									X verify ORDS login
+								X verify DB connectivity
+									X Create temp table and insert data
+							X REM_VOL
+								X yes - remove apex static volume
+								X no - retain all volumes
+						
 					X no
 						X REM_VOL
 							X yes - remove apex static volume
@@ -205,28 +255,46 @@ X testing (6/10/26):
 			X dev
 				X ORDS_ENABLED:
 					X yes
-						X installs db, ords, apex from scratch
-							X verify ORDS/Apex login
-							X verify DB connectivity
-								X Create temp table and insert data
-						X (same TARGET_APEX_VERSION) resume db, ords, apex
-							X verify ORDS/Apex login
-							X verify DB connectivity
-								X verify temp table
-						X (increase TARGET_APEX_VERSION) resume db, ords, apex
-							X verify ORDS/Apex login
-							X verify DB connectivity
-								X verify temp table
-						X REM_VOL
-							X yes - remove all volumes
+						X APEX version defined:
+							X installs db, ords, apex from scratch
 								X verify ORDS/Apex login
 								X verify DB connectivity
 									X Create temp table and insert data
-							X no - retain all volumes
-						X validation:
-							X decrease TARGET_APEX_VERSION (downgrade error)
-							X invalid TARGET_APEX_VERSION (format fails - 24.3.1)
-							X incorrect TARGET_APEX_VERSION (does not exist - 24.6)
+							X (same TARGET_APEX_VERSION) resume db, ords, apex
+								X verify ORDS/Apex login
+								X verify DB connectivity
+									X verify temp table
+							X (increase TARGET_APEX_VERSION) resume db, ords, apex
+								X verify ORDS/Apex login
+								X verify DB connectivity
+									X verify temp table
+							X REM_VOL
+								X yes - remove all volumes
+									X verify ORDS/Apex login
+									X verify DB connectivity
+										X Create temp table and insert data
+								X no - retain all volumes
+							X validation:
+								X decrease TARGET_APEX_VERSION (downgrade error)
+								X invalid TARGET_APEX_VERSION (format fails - 24.3.1)
+								X incorrect TARGET_APEX_VERSION (does not exist - 24.6)
+						X APEX version not defined:
+							X installs db, ords from scratch
+								X setup ORDS login
+									X verify ORDS login
+								X verify DB connectivity
+									X Create temp table and insert data
+							X REM_VOL
+								X yes - remove all volumes
+									X setup ORDS login
+										X verify ORDS login
+									X verify DB connectivity
+										X Create temp table and insert data
+								X no - retain all volumes
+									X verify ORDS login
+									X verify DB connectivity
+										X verify temp table
+
 					X no - ORDS container does not run
 						X initial
 							X verify DB connectivity
@@ -244,10 +312,14 @@ X testing (6/10/26):
 			X test
 				X ORDS_ENABLED:
 					X yes
-						REM_VOL
-							X yes: remove apex static volume
-							X no: retain volumes
-					
+						X APEX version defined:
+							X REM_VOL
+								X yes: remove apex static volume
+								X no: retain volumes
+						X APEX version not defined:
+							X REM_VOL
+								X yes: remove apex static volume
+								X no: retain volumes					
 					X no
 						REM_VOL
 							X yes: remove volumes
@@ -255,10 +327,15 @@ X testing (6/10/26):
 			X dev
 				X ORDS_ENABLED:
 					X yes
-						REM_VOL
-							X yes: remove apex static and db volumes
-							X no: retain volumes
+						X APEX version defined:
+							X REM_VOL
+								X yes: remove apex static and db volumes
+								X no: retain volumes
 					
+						X APEX version not defined:
+							X REM_VOL
+								X yes: remove apex static volume
+								X no: retain volumes					
 					X no
 						X REM_VOL
 							X yes: remove db volumes
